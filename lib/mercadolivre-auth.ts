@@ -1,3 +1,4 @@
+import { siteUrl } from "./site";
 import "server-only";
 import { adminClient } from "./supabase";
 
@@ -20,7 +21,7 @@ export function mlConfigured(): boolean {
 
 export function mlRedirectUri(): string {
   if (process.env.ML_REDIRECT_URI) return process.env.ML_REDIRECT_URI;
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const site = siteUrl();
   return `${site}/admin/mercadolivre`;
 }
 

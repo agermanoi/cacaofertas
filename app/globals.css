@@ -1480,3 +1480,5 @@ button.btn-ghost {
 .contact-form .check input { margin-top: 4px; flex: none; }
 .admin-form textarea.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; }
 .injected { display: contents; }
+.sitemap-page ul { columns: 2 260px; column-gap: 32px; padding-left: 18px; }
+.sitemap-page li { break-inside: avoid; margin-bottom: 6px; }

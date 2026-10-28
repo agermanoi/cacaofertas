@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { blackFriday } from "@/lib/format";
@@ -5,7 +6,7 @@ import { cssVars, getSettings } from "@/lib/settings";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const SITE_URL = siteUrl();
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings();
@@ -77,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/contato">Contato</Link>
               <Link href="/politica-de-privacidade">Política de privacidade</Link>
               <Link href="/termos-de-uso">Termos de uso</Link>
+              <Link href="/mapa-do-site">Mapa do site</Link>
             </nav>
             <div className="foot-notes">
               <p>
