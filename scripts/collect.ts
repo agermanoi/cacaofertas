@@ -131,8 +131,13 @@ async function main() {
   }
 
   console.table(stats);
-  const allFailed = Object.values(stats).every((s) => s.ok === 0);
-  if (allFailed && products.length) process.exit(1);
+  // A raspagem sem URLs cadastradas sempre "dá certo"; ela não conta como fonte funcionando.
+  const apiSources = Object.entries(stats).filter(([src]) => src !== "scraper");
+  const failedApis = apiSources.filter(([, s]) => s.ok === 0 && s.fail > 0).map(([src]) => src);
+  const totalOffers = Object.values(stats).reduce((n, s) => n + s.offers, 0);
+  if (failedApis.length) console.error(`\n✗ Fonte(s) com falha em todos os produtos: ${failedApis.join(", ")}. Veja os erros acima.`);
+  if (products.length && totalOffers === 0) console.error("\n✗ Nenhuma oferta encontrada nesta coleta.");
+  if (products.length && (failedApis.length || totalOffers === 0)) process.exit(1);
 }
 
 main().catch((e) => {
