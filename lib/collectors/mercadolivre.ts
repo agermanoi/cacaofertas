@@ -56,6 +56,16 @@ function itemUrl(itemId: string): string {
   return m ? `https://produto.mercadolivre.com.br/${m[1]}-${m[2]}` : `https://www.mercadolivre.com.br/p/${itemId}`;
 }
 
+/** Busca principal + buscas curtas de reserva (termos obrigatórios, sem "~" e com a 1ª alternativa). */
+export function searchQueries(product: Pick<Product, "query" | "must">): string[] {
+  const terms = (product.must || []).map((t) => t.split("|")[0].replace(/^~/, "").trim()).filter(Boolean);
+  const head = product.query.split(" ").slice(0, 3);
+  const short = [...new Set([...head, ...terms.flatMap((t) => t.split(" "))])].join(" ");
+  const codes = (product.must || []).filter((t) => t.startsWith("~")).map((t) => t.split("|")[0].slice(1));
+  const out = [product.query, short, codes.length ? `${head.join(" ")} ${codes.join(" ")}` : ""];
+  return [...new Set(out.map((q) => q.trim()).filter((q) => q.length > 2))];
+}
+
 export function mercadoLivre(db: SupabaseClient): Collector {
   let accessToken: string | null = null;
   let itemsEndpointBlocked = false;
@@ -112,15 +122,31 @@ export function mercadoLivre(db: SupabaseClient): Collector {
     rejected,
     enabled: () => Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET),
     async collect(product: Product): Promise<OfferInput[]> {
-      const params = new URLSearchParams({ site_id: "MLB", status: "active", q: product.query, limit: "50" });
-      const search = await get<{ results?: CatalogHit[] }>(`/products/search?${params}`);
-
-      // Só examina produtos de catálogo cujo nome passa nas palavras obrigatórias/proibidas
-      // (o preço é checado depois, oferta por oferta).
-      const results = search.results || [];
-      const hits = results.filter((h) => titleMatches(product, h.name)).slice(0, PER_QUERY);
-      const refused = results.filter((h) => !titleMatches(product, h.name)).map((h) => h.name);
-      if (refused.length) rejected[product.slug] = refused.slice(0, 6);
+      // A busca do catálogo varia de uma chamada para outra. Se a busca principal não trouxer
+      // o modelo, tenta de novo com uma busca curta montada com os termos obrigatórios.
+      const hits: CatalogHit[] = [];
+      const refused: string[] = [];
+      const seenHits = new Set<string>();
+      for (const q of searchQueries(product)) {
+        const params = new URLSearchParams({ site_id: "MLB", status: "active", q, limit: "50" });
+        let results: CatalogHit[] = [];
+        try {
+          results = (await get<{ results?: CatalogHit[] }>(`/products/search?${params}`)).results || [];
+        } catch (e) {
+          if (!hits.length && q === product.query) throw e;
+          continue;
+        }
+        for (const h of results) {
+          if (seenHits.has(h.id)) continue;
+          seenHits.add(h.id);
+          if (titleMatches(product, h.name)) hits.push(h);
+          else refused.push(h.name);
+        }
+        if (hits.length) break;
+      }
+      hits.splice(PER_QUERY);
+      if (!hits.length && refused.length) rejected[product.slug] = refused.slice(0, 6);
+      else delete rejected[product.slug];
 
       const out: OfferInput[] = [];
       for (const hit of hits) {
