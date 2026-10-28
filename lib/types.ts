@@ -43,6 +43,8 @@ export interface Collector {
   source: Source;
   enabled(): boolean;
   collect(product: Product): Promise<OfferInput[]>;
+  /** Nomes que a fonte devolveu e o filtro recusou, por slug (para calibrar must/exclude). */
+  rejected?: Record<string, string[]>;
 }
 
 export interface ProductOverview {

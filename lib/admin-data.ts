@@ -79,6 +79,7 @@ export interface CollectSummary {
   totalOffers: number;
   errors: { source: string; slug: string; message: string }[];
   errorCount: number;
+  misses?: Record<string, string[]>;
 }
 
 /** Resumo da última coleta, gravado pelo scripts/collect.ts na tabela kv. */

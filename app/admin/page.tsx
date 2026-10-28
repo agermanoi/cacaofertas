@@ -102,6 +102,21 @@ export default async function AdminHome({ searchParams }: Props) {
               ))}
             </ul>
           ) : null}
+          {last.misses && Object.keys(last.misses).length ? (
+            <div className="collect-misses">
+              <p className="hint">
+                Sem oferta nesta coleta ({Object.keys(last.misses).length}). Abaixo, os nomes que a loja devolveu e o filtro recusou: se forem
+                o produto certo, afrouxe as palavras obrigatórias ou proibidas na edição do produto.
+              </p>
+              <ul className="collect-errors">
+                {Object.entries(last.misses).map(([slug, names]) => (
+                  <li key={slug}>
+                    <strong>{slug}</strong>: {names.length ? names.join(" | ") : "a busca não encontrou nada"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </details>
       ) : null}
 

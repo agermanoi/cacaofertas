@@ -106,6 +106,7 @@ async function main() {
 
   const stats: Record<string, { ok: number; fail: number; offers: number }> = {};
   const errors: { source: string; slug: string; message: string }[] = [];
+  const zeroOffers: string[] = [];
   for (const c of collectors) stats[c.source] = { ok: 0, fail: 0, offers: 0 };
 
   for (const product of products) {
@@ -128,6 +129,7 @@ async function main() {
       }
     }
     const n = await saveOffers(product, found);
+    if (!n) zeroOffers.push(product.slug);
     const best = found.length ? Math.min(...found.map((o) => o.price)) : null;
     console.log(`  ${n ? "✓" : "·"} ${product.slug}: ${n} ofertas${best ? ` · melhor R$ ${best.toFixed(2)}` : ""}`);
   }
@@ -142,6 +144,13 @@ async function main() {
     stats,
     totalOffers: Object.values(stats).reduce((n, s) => n + s.offers, 0),
     errors: errors.slice(0, 40),
+    // produtos que ficaram sem oferta, com os nomes que as fontes devolveram e o filtro recusou
+    misses: Object.fromEntries(
+      zeroOffers.map((slug) => [
+        slug,
+        collectors.flatMap((c) => (c.rejected?.[slug] || []).map((name) => `${c.source}: ${name}`)).slice(0, 8),
+      ])
+    ),
     errorCount: errors.length,
   };
   await db.from("kv").upsert({ key: "last_collect", value: JSON.stringify(summary), updated_at: summary.at });

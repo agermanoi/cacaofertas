@@ -59,6 +59,7 @@ function itemUrl(itemId: string): string {
 export function mercadoLivre(db: SupabaseClient): Collector {
   let accessToken: string | null = null;
   let itemsEndpointBlocked = false;
+  const rejected: Record<string, string[]> = {};
 
   async function getToken(): Promise<string> {
     if (accessToken) return accessToken;
@@ -88,13 +89,27 @@ export function mercadoLivre(db: SupabaseClient): Collector {
     return toAffiliate(url);
   }
 
+  /** GET com token; espera e tenta de novo quando o ML limita a taxa (429). */
   async function get<T>(path: string): Promise<T> {
     const token = await getToken();
-    return httpJson<T>(`${API}${path}`, { headers: { authorization: `Bearer ${token}` } });
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const r = await httpJson<T>(`${API}${path}`, { headers: { authorization: `Bearer ${token}` } });
+        await sleep(350); // ~3 req/s: abaixo do limite do ML
+        return r;
+      } catch (e) {
+        if (e instanceof HttpError && e.status === 429 && attempt < 3) {
+          await sleep(5000 * (attempt + 1));
+          continue;
+        }
+        throw e;
+      }
+    }
   }
 
   return {
     source: "mercadolivre",
+    rejected,
     enabled: () => Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET),
     async collect(product: Product): Promise<OfferInput[]> {
       const params = new URLSearchParams({ site_id: "MLB", status: "active", q: product.query, limit: "20" });
@@ -102,7 +117,10 @@ export function mercadoLivre(db: SupabaseClient): Collector {
 
       // Só examina produtos de catálogo cujo nome passa nas palavras obrigatórias/proibidas
       // (o preço é checado depois, oferta por oferta).
-      const hits = (search.results || []).filter((h) => titleMatches(product, h.name)).slice(0, PER_QUERY);
+      const results = search.results || [];
+      const hits = results.filter((h) => titleMatches(product, h.name)).slice(0, PER_QUERY);
+      const refused = results.filter((h) => !titleMatches(product, h.name)).map((h) => h.name);
+      if (refused.length) rejected[product.slug] = refused.slice(0, 6);
 
       const out: OfferInput[] = [];
       for (const hit of hits) {
@@ -151,7 +169,6 @@ export function mercadoLivre(db: SupabaseClient): Collector {
             listPrice: it.original_price ? Number(it.original_price) : null,
           });
         }
-        await sleep(150);
       }
       return out;
     },
