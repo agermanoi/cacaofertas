@@ -1,4 +1,4 @@
-export type Source = "mercadolivre" | "amazon" | "serpapi" | "lomadee" | "scraper";
+export type Source = "mercadolivre" | "amazon" | "serpapi" | "lomadee" | "afilio" | "scraper";
 
 export interface Product {
   id: string;

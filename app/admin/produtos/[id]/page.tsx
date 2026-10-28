@@ -13,6 +13,7 @@ const SOURCE: Record<string, string> = {
   amazon: "Amazon (SerpAPI)",
   serpapi: "Google Shopping",
   lomadee: "Lomadee",
+  afilio: "Afilio",
   scraper: "Raspagem",
 };
 

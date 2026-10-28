@@ -14,6 +14,7 @@ import { serpApi, serpApiSearchesLeft, serpSample } from "../lib/collectors/serp
 import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
 import { amazonSerp } from "../lib/collectors/amazon";
+import { afilio, afilioCampaigns } from "../lib/collectors/afilio";
 
 const db = adminClient();
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()); // AAAA-MM-DD
@@ -104,6 +105,10 @@ async function loadKeysFromDb() {
     serpapi_key: "SERPAPI_KEY",
     amazon_associate_tag: "AMAZON_ASSOCIATE_TAG",
     serpapi_google_shopping: "SERPAPI_GOOGLE_SHOPPING",
+    afilio_token: "AFILIO_TOKEN",
+    afilio_affid: "AFILIO_AFFID",
+    afilio_siteid: "AFILIO_SITEID",
+    afilio_feeds: "AFILIO_FEEDS",
   };
   const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
   for (const row of data || []) {
@@ -148,6 +153,8 @@ let serpInfo: Record<string, unknown> | null = null;
 /** Fontes que gastam buscas da SerpAPI. */
 const SERP_SOURCES = new Set(["amazon", "serpapi"]);
 
+const afilioCollector = afilio();
+
 async function main() {
   await loadKeysFromDb();
   // Diagnóstico: quais lojas a conta Lomadee enxerga (só na coleta completa)
@@ -160,10 +167,21 @@ async function main() {
     });
     console.log(`Lomadee: ${info.brands.length} lojas visíveis${info.error ? ` (erro: ${info.error})` : ""}`);
   }
+  // Diagnóstico: campanhas da conta Afilio (1 requisição)
+  if (process.env.AFILIO_TOKEN && process.env.AFILIO_AFFID) {
+    const info = await afilioCampaigns();
+    await db.from("kv").upsert({
+      key: "afilio_campaigns",
+      value: JSON.stringify({ at: new Date().toISOString(), ...info }),
+      updated_at: new Date().toISOString(),
+    });
+    console.log(`Afilio: ${info.list.length} campanhas${info.error ? ` (erro: ${info.error})` : ""}`);
+  }
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
-  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
+  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), afilioCollector, scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
+  const afilioInfo = afilioCollector.enabled() ? await afilioCollector.prepare() : null;
 
   console.log(`Coleta ${today} · ${products.length} produtos · fontes: ${collectors.map((c) => c.source).join(", ")}`);
   if (!collectors.length) throw new Error("Nenhuma fonte configurada. Veja o .env.example.");
@@ -230,6 +248,7 @@ async function main() {
       ])
     ),
     errorCount: errors.length,
+    afilio: afilioInfo || undefined,
     serpapi: serpInfo ? { ...serpInfo, sample: serpSample.slice(0, 30) } : undefined,
   };
   await db.from("kv").upsert({ key: "last_collect", value: JSON.stringify(summary), updated_at: summary.at });
