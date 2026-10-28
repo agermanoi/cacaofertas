@@ -26,10 +26,13 @@ export function Catalog({
   items,
   title = "Os mais buscados",
   showCategories = true,
+  adPrefix = "home",
 }: {
   items: CatalogItem[];
   title?: string;
   showCategories?: boolean;
+  /** Prefixo das posições de anúncio na lista (home-lista-1, categoria-lista-1…) */
+  adPrefix?: string;
 }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("Todos");
@@ -109,7 +112,7 @@ export function Catalog({
             </li>
             {INFEED_AFTER.includes(i + 1) && i + 1 < list.length ? (
               <li className="row-ad">
-                <AdSlot id={`home-lista-${INFEED_AFTER.indexOf(i + 1) + 1}`} format="infeed" />
+                <AdSlot id={`${adPrefix}-lista-${INFEED_AFTER.indexOf(i + 1) + 1}`} format="infeed" />
               </li>
             ) : null}
             </Fragment>

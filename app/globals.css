@@ -1647,3 +1647,16 @@ button.btn-ghost {
 }
 .coupon-more { margin: -16px 0 28px; }
 .coupon-more .coupon-grid { margin-top: 12px; }
+
+/* ---------- Anúncios (GAM) ---------- */
+.ads-off .ad:not(.ad-debug) { display: none; }
+.ad.ad-empty:not(.ad-debug) { display: none; }
+.ad-slot iframe { display: block; margin: 0 auto; }
+.ads-off .row-ad,
+.row-ad:has(.ad-empty) { display: none; }
+.gam-table td, .gam-table th { font-size: 0.85rem; vertical-align: top; }
+.gam-table code { white-space: nowrap; }
+.label-like { font-weight: 700; display: block; margin-bottom: 6px; }
+.gam-details { margin-top: 12px; }
+.gam-details summary { cursor: pointer; font-weight: 800; color: var(--brand-dark); }
+.gam-details .table-scroll { margin-top: 10px; }

@@ -66,6 +66,11 @@ export async function saveSettings(formData: FormData) {
     if (raw(formData, k).length > SCRIPT_MAX) back({ erro: `Um dos campos de script passa de ${SCRIPT_MAX} caracteres.` });
   }
 
+  if (formData.get("gam_enabled") === "on") {
+    if (!/^\d{3,20}$/.test(text(formData, "gam_network"))) back({ erro: "O código da rede do GAM deve ter só números (ex.: 21234567890)." });
+    if (!text(formData, "gam_parent")) back({ erro: "Informe o ad unit pai do GAM (ex.: cacaofertas)." });
+  }
+
   const email = text(formData, "contact_email");
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) back({ erro: "O e-mail de contato não parece válido." });
 
@@ -96,6 +101,14 @@ export async function saveSettings(formData: FormData) {
       head: raw(formData, "scripts_head"),
       bodyStart: raw(formData, "scripts_bodyStart"),
       bodyEnd: raw(formData, "scripts_bodyEnd"),
+    },
+    gam: {
+      enabled: formData.get("gam_enabled") === "on",
+      networkCode: text(formData, "gam_network"),
+      parentAdUnit: text(formData, "gam_parent"),
+      childUnits: formData.get("gam_child") === "on",
+      lazyLoad: formData.get("gam_lazy") === "on",
+      refreshSeconds: Number(text(formData, "gam_refresh") || 0),
     },
     adsTxt: raw(formData, "ads_txt"),
     legal: {

@@ -38,6 +38,19 @@ export interface SiteSettings {
     bodyStart: string;
     bodyEnd: string;
   };
+  /** Google Ad Manager: slots gerados a partir dos espaços de anúncio do site. */
+  gam: {
+    enabled: boolean;
+    /** Código da rede (só números), ex.: 21234567890 */
+    networkCode: string;
+    /** Ad unit pai, ex.: "cacaofertas" ou "cacaofertas/site" */
+    parentAdUnit: string;
+    /** true = um ad unit filho por posição (pai/home-topo); false = só o pai, com a posição na segmentação */
+    childUnits: boolean;
+    lazyLoad: boolean;
+    /** Segundos entre refreshes de um anúncio visível (0 = sem refresh; mínimo 30) */
+    refreshSeconds: number;
+  };
   /** Conteúdo do /ads.txt (vendedores autorizados de mídia). */
   adsTxt: string;
   legal: {
@@ -62,6 +75,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   contact: { email: "", whatsapp: "", instagram: "" },
   analytics: { gaId: "", gtmId: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
+  gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
   adsTxt: "",
   legal: { ownerName: "", document: "", city: "" },
 };
@@ -103,6 +117,20 @@ export function mergeSettings(raw: unknown): SiteSettings {
       bodyStart: opt(r.scripts?.bodyStart).slice(0, SCRIPT_MAX),
       bodyEnd: opt(r.scripts?.bodyEnd).slice(0, SCRIPT_MAX),
     },
+    gam: (() => {
+      const g = (r.gam || {}) as Partial<SiteSettings["gam"]>;
+      const networkCode = opt(g.networkCode).replace(/\D/g, "").slice(0, 20);
+      const parentAdUnit = opt(g.parentAdUnit).replace(/^\/+|\/+$/g, "").replace(/[^A-Za-z0-9_\-./]/g, "").slice(0, 100);
+      const rs = Number(g.refreshSeconds ?? D.gam.refreshSeconds);
+      return {
+        enabled: Boolean(g.enabled) && Boolean(networkCode) && Boolean(parentAdUnit),
+        networkCode,
+        parentAdUnit,
+        childUnits: Boolean(g.childUnits),
+        lazyLoad: g.lazyLoad === undefined ? true : Boolean(g.lazyLoad),
+        refreshSeconds: !Number.isFinite(rs) || rs <= 0 ? 0 : Math.max(30, Math.min(600, Math.round(rs))),
+      };
+    })(),
     adsTxt: opt(r.adsTxt).slice(0, 50000),
     legal: { ownerName: opt(r.legal?.ownerName), document: opt(r.legal?.document), city: opt(r.legal?.city) },
   };

@@ -106,7 +106,7 @@ export default async function CategoryPage({ params }: Params) {
 
       <AdSlot id="categoria-topo" format="leaderboard" />
 
-      <Catalog items={items} title={`${name}: todos os produtos`} showCategories={false} />
+      <Catalog items={items} title={`${name}: todos os produtos`} showCategories={false} adPrefix="categoria" />
 
       {info.tips.length ? (
         <section aria-labelledby="dicas" className="page-text category-tips">

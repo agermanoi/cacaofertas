@@ -1,6 +1,7 @@
 import { Flash } from "@/components/admin/Flash";
 import { DEFAULT_SETTINGS, getSettings } from "@/lib/settings";
 import { resetColors, saveSettings } from "./actions";
+import { FORMATS, POSITIONS, sizesLabel } from "@/lib/ad-formats";
 
 type Props = { searchParams: Promise<{ ok?: string; erro?: string }> };
 
@@ -182,6 +183,90 @@ export default async function SettingsPage({ searchParams }: Props) {
             Cole só códigos de fontes confiáveis: eles rodam em todas as páginas. Um código com erro pode quebrar o visual ou
             deixar o site lento. Se algo estranho acontecer, apague o campo e salve.
           </p>
+        </fieldset>
+
+        <fieldset id="gam">
+          <legend>Anúncios (Google Ad Manager)</legend>
+          <label className="check">
+            <input type="checkbox" name="gam_enabled" defaultChecked={s.gam.enabled} /> Exibir anúncios do GAM no site
+          </label>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="gam_network">Código da rede</label>
+              <input id="gam_network" name="gam_network" inputMode="numeric" defaultValue={s.gam.networkCode} placeholder="21234567890" autoComplete="off" />
+              <p className="hint">Em Admin → Configurações globais da rede, no GAM.</p>
+            </div>
+            <div className="field">
+              <label htmlFor="gam_parent">Ad unit pai</label>
+              <input id="gam_parent" name="gam_parent" defaultValue={s.gam.parentAdUnit} placeholder="cacaofertas" autoComplete="off" />
+              <p className="hint">O código do ad unit, não o nome. Pode ter níveis: cacaofertas/site.</p>
+            </div>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="gam_refresh">Refresh (segundos)</label>
+              <input id="gam_refresh" name="gam_refresh" type="number" min={0} max={600} step={5} defaultValue={s.gam.refreshSeconds} />
+              <p className="hint">Mínimo 30. Use 0 para desligar. Só atualiza anúncio já visto e ainda visível na tela.</p>
+            </div>
+            <div className="field">
+              <span className="label-like">Opções</span>
+              <label className="check">
+                <input type="checkbox" name="gam_lazy" defaultChecked={s.gam.lazyLoad} /> Lazy load (carrega perto de aparecer na tela)
+              </label>
+              <label className="check">
+                <input type="checkbox" name="gam_child" defaultChecked={s.gam.childUnits} /> Um ad unit filho por posição
+              </label>
+            </div>
+          </div>
+          <p className="hint">
+            {s.gam.childUnits
+              ? "Ad units usados: /rede/pai/posição (crie um filho para cada posição abaixo)."
+              : "Todos os espaços usam o ad unit pai. A posição vai na segmentação pos=… (crie a chave “pos” no GAM)."}{" "}
+            Toda solicitação leva também as chaves <code>formato</code>, <code>pagina</code> e <code>refresh</code> (0 na primeira exibição).
+          </p>
+
+          <details className="gam-details">
+            <summary>Posições e tamanhos gerados ({POSITIONS.length})</summary>
+            <div className="table-scroll">
+              <table className="admin-table gam-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Posição</th>
+                    <th scope="col">Ad unit</th>
+                    <th scope="col">Desktop</th>
+                    <th scope="col">Celular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {POSITIONS.map((p) => {
+                    const f = FORMATS[p.format];
+                    const unit = `/${s.gam.networkCode || "REDE"}/${s.gam.parentAdUnit || "PAI"}${s.gam.childUnits ? `/${p.id}` : ""}`;
+                    return (
+                      <tr key={p.id}>
+                        <td>
+                          <code>{p.id}</code>
+                          <br />
+                          <small className="muted">{p.where}</small>
+                        </td>
+                        <td>
+                          <code>{unit}</code>
+                          {!s.gam.childUnits ? (
+                            <>
+                              <br />
+                              <small className="muted">pos={p.id}</small>
+                            </>
+                          ) : null}
+                        </td>
+                        <td>{sizesLabel(f.desktop)}</td>
+                        <td>{sizesLabel(f.mobile)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="hint">Tablet (768 a 1023 px) usa os tamanhos de desktop até 728 px de largura.</p>
+          </details>
         </fieldset>
 
         <fieldset id="ads-txt">

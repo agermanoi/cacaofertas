@@ -1,47 +1,148 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { FORMATS, allSizes, sizesLabel, type AdFormat } from "@/lib/ad-formats";
+
+export type { AdFormat } from "@/lib/ad-formats";
+
 /**
- * Espaço reservado para anúncio. Só a div: plugue GPT, AdSense, Prebid ou seu ad server
- * usando o id (ex.: googletag.defineSlot('/1234/radar/home-topo', sizes, 'ad-home-topo')).
+ * Espaço de anúncio servido pelo Google Ad Manager (GPT).
  *
- * - A altura mínima fica reservada para não causar CLS (pulo de layout).
- * - data-sizes-desktop / data-sizes-mobile documentam os formatos previstos.
- * - NEXT_PUBLIC_ADS=off remove todos os espaços.
- * - NEXT_PUBLIC_ADS_DEBUG=1 mostra o contorno e o nome de cada slot.
+ * A configuração (rede, ad unit pai, lazy load, refresh) vem de Admin → Configurações
+ * e é colocada em window.__coAds pelo layout. Sem GAM ativo, os espaços ficam ocultos
+ * (classe ads-off no body), sem deixar buracos na página.
+ *
+ * - Altura mínima reservada para não causar CLS.
+ * - Lazy load nativo do GPT.
+ * - Refresh só quando o anúncio já foi visto e continua ≥ 50% na tela, com a aba ativa.
+ * - NEXT_PUBLIC_ADS_DEBUG=1 mostra contorno e tamanhos de cada slot.
  */
 
-export type AdFormat = "leaderboard" | "retangulo" | "infeed" | "rodape";
-
-const FORMATS: Record<AdFormat, { desktop: string; mobile: string }> = {
-  // 970x90 / 728x90 no desktop, 320x50 / 320x100 no celular
-  leaderboard: { desktop: "970x90,728x90", mobile: "320x100,320x50" },
-  // 300x250 em qualquer tela (336x280 no desktop)
-  retangulo: { desktop: "336x280,300x250", mobile: "300x250" },
-  // entre as linhas do catálogo: faixa no desktop, retângulo no celular
-  infeed: { desktop: "728x90,fluid", mobile: "300x250,fluid" },
-  // antes do rodapé
-  rodape: { desktop: "970x250,970x90,728x90", mobile: "300x250,320x100" },
+type AdsConfig = {
+  network: string;
+  parent: string;
+  child: boolean;
+  lazy: boolean;
+  refresh: number;
 };
 
+declare global {
+  interface Window {
+    googletag: any;
+    __coAds?: AdsConfig;
+    __coAdsState?: { visible: Map<string, number>; timers: Map<string, number>; listeners: boolean };
+  }
+}
+
+function pageType(path: string): string {
+  const seg = path.split("/")[1] || "home";
+  return seg || "home";
+}
+
+function ensureListeners(cfg: AdsConfig) {
+  const w = window;
+  w.__coAdsState ||= { visible: new Map(), timers: new Map(), listeners: false };
+  const st = w.__coAdsState;
+  if (st.listeners) return;
+  st.listeners = true;
+  w.googletag.cmd.push(() => {
+    const pubads = w.googletag.pubads();
+
+    pubads.addEventListener("slotRenderEnded", (e: any) => {
+      const el = document.getElementById(e.slot.getSlotElementId());
+      el?.closest(".ad")?.classList.toggle("ad-empty", Boolean(e.isEmpty));
+    });
+
+    pubads.addEventListener("slotVisibilityChanged", (e: any) => {
+      st.visible.set(e.slot.getSlotElementId(), e.inViewPercentage);
+    });
+
+    if (cfg.refresh > 0) {
+      // Depois de uma impressão visível, agenda o próximo refresh
+      pubads.addEventListener("impressionViewable", (e: any) => {
+        const slot = e.slot;
+        const id = slot.getSlotElementId();
+        window.clearTimeout(st.timers.get(id));
+        const tick = () => {
+          // slot removido (troca de página)
+          if (!document.getElementById(id)) return;
+          const seen = (st.visible.get(id) ?? 0) >= 50 && document.visibilityState === "visible";
+          if (!seen) {
+            st.timers.set(id, window.setTimeout(tick, 5000)); // tenta de novo quando voltar à tela
+            return;
+          }
+          const n = Number(slot.getTargeting("refresh")[0] || 0) + 1;
+          slot.setTargeting("refresh", String(n));
+          pubads.refresh([slot]);
+        };
+        st.timers.set(id, window.setTimeout(tick, cfg.refresh * 1000));
+      });
+    }
+  });
+}
+
 export function AdSlot({ id, format, className }: { id: string; format: AdFormat; className?: string }) {
-  if (process.env.NEXT_PUBLIC_ADS === "off") return null;
+  const ref = useRef<HTMLDivElement>(null);
+  const path = usePathname() || "/";
   const f = FORMATS[format];
+  const elId = `ad-${id}`;
   const debug = process.env.NEXT_PUBLIC_ADS_DEBUG === "1";
+
+  useEffect(() => {
+    const cfg = window.__coAds;
+    if (!cfg || !ref.current) return;
+    const w = window;
+    w.googletag = w.googletag || { cmd: [] };
+    ensureListeners(cfg);
+
+    let slot: any = null;
+    w.googletag.cmd.push(() => {
+      const gt = w.googletag;
+      if (!document.getElementById(elId)) return;
+      const unit = `/${cfg.network}/${cfg.parent}${cfg.child ? `/${id}` : ""}`;
+      slot = gt.defineSlot(unit, allSizes(f), elId);
+      if (!slot) return; // já definido (ex.: renderização dupla em desenvolvimento)
+      const mapping = gt
+        .sizeMapping()
+        .addSize([1024, 0], f.desktop)
+        .addSize([768, 0], f.tablet)
+        .addSize([0, 0], f.mobile)
+        .build();
+      slot
+        .defineSizeMapping(mapping)
+        .setTargeting("pos", id)
+        .setTargeting("formato", format)
+        .setTargeting("pagina", pageType(path))
+        .setTargeting("refresh", "0")
+        .addService(gt.pubads());
+      gt.display(elId);
+    });
+
+    return () => {
+      const st = w.__coAdsState;
+      if (st) {
+        window.clearTimeout(st.timers.get(elId));
+        st.timers.delete(elId);
+        st.visible.delete(elId);
+      }
+      w.googletag.cmd.push(() => {
+        if (slot) w.googletag.destroySlots([slot]);
+      });
+    };
+    // path muda = nova página = slot novo
+  }, [elId, id, format, f, path]);
+
   return (
     <aside
       className={`ad ad-${format}${debug ? " ad-debug" : ""}${className ? ` ${className}` : ""}`}
       aria-label="Publicidade"
     >
       <span className="ad-label">Publicidade</span>
-      <div
-        id={`ad-${id}`}
-        className="ad-slot"
-        data-ad-slot={id}
-        data-ad-format={format}
-        data-sizes-desktop={f.desktop}
-        data-sizes-mobile={f.mobile}
-      >
+      <div ref={ref} id={elId} className="ad-slot" data-ad-slot={id} data-ad-format={format}>
         {debug ? (
           <span className="ad-debug-info">
-            #{`ad-${id}`} · desktop {f.desktop} · mobile {f.mobile}
+            #{elId} · desktop {sizesLabel(f.desktop)} · celular {sizesLabel(f.mobile)}
           </span>
         ) : null}
       </div>

@@ -29,6 +29,14 @@ export async function generateViewport(): Promise<Viewport> {
   return { themeColor: s.colors.primary };
 }
 
+/** Configuração do Google Ad Manager para os AdSlots (não roda no painel). */
+function gptInit(g: { networkCode: string; parentAdUnit: string; childUnits: boolean; lazyLoad: boolean; refreshSeconds: number }) {
+  const cfg = JSON.stringify({ network: g.networkCode, parent: g.parentAdUnit, child: g.childUnits, lazy: g.lazyLoad, refresh: g.refreshSeconds });
+  return `(function(){if(location.pathname.indexOf('/admin')===0)return;window.__coAds=${cfg};window.googletag=window.googletag||{cmd:[]};googletag.cmd.push(function(){var p=googletag.pubads();${
+    g.lazyLoad ? "p.enableLazyLoad({fetchMarginPercent:150,renderMarginPercent:50,mobileScaling:2});" : ""
+  }p.setCentering(true);p.setTargeting('site','cacaofertas');googletag.enableServices();});})();`;
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const s = await getSettings();
   const { days } = blackFriday();
@@ -44,8 +52,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
         <style dangerouslySetInnerHTML={{ __html: cssVars(s) }} />
         <HeadInjections s={s} />
+        {s.gam.enabled ? (
+          <>
+            <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" />
+            <script dangerouslySetInnerHTML={{ __html: gptInit(s.gam) }} />
+          </>
+        ) : null}
       </head>
-      <body>
+      <body className={s.gam.enabled ? undefined : "ads-off"}>
         <BodyStartInjections s={s} />
         <a className="skip" href="#conteudo">
           Pular para o conteúdo
