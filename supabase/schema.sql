@@ -160,3 +160,40 @@ create index if not exists contact_messages_created_idx on contact_messages (cre
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('brand', 'brand', true, 2097152, array['image/png','image/jpeg','image/webp','image/svg+xml'])
 on conflict (id) do nothing;
+
+-- ---------- Cupons ----------
+create table if not exists coupons (
+  id uuid primary key default gen_random_uuid(),
+  source text not null default 'manual',
+  external_id text,
+  store text not null,
+  title text not null,
+  code text,
+  description text,
+  rules text,
+  discount text,
+  category text,
+  url text not null,
+  affiliate_url text,
+  starts_at timestamptz,
+  expires_at timestamptz,
+  highlight boolean not null default false,
+  active boolean not null default true,
+  clicks integer not null default 0,
+  meta jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint coupons_source_external_key unique (source, external_id)
+);
+create index if not exists coupons_store_idx on coupons (lower(store));
+create index if not exists coupons_expires_idx on coupons (expires_at);
+alter table coupons enable row level security;
+drop policy if exists "public read coupons" on coupons;
+create policy "public read coupons" on coupons for select
+  using (active and (expires_at is null or expires_at > now()) and (starts_at is null or starts_at <= now()));
+create or replace function increment_coupon_click(cid uuid) returns void
+language sql security definer set search_path = public as $$
+  update coupons set clicks = clicks + 1 where id = cid;
+$$;
+revoke all on function increment_coupon_click(uuid) from public, anon, authenticated;
+grant execute on function increment_coupon_click(uuid) to service_role;

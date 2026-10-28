@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
-import { lomadeeAffiliateLink, lomadeeBrands, lomadeeCampaigns } from "../lib/collectors/lomadee";
-import { http, sleep } from "../lib/http";
+import { lomadeeBrands, lomadeeCampaigns } from "../lib/collectors/lomadee";
+import { http } from "../lib/http";
 import { normalizeStore } from "../lib/affiliate";
 
 /**
@@ -26,6 +26,7 @@ type Row = {
   highlight: boolean;
   active: boolean;
   updated_at: string;
+  meta?: Record<string, unknown> | null;
 };
 
 const iso = (v: unknown): string | null => {
@@ -87,11 +88,8 @@ export async function importLomadee(db: SupabaseClient): Promise<{ count: number
     for (const c of campaigns) {
       if (!c.url) continue;
       const store = normalizeStore(names.get(c.organizationId || "") || c.name.split(/[-–|:]/)[0] || "Loja");
-      let aff = known.get(c.id) || null;
-      if (!aff && c.organizationId) {
-        aff = await lomadeeAffiliateLink(c.organizationId, c.url);
-        await sleep(1100); // limite de 60 req/min da Lomadee
-      }
+      // O link curto de afiliado é gerado no primeiro clique (/c/[id]) e guardado
+      const aff = known.get(c.id) || null;
       rows.push({
         source: "lomadee",
         external_id: c.id,
@@ -109,6 +107,7 @@ export async function importLomadee(db: SupabaseClient): Promise<{ count: number
         highlight: Boolean(c.isHighlight),
         active: true,
         updated_at: now,
+        meta: c.organizationId ? { organizationId: c.organizationId } : null,
       });
     }
     return { count: await upsert(db, "lomadee", rows) };
