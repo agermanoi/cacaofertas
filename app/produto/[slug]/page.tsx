@@ -9,6 +9,7 @@ import { VerdictBadge } from "@/components/VerdictBadge";
 import { PriceChart } from "@/components/PriceChart";
 import { AdSlot } from "@/components/AdSlot";
 import { SpecSheet } from "@/components/SpecSheet";
+import { StoreLink } from "@/components/StoreLink";
 import { getSpecs } from "@/lib/specs";
 
 export const revalidate = 3600;
@@ -138,9 +139,9 @@ export default async function ProductPage({ params }: Params) {
                     <strong>{money(o.last_price)}</strong>
                   </td>
                   <td>
-                    <a href={`/go/${o.id}`} className="btn" rel="sponsored nofollow noopener" target="_blank">
+                    <StoreLink href={`/go/${o.id}`} className="btn">
                       Ver na loja
-                    </a>
+                    </StoreLink>
                   </td>
                 </tr>
               ))}
