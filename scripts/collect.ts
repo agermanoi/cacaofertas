@@ -98,7 +98,11 @@ async function saveOffers(product: Product, offers: OfferInput[]): Promise<numbe
 
 /** Chaves que podem ficar no banco (tabela kv) em vez de secret do GitHub. O secret, se existir, tem prioridade. */
 async function loadKeysFromDb() {
-  const map: Record<string, string> = { lomadee_api_key: "LOMADEE_API_KEY", serpapi_key: "SERPAPI_KEY" };
+  const map: Record<string, string> = {
+    lomadee_api_key: "LOMADEE_API_KEY",
+    serpapi_key: "SERPAPI_KEY",
+    amazon_associate_tag: "AMAZON_ASSOCIATE_TAG",
+  };
   const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
   for (const row of data || []) {
     const env = map[row.key];
