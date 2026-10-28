@@ -807,5 +807,1814 @@
       ]
     ],
     "note": "Confira no anúncio se é a 2ª geração (2022) e a versão só GPS de 44 mm."
+  },
+  "iphone-17-pro-256gb": {
+    "summary": "iPhone topo de linha de 6,3\" lançado em setembro de 2025, com chip A19 Pro, corpo unibody de alumínio e três câmeras de 48 MP.",
+    "specs": [
+      [
+        "Tela",
+        "6,3\" Super Retina XDR OLED, 2622 × 1206, ProMotion até 120 Hz"
+      ],
+      [
+        "Chip",
+        "A19 Pro (CPU de 6 núcleos, GPU de 6 núcleos)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB (também 512 GB e 1 TB)"
+      ],
+      [
+        "Câmeras traseiras",
+        "Principal 48 MP, ultra-angular 48 MP e teleobjetiva 48 MP 4× (zoom de qualidade óptica até 8×)"
+      ],
+      [
+        "Câmera frontal",
+        "18 MP Center Stage"
+      ],
+      [
+        "Bateria",
+        "Até 31 h de reprodução de vídeo"
+      ],
+      [
+        "Corpo",
+        "Unibody de alumínio, Ceramic Shield 2 na frente"
+      ],
+      [
+        "Lançamento",
+        "Setembro de 2025"
+      ]
+    ]
+  },
+  "iphone-17-pro-max-256gb": {
+    "summary": "A versão grande do iPhone 17 Pro: tela de 6,9\", a maior bateria da linha e as mesmas três câmeras de 48 MP.",
+    "specs": [
+      [
+        "Tela",
+        "6,9\" Super Retina XDR OLED, 2868 × 1320, ProMotion até 120 Hz"
+      ],
+      [
+        "Chip",
+        "A19 Pro (CPU de 6 núcleos, GPU de 6 núcleos)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB (também 512 GB, 1 TB e 2 TB)"
+      ],
+      [
+        "Câmeras traseiras",
+        "Principal 48 MP, ultra-angular 48 MP e teleobjetiva 48 MP 4× (zoom de qualidade óptica até 8×)"
+      ],
+      [
+        "Câmera frontal",
+        "18 MP Center Stage"
+      ],
+      [
+        "Bateria",
+        "Até 37 h de reprodução de vídeo"
+      ],
+      [
+        "Corpo",
+        "Unibody de alumínio, Ceramic Shield 2 na frente"
+      ],
+      [
+        "Lançamento",
+        "Setembro de 2025"
+      ]
+    ]
+  },
+  "iphone-air-256gb": {
+    "summary": "O iPhone mais fino já feito (5,6 mm), com chip A19 Pro e tela de 6,5\". Em troca da espessura, tem uma câmera traseira só e bateria menor.",
+    "specs": [
+      [
+        "Tela",
+        "6,5\" Super Retina XDR OLED, 120 Hz"
+      ],
+      [
+        "Chip",
+        "A19 Pro"
+      ],
+      [
+        "Memória",
+        "12 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "256 GB (também 512 GB e 1 TB)"
+      ],
+      [
+        "Câmeras",
+        "Traseira 48 MP; frontal 18 MP"
+      ],
+      [
+        "Bateria",
+        "3.149 mAh; carregamento sem fio MagSafe/Qi2 de 20 W"
+      ],
+      [
+        "Espessura e peso",
+        "5,6 mm, 165 g"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Chip de operadora",
+        "Só eSIM"
+      ]
+    ],
+    "note": "Não tem entrada para chip físico: confira se sua operadora oferece eSIM."
+  },
+  "iphone-16e-128gb": {
+    "summary": "O iPhone mais barato da linha atual: chip A18 (o mesmo do iPhone 16), tela de 6,1\" e uma câmera traseira de 48 MP.",
+    "specs": [
+      [
+        "Tela",
+        "6,1\" OLED, 60 Hz"
+      ],
+      [
+        "Chip",
+        "A18"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "128 GB (também 256 e 512 GB)"
+      ],
+      [
+        "Câmeras",
+        "Traseira 48 MP (única); frontal 12 MP"
+      ],
+      [
+        "Bateria",
+        "4.005 mAh"
+      ],
+      [
+        "Carregamento",
+        "20 W com fio (USB-C); sem fio Qi de 7,5 W, sem MagSafe"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Peso",
+        "167 g"
+      ],
+      [
+        "Lançamento",
+        "Fevereiro de 2025"
+      ]
+    ]
+  },
+  "iphone-15-128gb": {
+    "summary": "Modelo de 2023 que segue à venda com preço menor: Dynamic Island, câmera dupla com principal de 48 MP e USB-C.",
+    "specs": [
+      [
+        "Tela",
+        "6,1\" OLED Super Retina XDR, 60 Hz"
+      ],
+      [
+        "Chip",
+        "A16 Bionic"
+      ],
+      [
+        "Memória",
+        "6 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "128 GB (também 256 e 512 GB)"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 48 MP + ultra-angular 12 MP; frontal 12 MP"
+      ],
+      [
+        "Bateria",
+        "3.349 mAh"
+      ],
+      [
+        "Carregamento",
+        "20 W com fio (USB-C); MagSafe e Qi2 de 15 W"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Peso",
+        "171 g"
+      ],
+      [
+        "Lançamento",
+        "Setembro de 2023"
+      ]
+    ]
+  },
+  "galaxy-s26-ultra-256gb": {
+    "summary": "O topo de linha da Samsung para 2026: tela de 6,9\" com 2.600 nits, Snapdragon 8 Elite Gen 5 e câmera principal de 200 MP.",
+    "specs": [
+      [
+        "Tela",
+        "6,9\" Dynamic LTPO AMOLED 2X, 3120 × 1440, 120 Hz, até 2.600 nits"
+      ],
+      [
+        "Processador",
+        "Snapdragon 8 Elite Gen 5"
+      ],
+      [
+        "Memória",
+        "12 GB de RAM (16 GB na versão de 1 TB)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB (também 512 GB e 1 TB), sem microSD"
+      ],
+      [
+        "Câmeras traseiras",
+        "Principal 200 MP, ultra-angular 50 MP, teleobjetiva 50 MP 5× e teleobjetiva 10 MP 3×"
+      ],
+      [
+        "Câmera frontal",
+        "12 MP"
+      ],
+      [
+        "Bateria",
+        "5.000 mAh; 60 W com fio, 25 W sem fio"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Peso",
+        "214 g"
+      ],
+      [
+        "Atualizações",
+        "Android 16 / One UI 8.5, 7 anos de atualizações"
+      ],
+      [
+        "Lançamento",
+        "Fevereiro de 2026"
+      ]
+    ]
+  },
+  "galaxy-a36-256gb": {
+    "summary": "Intermediário da Samsung com tela AMOLED de 120 Hz, Snapdragon 6 Gen 3, carregamento de 45 W e resistência IP67.",
+    "specs": [
+      [
+        "Tela",
+        "6,7\" Super AMOLED, 2340 × 1080, 120 Hz, até 1.900 nits"
+      ],
+      [
+        "Processador",
+        "Snapdragon 6 Gen 3"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, sem microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP + ultra-angular 8 MP + macro 5 MP; frontal 12 MP"
+      ],
+      [
+        "Bateria",
+        "5.000 mAh, carregamento de 45 W"
+      ],
+      [
+        "Resistência",
+        "IP67"
+      ],
+      [
+        "Peso",
+        "195 g"
+      ],
+      [
+        "Lançamento",
+        "Março de 2025"
+      ]
+    ]
+  },
+  "galaxy-a26-256gb": {
+    "summary": "Intermediário de entrada com tela AMOLED de 120 Hz, resistência IP67 e entrada para microSD.",
+    "specs": [
+      [
+        "Tela",
+        "6,7\" Super AMOLED, 2400 × 1080, 120 Hz"
+      ],
+      [
+        "Processador",
+        "Exynos 1380"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP + ultra-angular 8 MP + macro 2 MP; frontal 13 MP"
+      ],
+      [
+        "Bateria",
+        "5.000 mAh, carregamento de 25 W"
+      ],
+      [
+        "Resistência",
+        "IP67"
+      ],
+      [
+        "Peso",
+        "200 g"
+      ],
+      [
+        "Lançamento",
+        "Março de 2025"
+      ]
+    ]
+  },
+  "galaxy-a16-128gb": {
+    "summary": "Celular de entrada da Samsung com tela AMOLED grande, bateria de 5.000 mAh e muitos anos de atualização.",
+    "specs": [
+      [
+        "Tela",
+        "6,7\" Super AMOLED, 90 Hz"
+      ],
+      [
+        "Processador",
+        "MediaTek Helio G99 (versão 4G)"
+      ],
+      [
+        "Armazenamento",
+        "128 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP + ultra-angular 5 MP + macro 2 MP; frontal 13 MP"
+      ],
+      [
+        "Bateria",
+        "5.000 mAh, carregamento de 25 W"
+      ],
+      [
+        "Resistência",
+        "IP54"
+      ],
+      [
+        "Peso",
+        "200 g"
+      ]
+    ],
+    "note": "Existe versão 4G e 5G com processadores diferentes. Confira no anúncio qual é."
+  },
+  "galaxy-a17-128gb": {
+    "summary": "Sucessor do Galaxy A16, com 5G, processador Exynos 1330, estabilização óptica na câmera e até 6 atualizações de Android.",
+    "specs": [
+      [
+        "Tela",
+        "6,7\" Super AMOLED, 90 Hz"
+      ],
+      [
+        "Processador",
+        "Exynos 1330"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "128 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP com OIS + ultra-angular 5 MP + macro 2 MP; frontal 13 MP"
+      ],
+      [
+        "Bateria",
+        "5.000 mAh, carregamento de 25 W"
+      ],
+      [
+        "Atualizações",
+        "Até 6 versões do Android"
+      ],
+      [
+        "Peso",
+        "192 g"
+      ],
+      [
+        "Lançamento",
+        "Agosto de 2025"
+      ]
+    ]
+  },
+  "moto-g86-256gb": {
+    "summary": "Intermediário da Motorola com tela P-OLED muito brilhante, Dimensity 7300 e resistência IP68/IP69.",
+    "specs": [
+      [
+        "Tela",
+        "6,67\" P-OLED, 120 Hz, até 4.500 nits de pico"
+      ],
+      [
+        "Processador",
+        "MediaTek Dimensity 7300"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP + ultra-angular 8 MP; frontal 32 MP"
+      ],
+      [
+        "Bateria",
+        "5.200 mAh, carregamento de 30 W"
+      ],
+      [
+        "Resistência",
+        "IP68 e IP69"
+      ],
+      [
+        "Peso",
+        "185 g"
+      ],
+      [
+        "Lançamento",
+        "Maio de 2025"
+      ]
+    ]
+  },
+  "moto-g56-256gb": {
+    "summary": "Versão mais em conta do Moto G86: tela LCD de 120 Hz, Dimensity 7060 e a mesma resistência IP68/IP69.",
+    "specs": [
+      [
+        "Tela",
+        "6,72\" IPS LCD, 120 Hz"
+      ],
+      [
+        "Processador",
+        "MediaTek Dimensity 7060"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, microSD (slot híbrido)"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP + ultra-angular 8 MP; frontal 32 MP"
+      ],
+      [
+        "Bateria",
+        "5.200 mAh, carregamento de 30 W"
+      ],
+      [
+        "Resistência",
+        "IP68 e IP69"
+      ],
+      [
+        "Peso",
+        "200 g"
+      ],
+      [
+        "Lançamento",
+        "Maio de 2025"
+      ]
+    ]
+  },
+  "moto-g05-128gb": {
+    "summary": "Celular de entrada da Motorola com tela grande de 90 Hz e bateria de 5.200 mAh.",
+    "specs": [
+      [
+        "Tela",
+        "6,67\" IPS LCD, 90 Hz"
+      ],
+      [
+        "Processador",
+        "MediaTek Helio G81 Extreme"
+      ],
+      [
+        "Memória",
+        "4 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "128 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseira 50 MP; frontal 8 MP"
+      ],
+      [
+        "Bateria",
+        "5.200 mAh, carregamento de 18 W"
+      ],
+      [
+        "Resistência",
+        "IP54"
+      ],
+      [
+        "Peso",
+        "188 g"
+      ],
+      [
+        "Lançamento",
+        "Dezembro de 2024"
+      ]
+    ]
+  },
+  "motorola-edge-60-256gb": {
+    "summary": "Intermediário premium com tela curva P-OLED, três câmeras de 50 MP/10 MP, frontal de 50 MP e carregamento de 68 W.",
+    "specs": [
+      [
+        "Tela",
+        "6,7\" LTPO P-OLED, 120 Hz, até 4.500 nits de pico"
+      ],
+      [
+        "Processador",
+        "MediaTek Dimensity 7300"
+      ],
+      [
+        "Memória",
+        "8 ou 12 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB"
+      ],
+      [
+        "Câmeras traseiras",
+        "Principal 50 MP, ultra-angular 50 MP e teleobjetiva 10 MP"
+      ],
+      [
+        "Câmera frontal",
+        "50 MP"
+      ],
+      [
+        "Bateria",
+        "5.200 mAh, carregamento de 68 W"
+      ],
+      [
+        "Resistência",
+        "IP68, IP69 e MIL-STD 810H"
+      ],
+      [
+        "Peso",
+        "179 g"
+      ],
+      [
+        "Lançamento",
+        "Abril de 2025"
+      ]
+    ]
+  },
+  "poco-x7-pro-256gb": {
+    "summary": "Intermediário com cara de topo de linha: Dimensity 8400 Ultra, tela AMOLED 1.5K e bateria de 6.000 mAh com carga de 90 W.",
+    "specs": [
+      [
+        "Tela",
+        "6,67\" AMOLED, 2712 × 1220, 120 Hz, até 3.200 nits de pico"
+      ],
+      [
+        "Processador",
+        "MediaTek Dimensity 8400 Ultra"
+      ],
+      [
+        "Memória",
+        "8 ou 12 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, sem microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseiras 50 MP com OIS + ultra-angular 8 MP; frontal 20 MP"
+      ],
+      [
+        "Bateria",
+        "6.000 mAh, carregamento de 90 W"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Peso",
+        "195 g"
+      ],
+      [
+        "Lançamento",
+        "Janeiro de 2025"
+      ]
+    ]
+  },
+  "redmi-15c-256gb": {
+    "summary": "Celular de entrada da Xiaomi com tela de 6,9\" e bateria de 6.000 mAh.",
+    "specs": [
+      [
+        "Tela",
+        "6,9\" IPS LCD, 1600 × 720, 120 Hz"
+      ],
+      [
+        "Processador",
+        "MediaTek Helio G81 Ultra"
+      ],
+      [
+        "Memória",
+        "4, 6 ou 8 GB de RAM (varia por versão)"
+      ],
+      [
+        "Armazenamento",
+        "256 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseira 50 MP; frontal 8 MP"
+      ],
+      [
+        "Bateria",
+        "6.000 mAh, carregamento de 33 W"
+      ],
+      [
+        "Resistência",
+        "IP64"
+      ],
+      [
+        "Peso",
+        "205 g"
+      ],
+      [
+        "Lançamento",
+        "Agosto de 2025"
+      ]
+    ]
+  },
+  "smart-tv-samsung-55-crystal-u8000f": {
+    "summary": "Linha Crystal UHD 2026 da Samsung: TV 4K de entrada com processador Crystal 4K, Tizen e Gaming Hub.",
+    "specs": [
+      [
+        "Tela",
+        "55\" LED Crystal UHD 4K (3840 × 2160)"
+      ],
+      [
+        "Processador",
+        "Crystal Processor 4K, com upscaling 4K"
+      ],
+      [
+        "Imagem",
+        "Motion Xcelerator e Color Booster"
+      ],
+      [
+        "Sistema",
+        "Tizen, com Samsung Vision AI"
+      ],
+      [
+        "Jogos",
+        "Gaming Hub e Xbox Cloud Gaming"
+      ],
+      [
+        "Ano",
+        "2026"
+      ]
+    ]
+  },
+  "smart-tv-samsung-65-crystal-u8000f": {
+    "summary": "Linha Crystal UHD 2026 da Samsung em 65\": 4K com processador Crystal 4K, Tizen e Gaming Hub.",
+    "specs": [
+      [
+        "Tela",
+        "65\" LED Crystal UHD 4K (3840 × 2160)"
+      ],
+      [
+        "Processador",
+        "Crystal Processor 4K, com upscaling 4K"
+      ],
+      [
+        "Imagem",
+        "Motion Xcelerator e Color Booster"
+      ],
+      [
+        "Sistema",
+        "Tizen, com Samsung Vision AI"
+      ],
+      [
+        "Jogos",
+        "Gaming Hub e Xbox Cloud Gaming"
+      ],
+      [
+        "Ano",
+        "2026"
+      ]
+    ]
+  },
+  "smart-tv-samsung-55-qled-q7f": {
+    "summary": "QLED de entrada da Samsung (2025): pontos quânticos para cores mais vivas que as Crystal UHD, com HDR10+.",
+    "specs": [
+      [
+        "Tela",
+        "55\" QLED 4K, painel VA, 60 Hz"
+      ],
+      [
+        "HDR",
+        "HDR10+"
+      ],
+      [
+        "Sistema",
+        "Tizen"
+      ],
+      [
+        "Áudio",
+        "20 W, 2 canais"
+      ],
+      [
+        "Conexões",
+        "3 HDMI"
+      ],
+      [
+        "Jogos",
+        "ALLM, HGiG e Gaming Hub (sem VRR)"
+      ],
+      [
+        "Ano",
+        "2025"
+      ]
+    ]
+  },
+  "smart-tv-lg-50-ut8050": {
+    "summary": "TV 4K da linha UA85 da LG (2025), com processador α7 AI de 8ª geração e webOS 25.",
+    "specs": [
+      [
+        "Tela",
+        "50\" LED 4K UHD, 60 Hz"
+      ],
+      [
+        "Processador",
+        "α7 AI Gen8"
+      ],
+      [
+        "Sistema",
+        "webOS 25"
+      ],
+      [
+        "Áudio",
+        "20 W, 2 canais"
+      ],
+      [
+        "Conexões",
+        "3 HDMI, 1 USB, Ethernet, saída óptica; Wi-Fi 5 e Bluetooth 5.0"
+      ],
+      [
+        "Jogos",
+        "VRR, ALLM e HGiG"
+      ],
+      [
+        "Ano",
+        "2025"
+      ]
+    ]
+  },
+  "smart-tv-lg-55-ut8050": {
+    "summary": "TV 4K da linha UA85 da LG (2025) em 55\", com processador α7 AI de 8ª geração e webOS 25.",
+    "specs": [
+      [
+        "Tela",
+        "55\" LED 4K UHD, 60 Hz"
+      ],
+      [
+        "Processador",
+        "α7 AI Gen8"
+      ],
+      [
+        "Sistema",
+        "webOS 25"
+      ],
+      [
+        "Áudio",
+        "20 W, 2 canais"
+      ],
+      [
+        "Conexões",
+        "3 HDMI, 1 USB, Ethernet, saída óptica; Wi-Fi 5 e Bluetooth 5.0"
+      ],
+      [
+        "Jogos",
+        "VRR, ALLM e HGiG"
+      ],
+      [
+        "Ano",
+        "2025"
+      ]
+    ]
+  },
+  "smart-tv-lg-55-oled-c5": {
+    "summary": "A OLED mais vendida da LG (2025): contraste infinito, até 144 Hz e quatro HDMI 2.1, referência para filmes e jogos.",
+    "specs": [
+      [
+        "Tela",
+        "55\" OLED evo 4K, até 144 Hz"
+      ],
+      [
+        "Processador",
+        "α9 AI Gen8"
+      ],
+      [
+        "HDR",
+        "Dolby Vision, HDR10 e HLG"
+      ],
+      [
+        "Áudio",
+        "40 W, 2.2 canais, Dolby Atmos"
+      ],
+      [
+        "Conexões",
+        "4 HDMI 2.1"
+      ],
+      [
+        "Jogos",
+        "VRR com G-Sync e FreeSync"
+      ],
+      [
+        "Sistema",
+        "webOS 25"
+      ],
+      [
+        "Ano",
+        "2025"
+      ]
+    ]
+  },
+  "smart-tv-tcl-55-p7k": {
+    "summary": "QLED da TCL (2025) com Google TV, HDR10+ e Dolby Vision e som Dolby Atmos.",
+    "specs": [
+      [
+        "Tela",
+        "55\" QLED 4K"
+      ],
+      [
+        "HDR",
+        "HDR10+, Dolby Vision e HLG"
+      ],
+      [
+        "Sistema",
+        "Google TV"
+      ],
+      [
+        "Áudio",
+        "20 W (2 × 10 W), Dolby Atmos"
+      ],
+      [
+        "Conexões",
+        "3 HDMI 2.1 com eARC"
+      ],
+      [
+        "Jogos",
+        "Game Master"
+      ],
+      [
+        "Ano",
+        "2025"
+      ]
+    ],
+    "note": "As fichas divergem sobre a taxa de atualização (60 Hz nativo, com VRR mais alto em jogos). Confira no anúncio."
+  },
+  "smart-tv-tcl-50-p755": {
+    "summary": "TV 4K da TCL com Google TV, todos os formatos de HDR (inclusive Dolby Vision) e Dolby Atmos.",
+    "specs": [
+      [
+        "Tela",
+        "50\" LED 4K, Direct LED, 60 Hz"
+      ],
+      [
+        "HDR",
+        "Dolby Vision, HDR10, HDR10+ e HLG"
+      ],
+      [
+        "Sistema",
+        "Google TV"
+      ],
+      [
+        "Áudio",
+        "20 W, 2 canais, Dolby Atmos"
+      ],
+      [
+        "Conexões",
+        "3 HDMI 2.1 com eARC"
+      ],
+      [
+        "Jogos",
+        "ALLM e Game Master 3.0"
+      ],
+      [
+        "Ano",
+        "2024"
+      ]
+    ]
+  },
+  "notebook-acer-nitro-v15-rtx-4050": {
+    "summary": "Notebook gamer de entrada com RTX 4050 e tela de 144 Hz: roda jogos atuais em Full HD com DLSS.",
+    "specs": [
+      [
+        "Processador",
+        "Intel Core i5-13420H (versões com i7-13620H)"
+      ],
+      [
+        "Placa de vídeo",
+        "NVIDIA GeForce RTX 4050"
+      ],
+      [
+        "Memória",
+        "DDR5 (8 a 32 GB conforme a versão)"
+      ],
+      [
+        "Armazenamento",
+        "SSD NVMe de 512 GB a 1 TB"
+      ],
+      [
+        "Tela",
+        "15,6\" IPS Full HD (1920 × 1080), 144 Hz"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi 6, Bluetooth 5.1"
+      ],
+      [
+        "Bateria",
+        "57 Wh"
+      ],
+      [
+        "Peso",
+        "Cerca de 2,1 kg"
+      ]
+    ],
+    "note": "O nome Nitro V15 cobre várias configurações. Confira processador, memória e SSD no anúncio."
+  },
+  "notebook-lenovo-loq-rtx-3050": {
+    "summary": "Notebook gamer de entrada da Lenovo com processador da série HX e RTX 3050 de 95 W.",
+    "specs": [
+      [
+        "Processador",
+        "Intel Core i5-12450HX"
+      ],
+      [
+        "Placa de vídeo",
+        "NVIDIA GeForce RTX 3050 6 GB, até 95 W"
+      ],
+      [
+        "Memória",
+        "DDR5 (8 ou 16 GB conforme a versão)"
+      ],
+      [
+        "Armazenamento",
+        "SSD NVMe PCIe 4.0 de 512 GB"
+      ],
+      [
+        "Tela",
+        "15,6\" IPS Full HD, 144 Hz, 300 nits, 100% sRGB"
+      ],
+      [
+        "Peso",
+        "Cerca de 2,4 kg"
+      ]
+    ],
+    "note": "Configurações variam por loja. Confira memória e SSD no anúncio."
+  },
+  "notebook-samsung-galaxy-book4-i5": {
+    "summary": "Notebook de uso geral da Samsung, leve para o tamanho de 15,6\", com Wi-Fi 6 e boa variedade de portas.",
+    "specs": [
+      [
+        "Processador",
+        "Intel Core i5 de 13ª geração (série U)"
+      ],
+      [
+        "Vídeo",
+        "Intel integrada"
+      ],
+      [
+        "Tela",
+        "15,6\" IPS Full HD (1920 × 1080), 60 Hz"
+      ],
+      [
+        "Portas",
+        "HDMI, 2 USB-C, 2 USB-A 3.2, Ethernet, leitor de cartão e fone"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi 6, Bluetooth 5.2"
+      ],
+      [
+        "Bateria",
+        "54 Wh, carregador de 45 W"
+      ],
+      [
+        "Peso",
+        "1,55 kg"
+      ],
+      [
+        "Sistema",
+        "Windows 11 Home"
+      ]
+    ],
+    "note": "Memória e SSD variam por versão (8 ou 16 GB; 256 ou 512 GB). Confira no anúncio."
+  },
+  "notebook-acer-aspire-go-15": {
+    "summary": "Notebook básico da Acer para estudo e trabalho, vendido em várias configurações de Core i3 a Core i7.",
+    "specs": [
+      [
+        "Processador",
+        "Intel Core i3-1305U, i5-1334U, i5-13420H ou i7-13620H (conforme a versão)"
+      ],
+      [
+        "Tela",
+        "15,3\" ou 15,6\" Full HD (conforme a versão)"
+      ],
+      [
+        "Memória",
+        "8 ou 16 GB"
+      ],
+      [
+        "Armazenamento",
+        "SSD de 256 ou 512 GB"
+      ],
+      [
+        "Sistema",
+        "Windows 11 ou Linux (conforme a versão)"
+      ]
+    ],
+    "note": "Os preços variam muito entre as versões. Compare processador, memória e SSD antes de comprar."
+  },
+  "mouse-logitech-g203": {
+    "summary": "O mouse gamer com fio mais vendido da Logitech: leve, 6 botões programáveis e iluminação RGB.",
+    "specs": [
+      [
+        "Sensor",
+        "Até 8.000 DPI"
+      ],
+      [
+        "Botões",
+        "6 programáveis (G HUB)"
+      ],
+      [
+        "Taxa de resposta",
+        "Até 1.000 Hz"
+      ],
+      [
+        "Peso",
+        "85 g"
+      ],
+      [
+        "Conexão",
+        "Com fio, cabo de 2,1 m"
+      ],
+      [
+        "Iluminação",
+        "RGB Lightsync"
+      ]
+    ]
+  },
+  "ssd-kingston-nv3-1tb": {
+    "summary": "SSD NVMe PCIe 4.0 de bom custo-benefício, até 6.000 MB/s. Serve para PC e para expandir o PS5.",
+    "specs": [
+      [
+        "Capacidade",
+        "1 TB"
+      ],
+      [
+        "Interface",
+        "PCIe 4.0 x4 NVMe"
+      ],
+      [
+        "Leitura / gravação",
+        "Até 6.000 / 4.000 MB/s"
+      ],
+      [
+        "Formato",
+        "M.2 2280, sem dissipador"
+      ],
+      [
+        "Garantia",
+        "3 anos"
+      ]
+    ],
+    "note": "Para usar no PS5, a Sony recomenda instalar um dissipador."
+  },
+  "headset-hyperx-cloud-stinger-2": {
+    "summary": "Headset gamer leve com drivers de 50 mm, microfone com cancelamento de ruído e som espacial DTS.",
+    "specs": [
+      [
+        "Drivers",
+        "50 mm"
+      ],
+      [
+        "Conexão",
+        "P3 (3,5 mm), com divisor para PC"
+      ],
+      [
+        "Microfone",
+        "Com cancelamento de ruído"
+      ],
+      [
+        "Som espacial",
+        "DTS Headphone:X"
+      ],
+      [
+        "Resposta de frequência",
+        "10 Hz a 28 kHz"
+      ],
+      [
+        "Peso",
+        "275 g"
+      ]
+    ]
+  },
+  "impressora-epson-ecotank-l3250": {
+    "summary": "Multifuncional de tanque de tinta com Wi-Fi: imprime, copia e digitaliza com custo por página muito baixo.",
+    "specs": [
+      [
+        "Funções",
+        "Impressão, cópia e digitalização"
+      ],
+      [
+        "Velocidade ISO",
+        "Até 10 ppm preto e 5 ppm cor"
+      ],
+      [
+        "Rendimento",
+        "Até 4.500 páginas (preto) e 7.500 páginas (cor)"
+      ],
+      [
+        "Resolução",
+        "Até 5.760 × 1.440 dpi"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi, Wi-Fi Direct e USB"
+      ],
+      [
+        "App",
+        "Epson Smart Panel"
+      ]
+    ]
+  },
+  "ipad-11-a16-128gb": {
+    "summary": "O iPad de entrada de 2025: tela de 11\", chip A16 e 128 GB na versão básica.",
+    "specs": [
+      [
+        "Tela",
+        "11\" Liquid Retina, 2360 × 1640, 500 nits"
+      ],
+      [
+        "Chip",
+        "A16"
+      ],
+      [
+        "Memória",
+        "6 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "128 GB (também 256 e 512 GB)"
+      ],
+      [
+        "Câmeras",
+        "Traseira 12 MP; frontal 12 MP na borda maior (Center Stage)"
+      ],
+      [
+        "Bateria",
+        "Até 10 h de navegação"
+      ],
+      [
+        "Desbloqueio",
+        "Touch ID no botão superior"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi 6, Bluetooth 5.3, USB-C"
+      ],
+      [
+        "Peso",
+        "477 g"
+      ],
+      [
+        "Lançamento",
+        "Março de 2025"
+      ]
+    ],
+    "note": "Não roda o Apple Intelligence."
+  },
+  "galaxy-tab-s10-fe-128gb": {
+    "summary": "Tablet intermediário da Samsung com S Pen na caixa, resistência a água e tela de 10,9\".",
+    "specs": [
+      [
+        "Tela",
+        "10,9\" LCD, 2304 × 1440, 90 Hz"
+      ],
+      [
+        "Processador",
+        "Exynos 1580"
+      ],
+      [
+        "Armazenamento",
+        "128 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseira 13 MP; frontal 12 MP"
+      ],
+      [
+        "Bateria",
+        "8.000 mAh"
+      ],
+      [
+        "Caneta",
+        "S Pen inclusa"
+      ],
+      [
+        "Resistência",
+        "IP68"
+      ],
+      [
+        "Peso",
+        "500 g"
+      ]
+    ],
+    "note": "Não confunda com o Tab S10 FE+, de 13,1\"."
+  },
+  "redmi-pad-se-128gb": {
+    "summary": "Tablet barato da Xiaomi para vídeos e estudo: tela de 11\" com 90 Hz, quatro alto-falantes e bateria de 8.000 mAh.",
+    "specs": [
+      [
+        "Tela",
+        "11\" IPS LCD, 1920 × 1200, 90 Hz"
+      ],
+      [
+        "Processador",
+        "Snapdragon 680"
+      ],
+      [
+        "Armazenamento",
+        "128 GB, com microSD"
+      ],
+      [
+        "Câmeras",
+        "Traseira 8 MP; frontal 5 MP"
+      ],
+      [
+        "Bateria",
+        "8.000 mAh (aceita 18 W; carregador de 10 W na caixa)"
+      ],
+      [
+        "Som",
+        "4 alto-falantes com Dolby Atmos e entrada P2"
+      ],
+      [
+        "Peso",
+        "478 g"
+      ]
+    ],
+    "note": "A memória RAM varia (4, 6 ou 8 GB). Confira no anúncio."
+  },
+  "playstation-5-pro": {
+    "summary": "A versão mais potente do PS5: GPU de 16,7 TFLOPs, upscaling PSSR e 2 TB de SSD.",
+    "specs": [
+      [
+        "GPU",
+        "AMD, 60 CUs, 16,7 TFLOPs"
+      ],
+      [
+        "CPU",
+        "AMD Zen 2, 8 núcleos"
+      ],
+      [
+        "Memória",
+        "16 GB GDDR6 + 2 GB DDR5"
+      ],
+      [
+        "Armazenamento",
+        "SSD de 2 TB, com slot NVMe para expansão"
+      ],
+      [
+        "Upscaling",
+        "PlayStation Spectral Super Resolution (PSSR)"
+      ],
+      [
+        "Leitor de disco",
+        "Vendido à parte"
+      ],
+      [
+        "Peso",
+        "3,1 kg"
+      ]
+    ],
+    "note": "Não vem com leitor de discos: para jogos em mídia física, compre o leitor separado."
+  },
+  "controle-dualsense": {
+    "summary": "O controle oficial do PS5, com resposta tátil e gatilhos adaptáveis.",
+    "specs": [
+      [
+        "Conexão",
+        "Bluetooth e USB-C"
+      ],
+      [
+        "Recursos",
+        "Resposta tátil, gatilhos adaptáveis, microfone e alto-falante embutidos"
+      ],
+      [
+        "Bateria",
+        "Recarregável, via USB-C"
+      ],
+      [
+        "Compatibilidade",
+        "PS5 e PC"
+      ]
+    ],
+    "note": "O DualSense Edge é outro produto, mais caro, com botões traseiros."
+  },
+  "xbox-series-x": {
+    "summary": "O Xbox mais potente, com leitor de discos e 1 TB de SSD, para jogos em 4K.",
+    "specs": [
+      [
+        "Resolução",
+        "Até 4K, até 120 fps"
+      ],
+      [
+        "Armazenamento",
+        "SSD de 1 TB"
+      ],
+      [
+        "Leitor de disco",
+        "Blu-ray 4K"
+      ],
+      [
+        "Retrocompatibilidade",
+        "Jogos de Xbox One, 360 e original (selecionados)"
+      ]
+    ],
+    "note": "Existe também a versão Digital, sem leitor de discos."
+  },
+  "nintendo-switch-oled": {
+    "summary": "O Switch da primeira geração com tela OLED de 7\", que segue rodando a biblioteca do Switch.",
+    "specs": [
+      [
+        "Tela",
+        "7\" OLED, 1280 × 720"
+      ],
+      [
+        "Armazenamento",
+        "64 GB, com microSD"
+      ],
+      [
+        "Modos",
+        "Portátil, mesa e TV (dock com porta LAN)"
+      ],
+      [
+        "Bateria",
+        "4,5 a 9 h, conforme o jogo"
+      ]
+    ],
+    "note": "O Nintendo Switch 2 é outro console, mais novo e mais caro."
+  },
+  "meta-quest-3s-128gb": {
+    "summary": "Óculos de realidade virtual independente (não precisa de PC) com o mesmo processador do Quest 3, por um preço menor.",
+    "specs": [
+      [
+        "Processador",
+        "Snapdragon XR2 Gen 2"
+      ],
+      [
+        "Memória",
+        "8 GB de RAM"
+      ],
+      [
+        "Armazenamento",
+        "128 GB (também 256 GB)"
+      ],
+      [
+        "Tela",
+        "LCD, 1832 × 1920 por olho, até 120 Hz"
+      ],
+      [
+        "Campo de visão",
+        "96° horizontal × 90° vertical"
+      ],
+      [
+        "Bateria",
+        "Cerca de 2,5 h"
+      ],
+      [
+        "Peso",
+        "514 g"
+      ],
+      [
+        "Controles",
+        "Touch Plus e rastreamento de mãos"
+      ]
+    ]
+  },
+  "airpods-4": {
+    "summary": "Fones da Apple no formato aberto (sem ponta de silicone), com chip H2 e estojo USB-C. Existe versão com e sem cancelamento de ruído.",
+    "specs": [
+      [
+        "Chip",
+        "H2"
+      ],
+      [
+        "Bateria",
+        "Até 5 h nos fones e 30 h com o estojo (menos com cancelamento de ruído ligado)"
+      ],
+      [
+        "Estojo",
+        "USB-C; na versão com cancelamento de ruído, também sem fio e com alto-falante"
+      ],
+      [
+        "Resistência",
+        "IP54 (fones e estojo)"
+      ],
+      [
+        "Áudio",
+        "Áudio Espacial Personalizado"
+      ]
+    ],
+    "note": "Confira no anúncio se é a versão com Cancelamento Ativo de Ruído, que custa mais."
+  },
+  "jbl-tune-520bt": {
+    "summary": "Headphone Bluetooth barato da JBL com bateria muito longa e conexão em dois aparelhos ao mesmo tempo.",
+    "specs": [
+      [
+        "Drivers",
+        "33 mm, JBL Pure Bass"
+      ],
+      [
+        "Bateria",
+        "Até 57 h; 5 min de carga dão 3 h"
+      ],
+      [
+        "Bluetooth",
+        "5.3, multiponto"
+      ],
+      [
+        "App",
+        "JBL Headphones (equalizador)"
+      ],
+      [
+        "Formato",
+        "Supra-auricular, dobrável"
+      ]
+    ]
+  },
+  "galaxy-buds-3-fe": {
+    "summary": "Fones intra-auriculares da Samsung com cancelamento de ruído e tradução simultânea com Galaxy AI.",
+    "specs": [
+      [
+        "Cancelamento de ruído",
+        "Sim, com modo ambiente"
+      ],
+      [
+        "Bateria",
+        "Até 6 h com ANC (8,5 h sem); total de 24 h com estojo (30 h sem ANC)"
+      ],
+      [
+        "Bluetooth",
+        "5.4, codecs SSC, AAC e SBC"
+      ],
+      [
+        "Microfones",
+        "3"
+      ],
+      [
+        "Resistência",
+        "IP54 (fones)"
+      ],
+      [
+        "Recursos",
+        "Intérprete e tradução com celulares Galaxy compatíveis"
+      ],
+      [
+        "Peso",
+        "5 g cada fone"
+      ]
+    ]
+  },
+  "jbl-charge-6": {
+    "summary": "Caixa de som portátil à prova d'água com bateria de até 24 h, função powerbank e Auracast.",
+    "specs": [
+      [
+        "Bateria",
+        "Até 24 h (+4 h com Playtime Boost)"
+      ],
+      [
+        "Resistência",
+        "IP68 e queda de 1 m"
+      ],
+      [
+        "Bluetooth",
+        "5.4, com Auracast"
+      ],
+      [
+        "Powerbank",
+        "Sim, carrega o celular pela USB-C"
+      ],
+      [
+        "Áudio por cabo",
+        "Lossless pela USB-C"
+      ],
+      [
+        "Peso",
+        "Cerca de 1 kg"
+      ]
+    ]
+  },
+  "jbl-go-4": {
+    "summary": "Caixinha de som de bolso da JBL, à prova d'água, com Auracast e conexão em dois aparelhos.",
+    "specs": [
+      [
+        "Potência",
+        "4,2 W"
+      ],
+      [
+        "Bateria",
+        "Até 7 h (+2 h com Playtime Boost)"
+      ],
+      [
+        "Resistência",
+        "IP67"
+      ],
+      [
+        "Recursos",
+        "Auracast e multiponto"
+      ],
+      [
+        "Peso",
+        "190 g"
+      ]
+    ]
+  },
+  "apple-watch-series-11": {
+    "summary": "Apple Watch de 2025: bateria de até 24 h, notificações de hipertensão e pontuação de sono.",
+    "specs": [
+      [
+        "Tamanhos",
+        "42 mm e 46 mm"
+      ],
+      [
+        "Chip",
+        "S10"
+      ],
+      [
+        "Tela",
+        "OLED LTPO3, sempre ativa, até 2.000 nits"
+      ],
+      [
+        "Bateria",
+        "Até 24 h (36 h no modo de pouca energia); 80% em cerca de 30 min"
+      ],
+      [
+        "Saúde",
+        "ECG, oxigênio no sangue, temperatura, notificações de hipertensão e pontuação de sono"
+      ],
+      [
+        "Resistência",
+        "À água até 50 m e IP6X"
+      ],
+      [
+        "Lançamento",
+        "2025"
+      ]
+    ],
+    "note": "A versão GPS + Celular custa mais. Confira no anúncio."
+  },
+  "redmi-watch-5-active": {
+    "summary": "Relógio inteligente barato da Xiaomi com tela de 2\", chamadas pelo Bluetooth e até 18 dias de bateria.",
+    "specs": [
+      [
+        "Tela",
+        "2\" LCD, 320 × 385"
+      ],
+      [
+        "Bateria",
+        "Até 18 dias (470 mAh)"
+      ],
+      [
+        "Chamadas",
+        "Pelo Bluetooth, com alto-falante e 2 microfones"
+      ],
+      [
+        "Sensores",
+        "Frequência cardíaca e oxigênio no sangue"
+      ],
+      [
+        "Resistência",
+        "5 ATM"
+      ],
+      [
+        "Compatibilidade",
+        "Android 8+ e iOS 12+"
+      ],
+      [
+        "Peso",
+        "30,6 g sem pulseira"
+      ]
+    ],
+    "note": "Não tem GPS próprio."
+  },
+  "fire-tv-stick-4k": {
+    "summary": "Transforma qualquer TV com HDMI em smart TV 4K, com Dolby Vision, HDR10+ e Wi-Fi 6.",
+    "specs": [
+      [
+        "Resolução",
+        "4K Ultra HD"
+      ],
+      [
+        "HDR",
+        "Dolby Vision, HDR10+ e HDR10"
+      ],
+      [
+        "Processador",
+        "Quad-core de 1,7 GHz"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi 6"
+      ],
+      [
+        "Controle",
+        "Controle remoto por voz com Alexa"
+      ]
+    ],
+    "note": "O Fire TV Stick 4K Max é outro modelo, mais rápido e mais caro."
+  },
+  "echo-pop": {
+    "summary": "Caixa de som inteligente compacta com Alexa, ideal para quarto ou cozinha.",
+    "specs": [
+      [
+        "Assistente",
+        "Alexa"
+      ],
+      [
+        "Casa inteligente",
+        "Compatível com Matter"
+      ],
+      [
+        "Processador de IA",
+        "AZ2 Neural Edge"
+      ]
+    ]
+  },
+  "echo-show-5": {
+    "summary": "Echo com tela de 5,5\": Alexa, relógio, previsão do tempo e câmera para chamadas de vídeo.",
+    "specs": [
+      [
+        "Tela",
+        "5,5\", 960 × 480"
+      ],
+      [
+        "Câmera",
+        "2 MP"
+      ],
+      [
+        "Microfones",
+        "3"
+      ],
+      [
+        "Processador",
+        "MediaTek MT8169B + AZ2 Neural Edge"
+      ],
+      [
+        "Assistente",
+        "Alexa"
+      ]
+    ]
+  },
+  "kindle-16gb": {
+    "summary": "O Kindle básico de 2024: tela de 300 ppi sem reflexo, 16 GB e semanas de bateria.",
+    "specs": [
+      [
+        "Tela",
+        "6\" E Ink, 300 ppi, com luz frontal ajustável"
+      ],
+      [
+        "Armazenamento",
+        "16 GB"
+      ],
+      [
+        "Bateria",
+        "Até 6 semanas"
+      ],
+      [
+        "Carregamento",
+        "USB-C"
+      ],
+      [
+        "Peso",
+        "158 g"
+      ],
+      [
+        "À prova d'água",
+        "Não"
+      ]
+    ],
+    "note": "Para ler na piscina ou na praia, o Paperwhite é à prova d'água."
+  },
+  "nespresso-vertuo-pop": {
+    "summary": "Cafeteira de cápsulas Vertuo, que faz de espresso a caneca grande com leitura automática da cápsula.",
+    "specs": [
+      [
+        "Sistema",
+        "Vertuo (cápsulas com código de barras)"
+      ],
+      [
+        "Tamanhos",
+        "Espresso 40 ml, duplo 80 ml, Gran Lungo 150 ml e Mug 230 ml"
+      ],
+      [
+        "Reservatório",
+        "600 ml"
+      ],
+      [
+        "Aquecimento",
+        "Cerca de 30 s"
+      ],
+      [
+        "Desligamento automático",
+        "Após 2 min sem uso"
+      ]
+    ],
+    "note": "Usa só cápsulas Vertuo, diferentes das cápsulas da linha Original."
+  },
+  "nespresso-essenza-mini": {
+    "summary": "A menor cafeteira da Nespresso, para cápsulas da linha Original, com 19 bar de pressão.",
+    "specs": [
+      [
+        "Sistema",
+        "Nespresso Original"
+      ],
+      [
+        "Pressão",
+        "19 bar"
+      ],
+      [
+        "Reservatório",
+        "0,6 L"
+      ],
+      [
+        "Potência",
+        "1.310 W"
+      ],
+      [
+        "Bebidas",
+        "Espresso e Lungo programáveis"
+      ]
+    ],
+    "note": "Confira a voltagem (110 V ou 220 V) no anúncio."
+  },
+  "ar-condicionado-lg-dual-inverter-12000": {
+    "summary": "Ar-condicionado split inverter da LG, só frio, com Wi-Fi e controle pelo app ThinQ.",
+    "specs": [
+      [
+        "Capacidade",
+        "12.000 BTU/h"
+      ],
+      [
+        "Ciclo",
+        "Só frio"
+      ],
+      [
+        "Tecnologia",
+        "Inverter"
+      ],
+      [
+        "Gás",
+        "R-32"
+      ],
+      [
+        "Conectividade",
+        "Wi-Fi com app LG ThinQ e comando de voz"
+      ],
+      [
+        "Ruído",
+        "Cerca de 43 dB (interna) e 55 dB (externa)"
+      ]
+    ],
+    "note": "A LG vende várias versões (Dual Inverter, AI Smart Inverter, com e sem Wi-Fi). Confira modelo, voltagem e se a instalação está inclusa."
   }
 }
