@@ -38,6 +38,8 @@ export interface SiteSettings {
     bodyStart: string;
     bodyEnd: string;
   };
+  /** Conteúdo do /ads.txt (vendedores autorizados de mídia). */
+  adsTxt: string;
   legal: {
     /** Nome do responsável pelo site (pessoa ou empresa) usado nas páginas legais. */
     ownerName: string;
@@ -60,6 +62,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   contact: { email: "", whatsapp: "", instagram: "" },
   analytics: { gaId: "", gtmId: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
+  adsTxt: "",
   legal: { ownerName: "", document: "", city: "" },
 };
 
@@ -100,6 +103,7 @@ export function mergeSettings(raw: unknown): SiteSettings {
       bodyStart: opt(r.scripts?.bodyStart).slice(0, SCRIPT_MAX),
       bodyEnd: opt(r.scripts?.bodyEnd).slice(0, SCRIPT_MAX),
     },
+    adsTxt: opt(r.adsTxt).slice(0, 50000),
     legal: { ownerName: opt(r.legal?.ownerName), document: opt(r.legal?.document), city: opt(r.legal?.city) },
   };
 }

@@ -97,6 +97,7 @@ export async function saveSettings(formData: FormData) {
       bodyStart: raw(formData, "scripts_bodyStart"),
       bodyEnd: raw(formData, "scripts_bodyEnd"),
     },
+    adsTxt: raw(formData, "ads_txt"),
     legal: {
       ownerName: text(formData, "legal_ownerName"),
       document: text(formData, "legal_document"),
@@ -110,6 +111,7 @@ export async function saveSettings(formData: FormData) {
   if (error) back({ erro: `Não foi possível salvar: ${error.message}` });
 
   revalidatePath("/", "layout");
+  revalidatePath("/ads.txt");
   back({ ok: "Configurações salvas. O site já está usando os novos valores." });
 }
 

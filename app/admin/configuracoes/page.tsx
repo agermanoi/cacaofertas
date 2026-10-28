@@ -184,6 +184,26 @@ export default async function SettingsPage({ searchParams }: Props) {
           </p>
         </fieldset>
 
+        <fieldset id="ads-txt">
+          <legend>ads.txt</legend>
+          <div className="field">
+            <label htmlFor="ads_txt">Conteúdo do arquivo cacaofertas.com.br/ads.txt</label>
+            <textarea
+              id="ads_txt"
+              name="ads_txt"
+              rows={8}
+              className="code"
+              defaultValue={s.adsTxt}
+              spellCheck={false}
+              placeholder={"google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0"}
+            />
+            <p className="hint">
+              Uma linha por vendedor, do jeito que a rede de anúncios (AdSense, Ad Manager etc.) passar. Depois de salvar, confira
+              em <a href="/ads.txt" target="_blank" rel="noopener">/ads.txt</a>.
+            </p>
+          </div>
+        </fieldset>
+
         <fieldset>
           <legend>Dados do responsável</legend>
           <p className="hint">
