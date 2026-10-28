@@ -197,7 +197,9 @@ export function mercadoLivre(db: SupabaseClient): Collector {
         }
       }
       // Diagnóstico: achou o modelo no catálogo, mas sem ninguém vendendo agora
-      if (hits.length && !out.length) rejected[product.slug] = hits.map((h) => `${h.name} (no catálogo, sem vendedor ativo)`);
+      if (hits.length && !out.length) rejected[product.slug] = hits.map(
+          (h) => `${h.name} (no catálogo, sem vendedor ganhador${itemsEndpointBlocked ? "; lista de vendedores bloqueada para o app" : ""})`
+        );
       return out;
     },
   };

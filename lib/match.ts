@@ -23,13 +23,28 @@ export function norm(s: string): string {
  * Termos curtos/numéricos (ex.: "16", "s25") exigem limite de palavra
  * para não casar "16" com "160" ou "iphone 16e".
  */
-function hasTerm(title: string, term: string): boolean {
+/** Palavras do título original (sem acento; hífen, ponto e barra juntam as partes: "AFN-40-BI" → "afn40bi"). */
+function codeWords(raw: string): string[] {
+  return raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[-./]/g, "")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function hasTerm(title: string, term: string, raw: string): boolean {
   return term.split("|").some((alt) => {
-    // "~codigo" = código de modelo: procura sem espaços e sem limite de palavra
-    // (ex.: "~u8000f" casa com "UN55U8000FGXZD" e "~afn40" com "AFN-40-BI")
+    // "~codigo" = código de modelo: pode estar no meio de uma palavra ("~u8000f" casa com
+    // "UN55U8000FGXZD"), ou começar uma palavra e continuar na seguinte ("~afn40" casa com
+    // "AFN 40"). Não atravessa palavras de outro jeito: "~du8000" não casa com "UHD U8000h".
     if (alt.startsWith("~")) {
       const code = norm(alt.slice(1)).replace(/ /g, "");
-      return code.length > 0 && title.replace(/ /g, "").includes(code);
+      if (!code) return false;
+      const words = codeWords(raw);
+      if (words.some((w) => w.includes(code))) return true;
+      return words.some((w, i) => i + 1 < words.length && (w + words[i + 1]).startsWith(code) && code.length > w.length);
     }
     const t = norm(alt);
     if (!t) return false;
@@ -41,17 +56,16 @@ function hasTerm(title: string, term: string): boolean {
 /** Só as palavras obrigatórias e proibidas, sem olhar preço. */
 export function titleMatches(product: Product, rawTitle: string): boolean {
   const title = norm(rawTitle);
-  return product.must.every((m) => hasTerm(title, m)) && !product.exclude.some((x) => hasTerm(title, x));
+  return (
+    product.must.every((m) => hasTerm(title, m, rawTitle)) && !product.exclude.some((x) => hasTerm(title, x, rawTitle))
+  );
 }
 
 export function matchesProduct(product: Product, offer: OfferInput): boolean {
-  const title = norm(offer.title);
   if (!offer.price || !Number.isFinite(offer.price)) return false;
   if (offer.price < Number(product.min_price || 0)) return false;
   if (product.max_price && offer.price > Number(product.max_price)) return false;
-  if (!product.must.every((m) => hasTerm(title, m))) return false;
-  if (product.exclude.some((x) => hasTerm(title, x))) return false;
-  return true;
+  return titleMatches(product, offer.title);
 }
 
 /** Filtra, remove duplicadas e mantém as N mais baratas por fonte/loja. */
