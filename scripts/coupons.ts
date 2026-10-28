@@ -48,6 +48,15 @@ function discountFrom(...texts: (string | undefined | null)[]): string | null {
   return null;
 }
 
+/** Material de divulgação (banner, post, story) e avisos sem desconto não são cupom. */
+const CREATIVE = /\b(banner|feed|story|stories|post|carrossel|logo|vitrine|e-?mail ?mkt)\b|\d{2,4}\s?[x×]\s?\d{2,4}/i;
+export function isRealCoupon(title: string, description: string | null | undefined, code: string | null | undefined): boolean {
+  if (CREATIVE.test(title)) return false;
+  if (code) return true;
+  const t = `${title} ${description || ""}`;
+  return /\d{1,2}\s?%|r\$\s?\d|frete gr[aá]tis|cashback|leve \d|compre \d|\boff\b|desconto|cupom/i.test(t);
+}
+
 async function upsert(db: SupabaseClient, source: string, rows: Row[]): Promise<number> {
   const now = new Date().toISOString();
   if (rows.length) {
@@ -85,8 +94,14 @@ export async function importLomadee(db: SupabaseClient): Promise<{ count: number
     const known = new Map((existing || []).map((e) => [e.external_id, e.affiliate_url]));
 
     const rows: Row[] = [];
+    const seenTitles = new Set<string>();
     for (const c of campaigns) {
       if (!c.url) continue;
+      const code = c.type.includes("Coupon") && c.code ? c.code : null;
+      if (!isRealCoupon(c.name, c.description, code)) continue;
+      const dupKey = `${c.organizationId}|${c.name.trim().toLowerCase()}|${code || ""}`;
+      if (seenTitles.has(dupKey)) continue;
+      seenTitles.add(dupKey);
       const store = normalizeStore(names.get(c.organizationId || "") || c.name.split(/[-–|:]/)[0] || "Loja");
       // O link curto de afiliado é gerado no primeiro clique (/c/[id]) e guardado
       const aff = known.get(c.id) || null;
@@ -144,7 +159,7 @@ export async function importAfilio(db: SupabaseClient): Promise<{ count: number;
     }
     const now = new Date().toISOString();
     const rows: Row[] = items
-      .filter((i) => i && (i.url || i.link))
+      .filter((i) => i && (i.url || i.link) && isRealCoupon(String(i.title || i.description || ""), i.description, i.code))
       .map((i) => ({
         source: "afilio",
         external_id: String(i.id_couponoffer || i.id || i.code || i.url).slice(0, 300),
