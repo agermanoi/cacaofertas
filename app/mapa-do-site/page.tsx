@@ -48,6 +48,9 @@ export default async function MapaDoSite() {
             <Link href="/">Página inicial</Link>
           </li>
           <li>
+            <Link href="/cupons">Cupons de desconto</Link>
+          </li>
+          <li>
             <Link href="/como-funciona">Como medimos os preços</Link>
           </li>
           <li>

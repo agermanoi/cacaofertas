@@ -60,9 +60,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <p className="countdown">
               {days === 0 ? "Hoje é Black Friday" : `Faltam ${days} ${days === 1 ? "dia" : "dias"} para a Black Friday`}
             </p>
-            <Link href="/como-funciona" className="top-link">
-              Como funciona
-            </Link>
+            <nav className="top-nav" aria-label="Principal">
+              <Link href="/cupons" className="top-link">
+                Cupons
+              </Link>
+              <Link href="/como-funciona" className="top-link">
+                Como funciona
+              </Link>
+            </nav>
           </div>
         </header>
         <main id="conteudo">{children}</main>
@@ -74,6 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <p className="foot-tagline">{s.tagline}</p>
             </div>
             <nav className="foot-nav" aria-label="Institucional">
+              <Link href="/cupons">Cupons de desconto</Link>
               <Link href="/como-funciona">Como funciona</Link>
               <Link href="/contato">Contato</Link>
               <Link href="/politica-de-privacidade">Política de privacidade</Link>

@@ -15,6 +15,7 @@ import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/
 import { scraper } from "../lib/collectors/scraper";
 import { amazonSerp } from "../lib/collectors/amazon";
 import { afilio, afilioCampaigns } from "../lib/collectors/afilio";
+import { importCoupons } from "./coupons";
 
 const db = adminClient();
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()); // AAAA-MM-DD
@@ -177,6 +178,8 @@ async function main() {
     });
     console.log(`Afilio: ${info.list.length} campanhas${info.error ? ` (erro: ${info.error})` : ""}`);
   }
+  // Cupons das redes (Lomadee, Afilio): só na coleta completa
+  if (process.argv.length <= 2 || process.env.IMPORT_COUPONS === "1") await importCoupons(db);
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
   const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), afilioCollector, scraper()].filter((c) => c.enabled());

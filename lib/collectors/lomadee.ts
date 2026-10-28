@@ -101,8 +101,8 @@ export async function lomadeeAffiliateLink(organizationId: string, url: string):
 }
 
 /** Lista as lojas (marcas) que a conta enxerga na Lomadee. Usado só para diagnóstico no painel. */
-export async function lomadeeBrands(): Promise<{ brands: { name: string; site?: string; active?: boolean; note?: string }[]; error?: string }> {
-  const brands: { name: string; site?: string; active?: boolean; note?: string }[] = [];
+export async function lomadeeBrands(): Promise<{ brands: { id?: string; name: string; site?: string; active?: boolean; note?: string }[]; error?: string }> {
+  const brands: { id?: string; name: string; site?: string; active?: boolean; note?: string }[] = [];
   try {
     for (let page = 1; page <= 15; page++) {
       const json = await httpJson<{ data?: any[]; pagination?: { totalPages?: number } }>(
@@ -112,7 +112,7 @@ export async function lomadeeBrands(): Promise<{ brands: { name: string; site?: 
       await sleep(1100);
       for (const b of json.data || []) {
         const note = (b.channels || []).map((c: any) => c?.message).filter(Boolean)[0];
-        brands.push({ name: String(b.name), site: b.site || undefined, active: b.network?.active, note });
+        brands.push({ id: b.id ? String(b.id) : undefined, name: String(b.name), site: b.site || undefined, active: b.network?.active, note });
       }
       if (!json.pagination?.totalPages || page >= json.pagination.totalPages) break;
     }
@@ -120,4 +120,47 @@ export async function lomadeeBrands(): Promise<{ brands: { name: string; site?: 
   } catch (e) {
     return { brands, error: (e as Error).message.slice(0, 300) };
   }
+}
+
+export interface LomadeeCampaign {
+  id: string;
+  name: string;
+  type: string;
+  code?: string;
+  url?: string;
+  description?: string;
+  organizationId?: string;
+  startAt?: string;
+  endAt?: string;
+  categories?: string[];
+  isHighlight?: boolean;
+}
+
+/** Cupons e ofertas vigentes das lojas da conta (escopo campaigns:read). */
+export async function lomadeeCampaigns(maxPages = 25): Promise<LomadeeCampaign[]> {
+  const out: LomadeeCampaign[] = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const params = new URLSearchParams({ page: String(page), limit: "20", status: "onTime" });
+    const json = await httpJson<{ data?: any[]; meta?: { totalPages?: number } }>(`${base()}/affiliate/campaigns?${params}`, {
+      headers: headers(),
+    });
+    await sleep(1100);
+    for (const c of json.data || []) {
+      out.push({
+        id: String(c.id),
+        name: String(c.name || ""),
+        type: String(c.type || ""),
+        code: c.code ? String(c.code) : undefined,
+        url: c.url ? String(c.url) : undefined,
+        description: c.description ? String(c.description) : undefined,
+        organizationId: c.organizationId ? String(c.organizationId) : undefined,
+        startAt: c.period?.startAt || undefined,
+        endAt: c.period?.endAt || undefined,
+        categories: Array.isArray(c.categories) ? c.categories.map((x: any) => String(x?.name ?? x)) : undefined,
+        isHighlight: Boolean(c.isHighlight),
+      });
+    }
+    if (!json.meta?.totalPages || page >= json.meta.totalPages) break;
+  }
+  return out;
 }

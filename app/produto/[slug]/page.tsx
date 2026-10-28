@@ -10,6 +10,8 @@ import { PriceChart } from "@/components/PriceChart";
 import { AdSlot } from "@/components/AdSlot";
 import { SpecSheet } from "@/components/SpecSheet";
 import { StoreLink } from "@/components/StoreLink";
+import { CouponCard } from "@/components/CouponCard";
+import { expiresLabel, getCouponsForStores } from "@/lib/coupons";
 import { getSpecs } from "@/lib/specs";
 
 export const revalidate = 3600;
@@ -41,6 +43,7 @@ export default async function ProductPage({ params }: Params) {
     getOffers(p.id),
   ]);
   const best = series.get(p.id) || [];
+  const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))]);
   const verdict = verdictFor(p);
   const specs = getSpecs(p.slug, p.specs);
 
@@ -154,6 +157,21 @@ export default async function ProductPage({ params }: Params) {
           Preço à vista visto na última coleta. Frete, cupons e parcelamento podem mudar o valor final.
         </p>
       </section>
+
+      {coupons.length ? (
+        <section aria-labelledby="cupons">
+          <h2 id="cupons">Cupons das lojas deste produto</h2>
+          <div className="coupon-grid">
+            {coupons.slice(0, 6).map((c) => (
+              <CouponCard key={c.id} c={c} expires={expiresLabel(c.expires_at)} />
+            ))}
+          </div>
+          <p className="note">
+            Confira as regras: muitos cupons valem só para algumas categorias ou acima de um valor mínimo.{" "}
+            <Link href="/cupons">Ver todos os cupons</Link>
+          </p>
+        </section>
+      ) : null}
 
       {specs ? <SpecSheet specs={specs} /> : null}
 
