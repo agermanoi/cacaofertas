@@ -32,9 +32,11 @@ export async function generateViewport(): Promise<Viewport> {
 /** Configuração do Google Ad Manager para os AdSlots (não roda no painel). */
 function gptInit(g: { networkCode: string; parentAdUnit: string; childUnits: boolean; lazyLoad: boolean; refreshSeconds: number }) {
   const cfg = JSON.stringify({ network: g.networkCode, parent: g.parentAdUnit, child: g.childUnits, lazy: g.lazyLoad, refresh: g.refreshSeconds });
-  return `(function(){if(location.pathname.indexOf('/admin')===0)return;window.__coAds=${cfg};window.googletag=window.googletag||{cmd:[]};googletag.cmd.push(function(){var p=googletag.pubads();${
+  const lazy = g.lazyLoad ? "{fetchMarginPercent:150,renderMarginPercent:50,mobileScaling:2}" : "false";
+  // API nova (setConfig) com reserva para a antiga
+  return `(function(){if(location.pathname.indexOf('/admin')===0)return;window.__coAds=${cfg};window.googletag=window.googletag||{cmd:[]};googletag.cmd.push(function(){var p=googletag.pubads();if(typeof googletag.setConfig==='function'){googletag.setConfig({lazyLoad:${lazy},centering:true,targeting:{site:'cacaofertas'}});}else{${
     g.lazyLoad ? "p.enableLazyLoad({fetchMarginPercent:150,renderMarginPercent:50,mobileScaling:2});" : ""
-  }p.setCentering(true);p.setTargeting('site','cacaofertas');googletag.enableServices();});})();`;
+  }p.setCentering(true);p.setTargeting('site','cacaofertas');}googletag.enableServices();});})();`;
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -31,8 +31,14 @@ declare global {
   interface Window {
     googletag: any;
     __coAds?: AdsConfig;
-    __coAdsState?: { visible: Map<string, number>; timers: Map<string, number>; listeners: boolean };
+    __coAdsState?: { visible: Map<string, number>; timers: Map<string, number>; refreshes: Map<string, number>; listeners: boolean };
   }
+}
+
+/** Segmentação do slot: setConfig (API atual do GPT) ou setTargeting (versões antigas). */
+function target(slot: any, values: Record<string, string>) {
+  if (typeof slot.setConfig === "function") slot.setConfig({ targeting: values });
+  else for (const [k, v] of Object.entries(values)) slot.setTargeting(k, v);
 }
 
 function pageType(path: string): string {
@@ -42,7 +48,7 @@ function pageType(path: string): string {
 
 function ensureListeners(cfg: AdsConfig) {
   const w = window;
-  w.__coAdsState ||= { visible: new Map(), timers: new Map(), listeners: false };
+  w.__coAdsState ||= { visible: new Map(), timers: new Map(), refreshes: new Map(), listeners: false };
   const st = w.__coAdsState;
   if (st.listeners) return;
   st.listeners = true;
@@ -72,8 +78,9 @@ function ensureListeners(cfg: AdsConfig) {
             st.timers.set(id, window.setTimeout(tick, 5000)); // tenta de novo quando voltar à tela
             return;
           }
-          const n = Number(slot.getTargeting("refresh")[0] || 0) + 1;
-          slot.setTargeting("refresh", String(n));
+          const n = (st.refreshes.get(id) || 0) + 1;
+          st.refreshes.set(id, n);
+          target(slot, { refresh: String(n) });
           pubads.refresh([slot]);
         };
         st.timers.set(id, window.setTimeout(tick, cfg.refresh * 1000));
@@ -109,13 +116,9 @@ export function AdSlot({ id, format, className }: { id: string; format: AdFormat
         .addSize([768, 0], f.tablet)
         .addSize([0, 0], f.mobile)
         .build();
-      slot
-        .defineSizeMapping(mapping)
-        .setTargeting("pos", id)
-        .setTargeting("formato", format)
-        .setTargeting("pagina", pageType(path))
-        .setTargeting("refresh", "0")
-        .addService(gt.pubads());
+      slot.defineSizeMapping(mapping);
+      target(slot, { pos: id, formato: format, pagina: pageType(path), refresh: "0" });
+      slot.addService(gt.pubads());
       gt.display(elId);
     });
 
@@ -125,6 +128,7 @@ export function AdSlot({ id, format, className }: { id: string; format: AdFormat
         window.clearTimeout(st.timers.get(elId));
         st.timers.delete(elId);
         st.visible.delete(elId);
+        st.refreshes.delete(elId);
       }
       w.googletag.cmd.push(() => {
         if (slot) w.googletag.destroySlots([slot]);
