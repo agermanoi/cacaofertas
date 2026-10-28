@@ -3,6 +3,25 @@ import { adminClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+/** Garante o código de afiliado nos links da Amazon (secret ou tabela kv), mesmo em ofertas antigas. */
+async function withAmazonTag(db: ReturnType<typeof adminClient>, target: string): Promise<string> {
+  let u: URL;
+  try {
+    u = new URL(target);
+  } catch {
+    return target;
+  }
+  if (!/(^|\.)amazon\.com\.br$/.test(u.hostname) || u.searchParams.get("tag")) return target;
+  let tag = process.env.AMAZON_ASSOCIATE_TAG || "";
+  if (!tag) {
+    const { data } = await db.from("kv").select("value").eq("key", "amazon_associate_tag").maybeSingle();
+    tag = String(data?.value || "");
+  }
+  if (!tag) return target;
+  u.searchParams.set("tag", tag);
+  return u.toString();
+}
+
 /** Registra o clique e redireciona para o link de afiliado (ou o da loja). */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,7 +40,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       () => undefined
     );
 
-  const res = NextResponse.redirect(offer.affiliate_url || offer.url, 302);
+  const target = await withAmazonTag(db, offer.affiliate_url || offer.url);
+  const res = NextResponse.redirect(target, 302);
   res.headers.set("X-Robots-Tag", "noindex, nofollow");
   return res;
 }
