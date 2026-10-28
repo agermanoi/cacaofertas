@@ -99,3 +99,25 @@ export async function lomadeeAffiliateLink(organizationId: string, url: string):
     return null;
   }
 }
+
+/** Lista as lojas (marcas) que a conta enxerga na Lomadee. Usado só para diagnóstico no painel. */
+export async function lomadeeBrands(): Promise<{ brands: { name: string; site?: string; active?: boolean; note?: string }[]; error?: string }> {
+  const brands: { name: string; site?: string; active?: boolean; note?: string }[] = [];
+  try {
+    for (let page = 1; page <= 15; page++) {
+      const json = await httpJson<{ data?: any[]; pagination?: { totalPages?: number } }>(
+        `${base()}/affiliate/brands?page=${page}&limit=20`,
+        { headers: headers() }
+      );
+      await sleep(1100);
+      for (const b of json.data || []) {
+        const note = (b.channels || []).map((c: any) => c?.message).filter(Boolean)[0];
+        brands.push({ name: String(b.name), site: b.site || undefined, active: b.network?.active, note });
+      }
+      if (!json.pagination?.totalPages || page >= json.pagination.totalPages) break;
+    }
+    return { brands };
+  } catch (e) {
+    return { brands, error: (e as Error).message.slice(0, 300) };
+  }
+}

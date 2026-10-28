@@ -11,7 +11,7 @@ import { selectOffers } from "../lib/match";
 import type { Collector, OfferInput, Product } from "../lib/types";
 import { mercadoLivre } from "../lib/collectors/mercadolivre";
 import { serpApi } from "../lib/collectors/serpapi";
-import { lomadee, lomadeeAffiliateLink } from "../lib/collectors/lomadee";
+import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
 
 const db = adminClient();
@@ -108,6 +108,16 @@ async function loadKeysFromDb() {
 
 async function main() {
   await loadKeysFromDb();
+  // Diagnóstico: quais lojas a conta Lomadee enxerga (só na coleta completa)
+  if (process.env.LOMADEE_API_KEY && process.argv.length <= 2) {
+    const info = await lomadeeBrands();
+    await db.from("kv").upsert({
+      key: "lomadee_brands",
+      value: JSON.stringify({ at: new Date().toISOString(), ...info }),
+      updated_at: new Date().toISOString(),
+    });
+    console.log(`Lomadee: ${info.brands.length} lojas visíveis${info.error ? ` (erro: ${info.error})` : ""}`);
+  }
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
   const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
