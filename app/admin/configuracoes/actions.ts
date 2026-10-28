@@ -111,6 +111,10 @@ export async function saveSettings(formData: FormData) {
       refreshSeconds: Number(text(formData, "gam_refresh") || 0),
     },
     adsTxt: raw(formData, "ads_txt"),
+    seals: {
+      safeBrowsing: formData.get("seal_safebrowsing") === "on",
+      html: raw(formData, "seals_html"),
+    },
     legal: {
       ownerName: text(formData, "legal_ownerName"),
       document: text(formData, "legal_document"),

@@ -1718,3 +1718,23 @@ button.btn-ghost {
 @media (prefers-reduced-motion: reduce) {
   .hero-track { scroll-behavior: auto; }
 }
+
+/* ---------- Selos de confiança ---------- */
+.foot-seals { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+.seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+}
+.seal:hover { border-color: #146c2e; }
+.seal span { display: flex; flex-direction: column; line-height: 1.2; }
+.seal strong { font-size: 0.85rem; }
+.seal small { font-size: 0.75rem; color: #5b6573; }
+.seal-custom { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.seal-custom img { max-height: 56px; width: auto; }

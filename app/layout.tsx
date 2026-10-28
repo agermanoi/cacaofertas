@@ -112,6 +112,33 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 © {year} {s.legal.ownerName || s.siteName}
                 {s.legal.document ? ` · ${s.legal.document}` : ""}
               </p>
+              {s.seals.safeBrowsing || s.seals.html ? (
+                <div className="foot-seals" aria-label="Selos de confiança">
+                  {s.seals.safeBrowsing ? (
+                    <a
+                      className="seal"
+                      href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(
+                        SITE_URL.replace(/^https?:\/\//, "")
+                      )}&hl=pt_BR`}
+                      target="_blank"
+                      rel="noopener"
+                      title="Abre a verificação do Google sobre este site"
+                    >
+                      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                        <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="#146C2E" />
+                        <path d="m8.5 12.2 2.4 2.4 4.8-5" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span>
+                        <strong>Navegação segura</strong>
+                        <small>Ver relatório do Google</small>
+                      </span>
+                    </a>
+                  ) : null}
+                  {s.seals.html ? (
+                    <div className="seal-custom" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: s.seals.html }} />
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
         </footer>

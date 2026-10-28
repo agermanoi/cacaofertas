@@ -53,6 +53,13 @@ export interface SiteSettings {
   };
   /** Conteúdo do /ads.txt (vendedores autorizados de mídia). */
   adsTxt: string;
+  /** Selos de confiança no rodapé. */
+  seals: {
+    /** Link para o relatório público do Google Navegação Segura sobre o domínio */
+    safeBrowsing: boolean;
+    /** HTML dos selos de terceiros (Reclame Aqui, Site Blindado...) */
+    html: string;
+  };
   legal: {
     /** Nome do responsável pelo site (pessoa ou empresa) usado nas páginas legais. */
     ownerName: string;
@@ -77,6 +84,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
   adsTxt: "",
+  seals: { safeBrowsing: true, html: "" },
   legal: { ownerName: "", document: "", city: "" },
 };
 
@@ -132,6 +140,10 @@ export function mergeSettings(raw: unknown): SiteSettings {
       };
     })(),
     adsTxt: opt(r.adsTxt).slice(0, 50000),
+    seals: {
+      safeBrowsing: r.seals?.safeBrowsing === undefined ? D.seals.safeBrowsing : Boolean(r.seals.safeBrowsing),
+      html: opt(r.seals?.html).slice(0, SCRIPT_MAX),
+    },
     legal: { ownerName: opt(r.legal?.ownerName), document: opt(r.legal?.document), city: opt(r.legal?.city) },
   };
 }

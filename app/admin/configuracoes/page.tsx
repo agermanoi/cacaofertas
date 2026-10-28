@@ -269,6 +269,30 @@ export default async function SettingsPage({ searchParams }: Props) {
           </details>
         </fieldset>
 
+        <fieldset id="selos">
+          <legend>Selos de confiança (rodapé)</legend>
+          <label className="check">
+            <input type="checkbox" name="seal_safebrowsing" defaultChecked={s.seals.safeBrowsing} /> Mostrar o selo “Navegação
+            segura”, com link para o relatório público do Google sobre o site
+          </label>
+          <div className="field">
+            <label htmlFor="seals_html">Selos de outros serviços (opcional)</label>
+            <textarea
+              id="seals_html"
+              name="seals_html"
+              rows={4}
+              className="code"
+              defaultValue={s.seals.html}
+              spellCheck={false}
+              placeholder="Cole aqui o código do selo do Reclame Aqui, Site Blindado etc."
+            />
+            <p className="hint">
+              Use só selos emitidos pelo próprio serviço, que levam a uma página de verificação. Selo sem verificação não
+              conta para o visitante e pode ser visto como propaganda enganosa.
+            </p>
+          </div>
+        </fieldset>
+
         <fieldset id="ads-txt">
           <legend>ads.txt</legend>
           <div className="field">
