@@ -5,11 +5,12 @@ import { Catalog, type CatalogItem } from "@/components/Catalog";
 import { PriceTag } from "@/components/PriceTag";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { AdSlot } from "@/components/AdSlot";
+import { getSettings } from "@/lib/settings";
 
 export const revalidate = 3600;
 
 export default async function Home() {
-  const products = await getOverview();
+  const [products, settings] = await Promise.all([getOverview(), getSettings()]);
   const series = await getDailySeries(products.map((p) => p.id), 30);
 
   const items: CatalogItem[] = products.map((p) => ({
@@ -32,11 +33,9 @@ export default async function Home() {
       <section className="hero">
         <div className="wrap hero-inner">
           <div className="hero-copy">
-            <h1>Antes de comprar, veja quanto custava ontem.</h1>
+            <h1>{settings.heroTitle}</h1>
             <p className="lede">
-              Acompanhamos {products.length || "os"} produtos mais buscados da Black Friday em várias lojas, duas
-              vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”,
-              também.
+              {settings.heroText.replace("{n}", products.length ? String(products.length) : "os")}
             </p>
             {fakes > 0 ? (
               <p className="hero-alert">

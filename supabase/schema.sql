@@ -131,3 +131,32 @@ create policy "public read history" on price_history for select using (true);
 -- kv e clicks: sem policy => anon não lê nem escreve (service role ignora RLS)
 
 grant select on product_daily, product_overview to anon, authenticated;
+
+-- ---------- Configurações do site (linha única, editada pelo painel) ----------
+create table if not exists site_settings (
+  id smallint primary key default 1 check (id = 1),
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table site_settings enable row level security;
+drop policy if exists "public read settings" on site_settings;
+create policy "public read settings" on site_settings for select using (true);
+insert into site_settings (id) values (1) on conflict (id) do nothing;
+
+-- ---------- Mensagens do formulário de contato (só service role) ----------
+create table if not exists contact_messages (
+  id bigint generated always as identity primary key,
+  name text not null,
+  email text not null,
+  subject text not null default '',
+  message text not null,
+  read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table contact_messages enable row level security;
+create index if not exists contact_messages_created_idx on contact_messages (created_at desc);
+
+-- ---------- Bucket público para logo e ícone ----------
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('brand', 'brand', true, 2097152, array['image/png','image/jpeg','image/webp','image/svg+xml'])
+on conflict (id) do nothing;

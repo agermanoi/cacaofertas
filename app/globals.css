@@ -1,42 +1,32 @@
-/* Radar de Ofertas — etiqueta de prateleira como linguagem visual.
-   Uma família (Archivo) variando largura: expandida/pesada nos preços, normal no texto. */
+/* Caça Ofertas — identidade visual v1.0
+   Laranja #FF7800, laranja claro #F7A535, grafite #17212F, fundo #F7F8FA.
+   Nunito (títulos, ExtraBold/Bold) + Nunito Sans (texto e interface).
+   As cores de marca são sobrescritas pelo painel (/admin/configuracoes) via <style> no layout. */
 
 :root {
+  color-scheme: light;
+  --brand: #ff7800;
+  --brand-2: #f7a535;
+  --brand-dark: #c75e00;
   --paper: #ffffff;
-  --shelf: #eef2f5;
-  --line: #d5dde5;
-  --ink: #14213d;
-  --ink-2: #4a5873;
-  --tag: #ffd23f;
-  --tag-ink: #1a1400;
-  --good: #1b7f4c;
-  --good-bg: #e2f3e9;
-  --bad: #c8223a;
-  --bad-bg: #fbe5e8;
-  --warn: #9a5b00;
-  --warn-bg: #fff1d6;
-  --focus: #2457d6;
+  --shelf: #f7f8fa;
+  --line: #e3e7ed;
+  --ink: #17212f;
+  --ink-2: #4d5868;
+  --tag: #ff7800;
+  --tag-ink: #17212f;
+  --good: #16794a;
+  --good-bg: #e3f4ea;
+  --bad: #c42a3c;
+  --bad-bg: #fbe7e9;
+  --warn: #8f5400;
+  --warn-bg: #fff2dc;
+  --focus: #17212f;
 
   --wrap: 1120px;
-  --r: 6px;
-  --font: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0f1729;
-    --shelf: #18223a;
-    --line: #2b3854;
-    --ink: #eef2f8;
-    --ink-2: #a9b4c9;
-    --good: #5fd39a;
-    --good-bg: #133326;
-    --bad: #ff7a8c;
-    --bad-bg: #3a1720;
-    --warn: #ffc266;
-    --warn-bg: #3a2a10;
-    --focus: #8fb0ff;
-  }
+  --r: 10px;
+  --font: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Nunito", "Nunito Sans", system-ui, sans-serif;
 }
 
 *,
@@ -104,13 +94,14 @@ a {
 
 h1,
 h2 {
-  font-variation-settings: "wdth" 112;
-  line-height: 1.1;
+  font-family: var(--font-display);
+  line-height: 1.12;
   letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 h1 {
-  font-size: clamp(2rem, 4.6vw, 3.4rem);
-  font-weight: 850;
+  font-size: clamp(2rem, 4.6vw, 3.3rem);
+  font-weight: 900;
   margin: 0 0 16px;
 }
 h2 {
@@ -120,44 +111,53 @@ h2 {
 }
 
 /* ---------- Cabeçalho ---------- */
-.top {
+.announce {
   background: var(--ink);
-  color: var(--paper);
+  color: #fff;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 16px;
 }
-@media (prefers-color-scheme: dark) {
-  .top {
-    background: #060b16;
-    color: var(--ink);
-  }
+.top {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 .top-inner {
   display: flex;
   align-items: center;
   gap: 24px;
-  min-height: 56px;
+  min-height: 72px;
 }
 .brand {
-  font-weight: 900;
-  font-variation-settings: "wdth" 125;
+  display: block;
   text-decoration: none;
-  font-size: 1.1rem;
-  letter-spacing: -0.01em;
+  flex: none;
 }
-.brand span {
-  background: var(--tag);
-  color: var(--tag-ink);
-  padding: 0 6px;
-  margin-left: 2px;
+.brand-logo {
+  height: 52px;
+  width: auto;
 }
 .countdown {
   margin: 0;
   font-size: 0.9rem;
-  opacity: 0.85;
+  font-weight: 700;
+  color: var(--brand-dark);
+  background: color-mix(in srgb, var(--brand) 12%, white);
+  padding: 4px 12px;
+  border-radius: 999px;
 }
 .top-link {
   margin-left: auto;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   text-underline-offset: 3px;
+}
+.top-link:hover {
+  color: var(--brand-dark);
 }
 
 /* ---------- Hero ---------- */
@@ -691,16 +691,16 @@ h2 {
 
 .btn {
   display: inline-block;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--brand);
+  color: var(--ink);
   text-decoration: none;
-  font-weight: 700;
-  padding: 8px 14px;
-  border-radius: var(--r);
+  font-weight: 800;
+  padding: 9px 16px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 .btn:hover {
-  background: var(--focus);
+  background: var(--brand-2);
 }
 
 /* ---------- Texto ---------- */
@@ -724,16 +724,49 @@ h2 {
 /* ---------- Rodapé ---------- */
 .foot {
   margin-top: 64px;
-  border-top: 1px solid var(--line);
-  background: var(--shelf);
+  border-top: 4px solid var(--brand);
+  background: var(--paper);
 }
-.foot-inner {
-  padding-top: 24px;
-  padding-bottom: 32px;
+.foot-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr);
+  gap: 32px;
+  padding-top: 32px;
+  padding-bottom: 40px;
   font-size: 0.85rem;
   color: var(--ink-2);
-  max-width: 80ch;
-  margin-left: max(16px, calc((100% - var(--wrap)) / 2));
+}
+.foot-logo {
+  height: 40px;
+  width: auto;
+}
+.foot-tagline {
+  margin: 10px 0 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+.foot-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.foot-nav a {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+.foot-nav a:hover {
+  color: var(--brand-dark);
+  text-decoration: underline;
+}
+.foot-notes p {
+  margin: 0 0 8px;
+}
+@media (max-width: 800px) {
+  .foot-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
 /* ---------- Ficha técnica ---------- */
@@ -1215,6 +1248,70 @@ button.btn-ghost {
   word-break: break-word;
 }
 
+/* Números e preços em Nunito */
+.tag-price,
+.row-price,
+.stats dd,
+.offers .num strong,
+.hero-deal-name,
+.brand-word {
+  font-family: var(--font-display);
+}
+.btn-ghost {
+  border-radius: 999px;
+}
+
+/* ---------- Páginas institucionais ---------- */
+.page-text h2 {
+  font-size: 1.25rem;
+  margin: 32px 0 8px;
+}
+.page-text ul {
+  color: var(--ink-2);
+  padding-left: 20px;
+}
+.page-text li {
+  margin-bottom: 6px;
+}
+.updated {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+.contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+.contact-card {
+  background: var(--shelf);
+  border-radius: var(--r);
+  padding: 20px;
+}
+.contact-card dt {
+  font-weight: 700;
+  margin-top: 12px;
+}
+.contact-card dd {
+  margin: 2px 0 0;
+  user-select: all;
+  word-break: break-word;
+}
+.contact-mascot {
+  width: 180px;
+  height: auto;
+  margin: 0 auto 8px;
+}
+.hp {
+  position: absolute;
+  left: -9999px;
+}
+@media (max-width: 800px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 900px) {
   .hero-inner {
@@ -1261,6 +1358,12 @@ button.btn-ghost {
   .countdown {
     display: none;
   }
+  .brand-logo {
+    height: 40px;
+  }
+  .top-inner {
+    min-height: 60px;
+  }
   .offers thead {
     display: none;
   }
@@ -1298,3 +1401,80 @@ button.btn-ghost {
     transition: none !important;
   }
 }
+
+/* ---------- Admin: abas, configurações, mensagens ---------- */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  border-bottom: 1px solid var(--line, #e3e6ea);
+}
+.admin-tabs a {
+  padding: 10px 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.admin-tabs a:hover { color: var(--brand-dark); }
+.admin-tabs a[aria-current="page"] { border-bottom-color: var(--brand); }
+.admin-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line, #d7dbe0);
+  border-radius: var(--r);
+  font: inherit;
+  background: #fff;
+}
+.brand-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 16px;
+}
+.brand-preview {
+  display: grid;
+  place-items: center;
+  min-height: 90px;
+  padding: 12px;
+  border: 1px dashed var(--line, #d7dbe0);
+  border-radius: var(--r);
+  background: repeating-conic-gradient(#f1f2f4 0 25%, #fff 0 50%) 0 0 / 16px 16px;
+}
+.brand-preview img { max-width: 100%; max-height: 70px; }
+.brand-preview.square img { max-height: 72px; width: 72px; object-fit: contain; }
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.color-input { display: flex; align-items: center; gap: 10px; }
+.admin-form .color-input input[type="color"] {
+  width: 52px;
+  height: 40px;
+  padding: 2px;
+  cursor: pointer;
+}
+.admin-section { margin-top: 16px; }
+.msg-list { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 12px; }
+.msg {
+  padding: 16px 18px;
+  border: 1px solid var(--line, #e3e6ea);
+  border-radius: var(--r);
+  background: #fff;
+}
+.msg-unread { border-left: 4px solid var(--brand); }
+.msg-head { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.msg-meta { color: #5b6573; font-size: 0.9rem; }
+.msg-body { white-space: pre-wrap; margin: 10px 0 12px; }
+.msg-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.msg-actions form { margin: 0; }
+.contact-form .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; }
+@media (max-width: 640px) {
+  .brand-row { grid-template-columns: 1fr; }
+}
+.page-text.page-wide { max-width: 980px; }
+.contact-form .check input { margin-top: 4px; flex: none; }
