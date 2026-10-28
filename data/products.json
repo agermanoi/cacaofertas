@@ -182,7 +182,7 @@
     "query": "smart tv samsung 50 crystal uhd 4k du8000",
     "must": [
       "50",
-      "~du8000"
+      "~u8000h|~du8000"
     ],
     "exclude": [
       "suporte",
@@ -932,12 +932,12 @@
   },
   {
     "slug": "smart-tv-samsung-55-crystal-u8000f",
-    "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000F",
+    "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000H",
     "category": "TVs",
-    "query": "smart tv samsung 55 crystal uhd u8000f",
+    "query": "samsung smart tv 55 crystal uhd 4k u8000h",
     "must": [
       "55",
-      "~u8000f"
+      "~u8000h"
     ],
     "exclude": [
       "suporte",
@@ -952,12 +952,12 @@
   },
   {
     "slug": "smart-tv-samsung-65-crystal-u8000f",
-    "name": "Smart TV Samsung 65\" Crystal UHD 4K U8000F",
+    "name": "Smart TV Samsung 65\" Crystal UHD 4K U8000H",
     "category": "TVs",
-    "query": "smart tv samsung 65 crystal uhd u8000f",
+    "query": "samsung smart tv 65 crystal uhd 4k u8000h",
     "must": [
       "65",
-      "~u8000f"
+      "~u8000h"
     ],
     "exclude": [
       "suporte",
@@ -991,13 +991,13 @@
   },
   {
     "slug": "smart-tv-lg-50-ut8050",
-    "name": "Smart TV LG 50\" 4K UHD UT8050",
+    "name": "Smart TV LG 50\" 4K UHD UA85",
     "category": "TVs",
-    "query": "smart tv lg 50ut8050",
+    "query": "smart tv lg 50 4k uhd 50ua85",
     "must": [
       "lg",
       "50",
-      "~ut8050"
+      "~50ua85"
     ],
     "exclude": [
       "suporte",
@@ -1011,13 +1011,13 @@
   },
   {
     "slug": "smart-tv-lg-55-ut8050",
-    "name": "Smart TV LG 55\" 4K UHD UT8050",
+    "name": "Smart TV LG 55\" 4K UHD UA85",
     "category": "TVs",
-    "query": "smart tv lg 55ut8050",
+    "query": "smart tv lg 55 4k uhd 55ua85",
     "must": [
       "lg",
       "55",
-      "~ut8050"
+      "~55ua85"
     ],
     "exclude": [
       "suporte",

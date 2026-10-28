@@ -6,7 +6,7 @@ import { titleMatches } from "../match";
 /**
  * Lomadee (rede de afiliados) — catálogo de produtos das lojas parceiras.
  * Docs: https://docs.lomadee.com.br/api-reference/introduction
- * Limite: 60 req/min por chave. Preços vêm em centavos.
+ * Limite: 60 req/min por chave. Preços vêm em reais (testado; a documentação fala em centavos).
  *
  * Env: LOMADEE_API_KEY (escopos products:read e shortener:write)
  *      LOMADEE_API_URL (opcional, padrão https://api.lomadee.com.br)
@@ -43,8 +43,9 @@ export function lomadee(): Collector {
 
       for (const q of lomadeeQueries(product)) {
         const params = new URLSearchParams({ search: q, limit: "100", isAvailable: "true" });
-        const min = Math.round(Number(product.min_price || 0) * 100);
-        const max = product.max_price ? Math.round(Number(product.max_price) * 100) : 100_000_000;
+        // Na prática a API devolve e filtra preço em reais (não em centavos, como diz a documentação)
+        const min = Math.round(Number(product.min_price || 0));
+        const max = product.max_price ? Math.round(Number(product.max_price)) : 1_000_000;
         if (min > 0) params.set("price", `${min}:${max}`);
 
         const json = await httpJson<{ data: any[] }>(`${base()}/affiliate/products?${params}`, { headers: headers() });
@@ -70,8 +71,8 @@ export function lomadee(): Collector {
             url: String(p.url),
             affiliateUrl: null, // gerado sob demanda por lomadeeAffiliateLink()
             imageUrl: opt?.images?.[0]?.url || p.images?.[0]?.url || null,
-            price: pricing.price / 100,
-            listPrice: pricing.listPrice ? pricing.listPrice / 100 : null,
+            price: Number(pricing.price),
+            listPrice: pricing.listPrice ? Number(pricing.listPrice) : null,
             meta: { organizationId: String(p.organizationId) },
           });
         }
