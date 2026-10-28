@@ -176,13 +176,13 @@
     "popularity": 80
   },
   {
-    "slug": "smart-tv-samsung-55-crystal-u8000f",
-    "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000F",
+    "slug": "smart-tv-samsung-55-crystal-du8000",
+    "name": "Smart TV Samsung 55\" Crystal UHD 4K DU8000",
     "category": "TVs",
-    "query": "55 crystal uhd u8000f 4k smart tv samsung",
+    "query": "smart tv samsung 55 crystal uhd 4k du8000",
     "must": [
       "55",
-      "~u8000f"
+      "~du8000"
     ],
     "exclude": [
       "suporte",
@@ -195,14 +195,14 @@
     "popularity": 96
   },
   {
-    "slug": "smart-tv-lg-50-4k-ua8550",
-    "name": "Smart TV LG 50\" 4K UHD UA8550",
+    "slug": "smart-tv-lg-50-4k-ur7800",
+    "name": "Smart TV LG 50\" 4K UHD UR7800",
     "category": "TVs",
-    "query": "smart tv lg 50ua8550psa 4k",
+    "query": "smart tv lg 50ur7800psb 4k",
     "must": [
       "lg",
       "50",
-      "~ua8550"
+      "~ur7800"
     ],
     "exclude": [
       "suporte",
@@ -357,21 +357,25 @@
     "popularity": 81
   },
   {
-    "slug": "cafeteira-dolce-gusto-genio-s-plus",
-    "name": "Cafeteira Dolce Gusto Genio S Plus",
+    "slug": "cafeteira-dolce-gusto-genio-s-basic",
+    "name": "Cafeteira Dolce Gusto Genio S Basic",
     "category": "Eletroportáteis",
-    "query": "cafeteira dolce gusto genio s plus dgs2",
+    "query": "cafeteira dolce gusto genio s basic",
     "must": [
       "genio s",
-      "plus"
+      "basic"
     ],
     "exclude": [
       "capsula",
       "cápsula",
       "suporte",
-      "porta"
+      "porta",
+      "sensor",
+      "gaveta",
+      "peça",
+      "peca"
     ],
-    "min_price": 350,
+    "min_price": 300,
     "popularity": 74
   },
   {
@@ -415,13 +419,14 @@
     "popularity": 79
   },
   {
-    "slug": "apple-watch-se-3-gps",
-    "name": "Apple Watch SE 3 (GPS)",
+    "slug": "apple-watch-se-2-gps-40mm",
+    "name": "Apple Watch SE 2ª geração (GPS) 40mm",
     "category": "Áudio e Wearables",
-    "query": "apple watch se 3 gps 40mm",
+    "query": "apple watch se 2 geracao gps 40mm",
     "must": [
       "apple watch",
-      "se 3"
+      "se 2|2 geracao|2a geracao",
+      "40"
     ],
     "exclude": [
       "pulseira",
@@ -430,9 +435,14 @@
       "pelicula",
       "película",
       "carregador",
-      "usado"
+      "usado",
+      "series",
+      "ultra",
+      "cellular",
+      "celular",
+      "44"
     ],
-    "min_price": 1400,
+    "min_price": 1100,
     "popularity": 77
   },
   {
@@ -474,13 +484,14 @@
     "popularity": 78
   },
   {
-    "slug": "kindle-paperwhite",
-    "name": "Kindle Paperwhite 16 GB (12ª geração)",
+    "slug": "kindle-paperwhite-signature-32gb",
+    "name": "Kindle Paperwhite Signature Edition 32 GB (12ª geração)",
     "category": "Casa inteligente",
-    "query": "amazon kindle paperwhite 16gb 12 geracao",
+    "query": "kindle paperwhite signature 32gb 12 geracao",
     "must": [
       "paperwhite",
-      "16"
+      "signature",
+      "32"
     ],
     "exclude": [
       "capa",
@@ -489,7 +500,7 @@
       "película",
       "usado"
     ],
-    "min_price": 600,
+    "min_price": 700,
     "popularity": 73
   }
 ]
