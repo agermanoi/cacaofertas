@@ -1187,6 +1187,34 @@ button.btn-ghost {
   margin: 0;
 }
 
+.collect-box {
+  border: 2px solid var(--line);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.collect-box.has-errors {
+  border-color: var(--bad);
+}
+.collect-box summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.collect-box .hint {
+  margin: 8px 0;
+}
+.collect-errors {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.collect-errors code {
+  word-break: break-word;
+}
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 900px) {
   .hero-inner {

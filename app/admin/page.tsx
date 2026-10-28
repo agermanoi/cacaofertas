@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { collectNow, logout, setActive } from "./actions";
-import { adminDbReady, adminListProducts } from "@/lib/admin-data";
+import { adminDbReady, adminLastCollect, adminListProducts } from "@/lib/admin-data";
 import { money } from "@/lib/format";
 import { Flash } from "@/components/admin/Flash";
 import { demo } from "@/lib/mock";
@@ -23,7 +23,7 @@ export default async function AdminHome({ searchParams }: Props) {
     );
   }
 
-  const all = await adminListProducts();
+  const [all, last] = await Promise.all([adminListProducts(), adminLastCollect()]);
   const active = all.filter((p) => p.active).length;
   const nq = norm(q.trim());
   const list = all.filter(
@@ -60,6 +60,50 @@ export default async function AdminHome({ searchParams }: Props) {
         <p className="flash flash-info">Modo demonstração: dá para navegar, mas nada é salvo.</p>
       ) : null}
       <Flash ok={ok} erro={erro} />
+
+      {last ? (
+        <details className={`collect-box ${last.errorCount || !last.totalOffers ? "has-errors" : ""}`}>
+          <summary>
+            Última coleta em{" "}
+            {new Date(last.at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" })}:{" "}
+            {last.totalOffers} {last.totalOffers === 1 ? "oferta" : "ofertas"} em {last.products}{" "}
+            {last.products === 1 ? "produto" : "produtos"}
+            {last.errorCount ? `, ${last.errorCount} ${last.errorCount === 1 ? "erro" : "erros"}` : ""}
+          </summary>
+          <p className="hint">Fontes usadas: {last.sources.join(", ") || "nenhuma"}</p>
+          <div className="table-scroll">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th scope="col">Fonte</th>
+                  <th scope="col" className="num">Produtos ok</th>
+                  <th scope="col" className="num">Falhas</th>
+                  <th scope="col" className="num">Ofertas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(last.stats).map(([src, st]) => (
+                  <tr key={src}>
+                    <td>{src}</td>
+                    <td className="num">{st.ok}</td>
+                    <td className="num">{st.fail}</td>
+                    <td className="num">{st.offers}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {last.errors.length ? (
+            <ul className="collect-errors">
+              {last.errors.slice(0, 8).map((e, i) => (
+                <li key={i}>
+                  <strong>{e.source}</strong> · {e.slug}: <code>{e.message}</code>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </details>
+      ) : null}
 
       <form className="admin-filter" method="get">
         <label htmlFor="q" className="sr-only">

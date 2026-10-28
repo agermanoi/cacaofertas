@@ -105,6 +105,7 @@ async function main() {
   if (!collectors.length) throw new Error("Nenhuma fonte configurada. Veja o .env.example.");
 
   const stats: Record<string, { ok: number; fail: number; offers: number }> = {};
+  const errors: { source: string; slug: string; message: string }[] = [];
   for (const c of collectors) stats[c.source] = { ok: 0, fail: 0, offers: 0 };
 
   for (const product of products) {
@@ -122,6 +123,7 @@ async function main() {
         stats[c.source].offers += picked.length;
       } catch (e) {
         stats[c.source].fail++;
+        errors.push({ source: c.source, slug: product.slug, message: (e as Error).message.slice(0, 300) });
         console.warn(`  ✗ ${c.source} · ${product.slug}: ${(e as Error).message}`);
       }
     }
@@ -131,6 +133,18 @@ async function main() {
   }
 
   console.table(stats);
+
+  // Resumo da execução no banco (aparece no /admin e ajuda a diagnosticar sem abrir o GitHub)
+  const summary = {
+    at: new Date().toISOString(),
+    products: products.length,
+    sources: collectors.map((c) => c.source),
+    stats,
+    totalOffers: Object.values(stats).reduce((n, s) => n + s.offers, 0),
+    errors: errors.slice(0, 40),
+    errorCount: errors.length,
+  };
+  await db.from("kv").upsert({ key: "last_collect", value: JSON.stringify(summary), updated_at: summary.at });
   // A raspagem sem URLs cadastradas sempre "dá certo"; ela não conta como fonte funcionando.
   const apiSources = Object.entries(stats).filter(([src]) => src !== "scraper");
   const failedApis = apiSources.filter(([, s]) => s.ok === 0 && s.fail > 0).map(([src]) => src);

@@ -70,3 +70,24 @@ export async function adminCategories(): Promise<string[]> {
     a.localeCompare(b, "pt-BR")
   );
 }
+
+export interface CollectSummary {
+  at: string;
+  products: number;
+  sources: string[];
+  stats: Record<string, { ok: number; fail: number; offers: number }>;
+  totalOffers: number;
+  errors: { source: string; slug: string; message: string }[];
+  errorCount: number;
+}
+
+/** Resumo da última coleta, gravado pelo scripts/collect.ts na tabela kv. */
+export async function adminLastCollect(): Promise<CollectSummary | null> {
+  if (demo.enabled()) return null;
+  const { data } = await adminClient().from("kv").select("value").eq("key", "last_collect").maybeSingle();
+  try {
+    return data?.value ? (JSON.parse(data.value) as CollectSummary) : null;
+  } catch {
+    return null;
+  }
+}
