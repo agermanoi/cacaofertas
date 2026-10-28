@@ -1,0 +1,34 @@
+{
+  "name": "radar-black-friday",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Histórico e melhores preços dos produtos mais buscados na Black Friday",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "collect": "tsx scripts/collect.ts",
+    "seed": "tsx scripts/seed.ts",
+    "ml:auth": "tsx scripts/ml-auth.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "cheerio": "^1.0.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "dotenv": "^16.4.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

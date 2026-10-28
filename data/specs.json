@@ -1,0 +1,299 @@
+{
+  "iphone-16-128gb": {
+    "summary": "Modelo de entrada da linha 2024 da Apple. Ganhou o Controle da Câmera, o botão de Ação e o chip A18, compatível com o Apple Intelligence.",
+    "specs": [
+      ["Tela", "6,1\" OLED Super Retina XDR, 2556 × 1179 (460 ppi)"],
+      ["Chip", "Apple A18 (CPU de 6 núcleos)"],
+      ["Câmeras traseiras", "48 MP Fusion (zoom 2x com qualidade óptica) + 12 MP ultra-angular"],
+      ["Câmera frontal", "12 MP"],
+      ["Armazenamento", "128 GB"],
+      ["Bateria", "Até 22 h de reprodução de vídeo"],
+      ["Botões", "Controle da Câmera e botão de Ação"],
+      ["Conector", "USB-C"],
+      ["Resistência", "IP68 (até 6 m por 30 min)"]
+    ]
+  },
+  "iphone-17-256gb": {
+    "summary": "iPhone padrão de 2025. Primeiro modelo não-Pro com tela ProMotion de 120 Hz, já começa em 256 GB e tem câmera ultra-angular de 48 MP.",
+    "specs": [
+      ["Tela", "6,3\" OLED Super Retina XDR, ProMotion até 120 Hz, sempre ativa"],
+      ["Brilho", "Pico de 3000 nits ao ar livre"],
+      ["Chip", "Apple A19 (CPU de 6 núcleos, GPU de 5 núcleos)"],
+      ["Câmeras traseiras", "48 MP Fusion principal + 48 MP Fusion ultra-angular"],
+      ["Câmera frontal", "18 MP Center Stage"],
+      ["Armazenamento", "256 GB (também há 512 GB)"],
+      ["Bateria", "Até 30 h de reprodução de vídeo"],
+      ["Conector", "USB-C"],
+      ["Resistência", "IP68 (até 6 m por 30 min)"],
+      ["Peso", "177 g"]
+    ]
+  },
+  "galaxy-s25-fe-256gb": {
+    "summary": "Versão mais acessível da linha Galaxy S25. Mantém tela de 120 Hz, câmera com teleobjetiva e a promessa de 7 anos de atualizações do Android.",
+    "specs": [
+      ["Tela", "6,7\" Dynamic AMOLED 2X, 120 Hz"],
+      ["Processador", "Samsung Exynos 2400"],
+      ["Memória", "8 GB de RAM, 256 GB de armazenamento"],
+      ["Câmeras traseiras", "50 MP principal + 12 MP ultra-angular + 8 MP teleobjetiva"],
+      ["Câmera frontal", "12 MP"],
+      ["Bateria", "4.900 mAh, carga de 45 W com fio e 15 W sem fio"],
+      ["Atualizações", "Até 7 versões do Android"],
+      ["Resistência", "IP68"],
+      ["Peso", "190 g"]
+    ]
+  },
+  "galaxy-a56-256gb": {
+    "summary": "Intermediário premium da Samsung, com acabamento em metal, tela AMOLED de 120 Hz, bateria de 5.000 mAh e 6 anos de atualizações.",
+    "specs": [
+      ["Tela", "6,7\" Super AMOLED, 120 Hz"],
+      ["Processador", "Samsung Exynos 1580 (8 núcleos)"],
+      ["Memória", "8 GB de RAM, 256 GB de armazenamento"],
+      ["Câmeras traseiras", "50 MP principal + 12 MP ultra-angular + 5 MP macro"],
+      ["Câmera frontal", "12 MP"],
+      ["Bateria", "5.000 mAh, carga de até 45 W"],
+      ["Atualizações", "Até 6 versões do Android"],
+      ["Resistência", "IP67"],
+      ["Peso", "198 g"]
+    ]
+  },
+  "redmi-note-14-256gb": {
+    "summary": "Opção de entrada da Xiaomi com tela AMOLED de 120 Hz, câmera de 108 MP e bateria grande. É a versão 4G: o Redmi Note 14 5G é outro aparelho.",
+    "specs": [
+      ["Tela", "6,67\" AMOLED, 2400 × 1080, até 120 Hz, pico de 1.800 nits"],
+      ["Processador", "MediaTek Helio G99-Ultra"],
+      ["Memória", "8 GB de RAM, 256 GB (expansível por microSD até 1 TB)"],
+      ["Câmeras traseiras", "108 MP principal + 2 MP profundidade + 2 MP macro"],
+      ["Câmera frontal", "20 MP"],
+      ["Bateria", "5.500 mAh, carga de 33 W (carregador incluso)"],
+      ["Rede", "4G"],
+      ["Resistência", "IP54 (respingos e poeira)"],
+      ["Peso", "196,5 g"]
+    ]
+  },
+  "playstation-5-slim": {
+    "summary": "Revisão de 2023 do PS5: cerca de 30% menor que o original, com SSD maior e leitor de disco destacável. A Edição Digital pode receber o leitor depois.",
+    "specs": [
+      ["Armazenamento", "SSD de 1 TB"],
+      ["Tamanho", "Cerca de 30% menos volume que o PS5 original"],
+      ["Peso", "3,2 kg (com leitor) ou 2,6 kg (Edição Digital)"],
+      ["Leitor de disco", "Ultra HD Blu-ray destacável; vendido à parte para a Edição Digital"],
+      ["Controle", "DualSense incluso"],
+      ["Desempenho", "Mesmo hardware de CPU e GPU do PS5 original"]
+    ],
+    "note": "Confira no anúncio se é a edição com leitor de disco ou a Edição Digital."
+  },
+  "nintendo-switch-2": {
+    "summary": "Sucessor do Switch lançado em 2025. Tela maior em Full HD com 120 Hz, saída 4K na TV e Joy-Con 2 que se prendem por ímã e funcionam como mouse.",
+    "specs": [
+      ["Tela", "7,9\" LCD, 1920 × 1080, até 120 Hz, HDR10 e VRR"],
+      ["Na TV", "Até 4K a 60 fps, ou 120 fps em 1080p/1440p"],
+      ["Armazenamento", "256 GB, expansível com cartão microSD Express"],
+      ["Bateria", "De 2 a 6,5 h, conforme o jogo"],
+      ["Controles", "Joy-Con 2 magnéticos, com função de mouse e botão C para o GameChat"],
+      ["Peso", "Cerca de 534 g com os Joy-Con"]
+    ],
+    "note": "Cartões microSD comuns do Switch original não funcionam no Switch 2."
+  },
+  "xbox-series-s": {
+    "summary": "Console mais compacto e barato da geração atual da Microsoft, sem leitor de disco. Bom para quem joga pelo Game Pass e em TV Full HD ou 1440p.",
+    "specs": [
+      ["Processador", "AMD Zen 2 de 8 núcleos, 3,6 GHz"],
+      ["GPU", "AMD RDNA 2, 4 teraflops"],
+      ["Memória", "10 GB GDDR6"],
+      ["Armazenamento", "SSD de 512 GB (branco) ou 1 TB (preto), expansível por cartão"],
+      ["Resolução", "Até 1440p, com até 120 fps em jogos compatíveis"],
+      ["Mídia", "Somente digital (sem leitor de disco)"],
+      ["Dimensões", "27,5 × 15,1 × 6,5 cm, 1,93 kg"]
+    ]
+  },
+  "smart-tv-samsung-55-crystal-u8000f": {
+    "summary": "Linha Crystal UHD 2025 da Samsung: TV 4K de entrada com sistema Tizen, HDR10+ e recursos de jogo como modo automático e VRR.",
+    "specs": [
+      ["Tela", "55\" LED 4K (3840 × 2160)"],
+      ["Processador", "Crystal Processor 4K"],
+      ["HDR", "HDR10+"],
+      ["Sistema", "Tizen"],
+      ["Áudio", "20 W, 2 canais, Object Tracking Sound Lite e Q-Symphony"],
+      ["Conexões", "3 HDMI, com eARC"],
+      ["Jogos", "Modo de jogo automático (ALLM), VRR e HGiG"]
+    ]
+  },
+  "smart-tv-lg-50-4k-ua8550": {
+    "summary": "TV 4K de entrada da LG para 2025, com webOS 25, HDR10 Pro e controle por voz com ThinQ AI e Alexa.",
+    "specs": [
+      ["Tela", "50\" LED 4K UHD, 60 Hz"],
+      ["HDR", "HDR10 Pro"],
+      ["Sistema", "webOS 25"],
+      ["Áudio", "AI Sound Pro com surround virtual"],
+      ["Assistentes", "ThinQ AI, compatível com Alexa, AirPlay e HomeKit"],
+      ["Jogos", "Otimizador de jogos e cloud gaming"]
+    ],
+    "note": "As lojas divergem sobre o processador desta versão. Confira no anúncio antes de comprar."
+  },
+  "smart-tv-tcl-65-mini-led-c6k": {
+    "summary": "TV Mini LED com pontos quânticos e escurecimento local, um degrau acima das QLED comuns em contraste. Tem 144 Hz para jogos e Google TV.",
+    "specs": [
+      ["Tela", "65\" QD-Mini LED 4K, painel VA com escurecimento local"],
+      ["Taxa de atualização", "120 Hz nativo, até 144 Hz com VRR"],
+      ["HDR", "Dolby Vision e HDR10+"],
+      ["Sistema", "Google TV"],
+      ["Áudio", "40 W, sistema 2.1 com woofer, Dolby Atmos"],
+      ["Conexões", "4 HDMI"],
+      ["Jogos", "VRR, ALLM, FreeSync e HGiG"]
+    ]
+  },
+  "notebook-lenovo-ideapad-slim-3i-i5-13420h": {
+    "summary": "Notebook de uso geral com processador Intel de série H (mais forte que os U de entrada), tela 16:10 e 16 GB de RAM.",
+    "specs": [
+      ["Processador", "Intel Core i5-13420H (8 núcleos, 12 threads, até 4,6 GHz)"],
+      ["Memória", "16 GB DDR5"],
+      ["Armazenamento", "SSD de 512 GB NVMe PCIe 4.0"],
+      ["Tela", "15,3\" WUXGA (1920 × 1200), 16:10, 300 nits, antirreflexo"],
+      ["Vídeo", "Intel UHD Graphics (integrada)"],
+      ["Portas", "2 USB-A, 1 USB-C (carga e vídeo), HDMI, leitor SD e fone"],
+      ["Bateria", "50 Wh"],
+      ["Peso", "1,59 kg"]
+    ],
+    "note": "Há uma versão com 8 GB de RAM no mesmo modelo. Confira a memória no anúncio."
+  },
+  "macbook-air-m4-13": {
+    "summary": "MacBook Air de 2025 com chip M4, que já começa com 16 GB de RAM e suporta dois monitores externos com a tampa aberta.",
+    "specs": [
+      ["Tela", "13,6\" Liquid Retina, 2560 × 1664, 500 nits"],
+      ["Chip", "Apple M4, CPU de 10 núcleos e GPU de 8 ou 10 núcleos"],
+      ["Memória", "A partir de 16 GB"],
+      ["Armazenamento", "A partir de 256 GB"],
+      ["Bateria", "Até 18 h"],
+      ["Câmera", "12 MP com Center Stage"],
+      ["Portas", "2 Thunderbolt (USB-C), MagSafe e fone"],
+      ["Monitores externos", "Até 2"],
+      ["Conectividade", "Wi-Fi 6E, Bluetooth 5.3"]
+    ]
+  },
+  "monitor-lg-ultragear-27gs60f": {
+    "summary": "Monitor gamer Full HD com painel IPS de 180 Hz e 1 ms. Uma das opções mais procuradas para quem sai dos 60 Hz.",
+    "specs": [
+      ["Tela", "27\" IPS, Full HD (1920 × 1080), antirreflexo"],
+      ["Taxa de atualização", "Até 180 Hz"],
+      ["Tempo de resposta", "1 ms (GtG)"],
+      ["Cor", "99% sRGB, HDR10"],
+      ["Brilho e contraste", "300 nits, 1000:1"],
+      ["Sincronização", "NVIDIA G-Sync e AMD FreeSync"],
+      ["Conexões", "1 HDMI e 1 DisplayPort 1.4"]
+    ]
+  },
+  "air-fryer-mondial-family-afn-40": {
+    "summary": "Air fryer básica e muito vendida da Mondial, com controles analógicos, cesto de 4 L e acabamento em inox.",
+    "specs": [
+      ["Capacidade", "4 L"],
+      ["Potência", "1500 W"],
+      ["Temperatura", "Até 200 °C"],
+      ["Timer", "Até 60 min, com aviso sonoro e desligamento automático"],
+      ["Cesto", "Antiaderente"],
+      ["Voltagem", "110 V ou 220 V (não é bivolt)"]
+    ]
+  },
+  "airfryer-philips-walita-serie-2000-xl-na230": {
+    "summary": "Air fryer digital da Philips Walita com cesto grande, janela para acompanhar o preparo e a tecnologia RapidAir da marca.",
+    "specs": [
+      ["Capacidade", "6,2 L (cerca de 1,2 kg de alimento)"],
+      ["Potência", "1700 W"],
+      ["Temperatura", "De 60 a 200 °C"],
+      ["Programas", "9 pré-definidos, incluindo manter aquecido"],
+      ["Painel", "Digital, timer de 60 min, janela com luz interna"],
+      ["Limpeza", "Peças removíveis vão à lava-louças"],
+      ["Voltagem", "110 V ou 220 V (não é bivolt)"]
+    ]
+  },
+  "robo-aspirador-wap-robot-w400": {
+    "summary": "Robô 3 em 1 (varre, aspira e passa pano) com app e controle por voz. Navega por sensores, sem mapeamento a laser.",
+    "specs": [
+      ["Funções", "Varre, aspira e passa pano"],
+      ["Sucção", "1.400 Pa"],
+      ["Autonomia", "Até 1h40 por carga"],
+      ["Reservatórios", "300 ml (pó) e 170 ml (água)"],
+      ["Navegação", "Sensores anti-queda e anticolisão; volta sozinho à base"],
+      ["Controle", "App via Wi-Fi, controle remoto, Alexa e Google Assistente"],
+      ["Filtragem", "HEPA"]
+    ]
+  },
+  "cafeteira-dolce-gusto-genio-s-plus": {
+    "summary": "Cafeteira de cápsulas automática da Dolce Gusto com ajuste de temperatura e funções para espresso mais intenso ou xícara maior.",
+    "specs": [
+      ["Pressão", "15 bar"],
+      ["Potência", "1350 W"],
+      ["Reservatório", "0,8 L removível"],
+      ["Temperatura", "4 níveis"],
+      ["Funções", "Espresso Boost, XL, modo ECO e desligamento automático"],
+      ["Voltagem", "110 V ou 220 V (não é bivolt)"]
+    ]
+  },
+  "airpods-pro-3": {
+    "summary": "Terceira geração dos fones intra-auriculares da Apple, com cancelamento de ruído mais forte, sensor de batimentos para treinos e mais bateria.",
+    "specs": [
+      ["Chip", "Apple H2"],
+      ["Cancelamento de ruído", "Ativo, com modo Ambiente"],
+      ["Bateria", "Até 8 h com cancelamento ativo; até 24 h com o estojo"],
+      ["Saúde", "Sensor de frequência cardíaca para exercícios"],
+      ["Resistência", "IP57 (fones e estojo)"],
+      ["Estojo", "Carga por USB-C, MagSafe, Qi ou carregador do Apple Watch; tem alto-falante para o Buscar"],
+      ["Ponteiras", "5 tamanhos (XXS a G)"]
+    ]
+  },
+  "jbl-flip-7": {
+    "summary": "Nova geração da caixa portátil mais vendida da JBL, agora com proteção IP68, mais bateria e ajuste de graves por IA.",
+    "specs": [
+      ["Potência", "25 W (woofer) + 10 W (tweeter)"],
+      ["Bateria", "Até 14 h, mais 2 h com Playtime Boost"],
+      ["Resistência", "IP68 (submersão até 1,5 m por 30 min)"],
+      ["Bluetooth", "5.4"],
+      ["Som", "AI Sound Boost, resposta de 60 Hz a 20 kHz"],
+      ["Pareamento", "Modo estéreo com outra Flip 7"]
+    ]
+  },
+  "apple-watch-se-3-gps": {
+    "summary": "Apple Watch mais barato, atualizado em 2025 com tela sempre ativa, chip S10, sensor de temperatura e nota de sono.",
+    "specs": [
+      ["Tamanhos", "40 mm ou 44 mm"],
+      ["Tela", "OLED LTPO sempre ativa, 1.000 nits"],
+      ["Chip", "S10, 64 GB de armazenamento"],
+      ["Bateria", "Até 18 h (até 32 h no modo de economia)"],
+      ["Carga rápida", "0 a 80% em cerca de 45 min"],
+      ["Saúde", "Frequência cardíaca, temperatura, nota de sono e alerta de apneia"],
+      ["Resistência", "À água até 50 m"]
+    ]
+  },
+  "galaxy-watch-8": {
+    "summary": "Relógio da Samsung de 2025 com Wear OS 6, corpo mais fino e sensores de composição corporal e de coração.",
+    "specs": [
+      ["Tamanhos", "40 mm (1,34\") ou 44 mm (1,47\")"],
+      ["Tela", "Super AMOLED"],
+      ["Processador", "Exynos W1000 (5 núcleos)"],
+      ["Memória", "2 GB de RAM, 32 GB de armazenamento"],
+      ["Bateria", "325 mAh (40 mm) ou 445 mAh (44 mm)"],
+      ["Sensores", "Bioimpedância, ECG, frequência cardíaca e temperatura"],
+      ["Sistema", "Wear OS 6"],
+      ["Espessura", "8,6 mm"]
+    ]
+  },
+  "echo-dot-5": {
+    "summary": "Caixa inteligente compacta da Amazon com Alexa. A 5ª geração trouxe som mais forte e sensor de temperatura para rotinas da casa.",
+    "specs": [
+      ["Assistente", "Alexa em português"],
+      ["Áudio", "Alto-falante de 44 mm"],
+      ["Casa inteligente", "Compatível com Matter; sensor de temperatura embutido"],
+      ["Conectividade", "Wi-Fi 2,4 e 5 GHz, Bluetooth"],
+      ["Privacidade", "Botão para desligar o microfone"]
+    ]
+  },
+  "kindle-paperwhite": {
+    "summary": "Leitor digital intermediário da Amazon, com tela antirreflexo de 7\", resistência à água e bateria que dura semanas.",
+    "specs": [
+      ["Tela", "7\" E Ink antirreflexo, 300 ppi, luz frontal ajustável"],
+      ["Armazenamento", "16 GB"],
+      ["Bateria", "Até 12 semanas"],
+      ["Resistência", "IPX8"],
+      ["Carga", "USB-C"]
+    ]
+  }
+}

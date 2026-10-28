@@ -1,0 +1,491 @@
+[
+  {
+    "slug": "iphone-16-128gb",
+    "name": "iPhone 16 128GB",
+    "category": "Smartphones",
+    "query": "iphone 16 128gb",
+    "must": [
+      "iphone",
+      "16",
+      "128"
+    ],
+    "exclude": [
+      "pro",
+      "plus",
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "vitrine",
+      "usado",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 3000,
+    "popularity": 100
+  },
+  {
+    "slug": "iphone-17-256gb",
+    "name": "iPhone 17 256GB",
+    "category": "Smartphones",
+    "query": "iphone 17 256gb",
+    "must": [
+      "iphone",
+      "17",
+      "256"
+    ],
+    "exclude": [
+      "pro",
+      "air",
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "usado",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 4500,
+    "popularity": 98
+  },
+  {
+    "slug": "galaxy-s25-fe-256gb",
+    "name": "Samsung Galaxy S25 FE 256GB",
+    "category": "Smartphones",
+    "query": "galaxy s25 fe 256gb",
+    "must": [
+      "s25",
+      "fe"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "usado",
+      "recondicionado"
+    ],
+    "min_price": 1800,
+    "popularity": 92
+  },
+  {
+    "slug": "galaxy-a56-256gb",
+    "name": "Samsung Galaxy A56 5G 256GB",
+    "category": "Smartphones",
+    "query": "galaxy a56 5g 256gb",
+    "must": [
+      "a56"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "usado",
+      "recondicionado"
+    ],
+    "min_price": 1300,
+    "popularity": 90
+  },
+  {
+    "slug": "redmi-note-14-256gb",
+    "name": "Xiaomi Redmi Note 14 (4G) 256GB",
+    "category": "Smartphones",
+    "query": "redmi note 14 256gb",
+    "must": [
+      "redmi",
+      "note",
+      "14"
+    ],
+    "exclude": [
+      "pro",
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "usado",
+      "5g"
+    ],
+    "min_price": 800,
+    "popularity": 85
+  },
+  {
+    "slug": "playstation-5-slim",
+    "name": "PlayStation 5 Slim",
+    "category": "Games",
+    "query": "playstation 5 slim console",
+    "must": [
+      "ps5|playstation 5",
+      "slim"
+    ],
+    "exclude": [
+      "controle",
+      "jogo",
+      "capa",
+      "suporte",
+      "skin",
+      "base",
+      "cooler",
+      "usado",
+      "headset"
+    ],
+    "min_price": 2500,
+    "popularity": 97
+  },
+  {
+    "slug": "nintendo-switch-2",
+    "name": "Nintendo Switch 2",
+    "category": "Games",
+    "query": "nintendo switch 2 console",
+    "must": [
+      "switch 2"
+    ],
+    "exclude": [
+      "jogo",
+      "case",
+      "capa",
+      "pelicula",
+      "película",
+      "controle",
+      "dock",
+      "usado",
+      "bolsa"
+    ],
+    "min_price": 2800,
+    "popularity": 94
+  },
+  {
+    "slug": "xbox-series-s",
+    "name": "Xbox Series S",
+    "category": "Games",
+    "query": "xbox series s console",
+    "must": [
+      "xbox",
+      "series s"
+    ],
+    "exclude": [
+      "controle",
+      "jogo",
+      "suporte",
+      "skin",
+      "cooler",
+      "usado",
+      "headset"
+    ],
+    "min_price": 2000,
+    "popularity": 80
+  },
+  {
+    "slug": "smart-tv-samsung-55-crystal-u8000f",
+    "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000F",
+    "category": "TVs",
+    "query": "smart tv samsung 55 crystal uhd u8000f",
+    "must": [
+      "samsung",
+      "55",
+      "~u8000f"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "capa",
+      "usado",
+      "vitrine"
+    ],
+    "min_price": 1700,
+    "popularity": 96
+  },
+  {
+    "slug": "smart-tv-lg-50-4k-ua8550",
+    "name": "Smart TV LG 50\" 4K UHD UA8550",
+    "category": "TVs",
+    "query": "smart tv lg 50 4k ua8550",
+    "must": [
+      "lg",
+      "50",
+      "~ua8550"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine"
+    ],
+    "min_price": 1500,
+    "popularity": 88
+  },
+  {
+    "slug": "smart-tv-tcl-65-mini-led-c6k",
+    "name": "Smart TV TCL 65\" QD-Mini LED C6K",
+    "category": "TVs",
+    "query": "smart tv tcl 65 c6k mini led",
+    "must": [
+      "tcl",
+      "65",
+      "~c6k"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine"
+    ],
+    "min_price": 2800,
+    "popularity": 82
+  },
+  {
+    "slug": "notebook-lenovo-ideapad-slim-3i-i5-13420h",
+    "name": "Notebook Lenovo IdeaPad Slim 3i Core i5-13420H 16GB 512GB",
+    "category": "Informática",
+    "query": "notebook lenovo ideapad slim 3i i5 13420h 16gb 512gb",
+    "must": [
+      "ideapad",
+      "~13420h",
+      "16"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "mochila",
+      "carregador",
+      "fonte",
+      "teclado",
+      "usado"
+    ],
+    "min_price": 2200,
+    "popularity": 87
+  },
+  {
+    "slug": "macbook-air-m4-13",
+    "name": "MacBook Air 13\" M4",
+    "category": "Informática",
+    "query": "macbook air m4 13",
+    "must": [
+      "macbook air",
+      "m4"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "carregador",
+      "usado",
+      "seminovo"
+    ],
+    "min_price": 6000,
+    "popularity": 84
+  },
+  {
+    "slug": "monitor-lg-ultragear-27gs60f",
+    "name": "Monitor Gamer LG UltraGear 27\" 27GS60F 180Hz",
+    "category": "Informática",
+    "query": "monitor lg ultragear 27gs60f",
+    "must": [
+      "~27gs60f"
+    ],
+    "exclude": [
+      "suporte",
+      "braço",
+      "usado"
+    ],
+    "min_price": 600,
+    "popularity": 72
+  },
+  {
+    "slug": "air-fryer-mondial-family-afn-40",
+    "name": "Air Fryer Mondial Family 4L AFN-40",
+    "category": "Eletroportáteis",
+    "query": "air fryer mondial family afn-40",
+    "must": [
+      "mondial",
+      "~afn40"
+    ],
+    "exclude": [
+      "forma",
+      "papel",
+      "cesto",
+      "acessorio",
+      "acessório",
+      "tapete"
+    ],
+    "min_price": 220,
+    "popularity": 95
+  },
+  {
+    "slug": "airfryer-philips-walita-serie-2000-xl-na230",
+    "name": "Airfryer Philips Walita Série 2000 XL NA230",
+    "category": "Eletroportáteis",
+    "query": "airfryer philips walita serie 2000 xl na230",
+    "must": [
+      "philips|walita",
+      "~na230"
+    ],
+    "exclude": [
+      "forma",
+      "papel",
+      "cesto",
+      "acessorio",
+      "acessório",
+      "tapete"
+    ],
+    "min_price": 350,
+    "popularity": 86
+  },
+  {
+    "slug": "robo-aspirador-wap-robot-w400",
+    "name": "Robô Aspirador WAP Robot W400",
+    "category": "Eletroportáteis",
+    "query": "robo aspirador wap robot w400",
+    "must": [
+      "wap",
+      "~w400"
+    ],
+    "exclude": [
+      "filtro",
+      "escova",
+      "refil",
+      "bateria",
+      "peça",
+      "~w4000"
+    ],
+    "min_price": 350,
+    "popularity": 81
+  },
+  {
+    "slug": "cafeteira-dolce-gusto-genio-s-plus",
+    "name": "Cafeteira Dolce Gusto Genio S Plus",
+    "category": "Eletroportáteis",
+    "query": "cafeteira dolce gusto genio s plus",
+    "must": [
+      "genio s",
+      "plus"
+    ],
+    "exclude": [
+      "capsula",
+      "cápsula",
+      "suporte",
+      "porta"
+    ],
+    "min_price": 350,
+    "popularity": 74
+  },
+  {
+    "slug": "airpods-pro-3",
+    "name": "Apple AirPods Pro 3",
+    "category": "Áudio e Wearables",
+    "query": "airpods pro 3",
+    "must": [
+      "airpods pro",
+      "3"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "ponteira",
+      "usado",
+      "réplica",
+      "replica"
+    ],
+    "min_price": 1500,
+    "popularity": 83
+  },
+  {
+    "slug": "jbl-flip-7",
+    "name": "Caixa de Som JBL Flip 7",
+    "category": "Áudio e Wearables",
+    "query": "jbl flip 7",
+    "must": [
+      "jbl",
+      "flip 7"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "bolsa",
+      "usado",
+      "réplica",
+      "replica"
+    ],
+    "min_price": 500,
+    "popularity": 79
+  },
+  {
+    "slug": "apple-watch-se-3-gps",
+    "name": "Apple Watch SE 3 (GPS)",
+    "category": "Áudio e Wearables",
+    "query": "apple watch se 3 gps",
+    "must": [
+      "apple watch",
+      "se 3"
+    ],
+    "exclude": [
+      "pulseira",
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "carregador",
+      "usado"
+    ],
+    "min_price": 1400,
+    "popularity": 77
+  },
+  {
+    "slug": "galaxy-watch-8",
+    "name": "Samsung Galaxy Watch 8",
+    "category": "Áudio e Wearables",
+    "query": "galaxy watch 8",
+    "must": [
+      "galaxy watch",
+      "8"
+    ],
+    "exclude": [
+      "pulseira",
+      "capa",
+      "pelicula",
+      "película",
+      "carregador",
+      "usado",
+      "classic"
+    ],
+    "min_price": 1200,
+    "popularity": 70
+  },
+  {
+    "slug": "echo-dot-5",
+    "name": "Amazon Echo Dot 5ª geração",
+    "category": "Casa inteligente",
+    "query": "echo dot 5 geração alexa",
+    "must": [
+      "echo dot"
+    ],
+    "exclude": [
+      "suporte",
+      "capa",
+      "case",
+      "usado"
+    ],
+    "min_price": 200,
+    "popularity": 78
+  },
+  {
+    "slug": "kindle-paperwhite",
+    "name": "Kindle Paperwhite 16 GB (12ª geração)",
+    "category": "Casa inteligente",
+    "query": "kindle paperwhite 16gb 12 geração",
+    "must": [
+      "paperwhite",
+      "16"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "usado"
+    ],
+    "min_price": 600,
+    "popularity": 73
+  }
+]

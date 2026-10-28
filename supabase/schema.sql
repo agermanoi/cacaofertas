@@ -1,0 +1,133 @@
+-- =====================================================================
+-- Radar Black Friday — schema Supabase (Postgres)
+-- Rode inteiro no SQL Editor do Supabase. É idempotente.
+-- =====================================================================
+
+create extension if not exists pgcrypto;
+
+-- Produtos monitorados ------------------------------------------------
+create table if not exists products (
+  id           uuid primary key default gen_random_uuid(),
+  slug         text unique not null,
+  name         text not null,
+  category     text not null,
+  query        text not null,                -- termo usado nas buscas das APIs
+  must         text[] not null default '{}', -- palavras que PRECISAM estar no título
+  exclude      text[] not null default '{}', -- palavras que descartam a oferta
+  min_price    numeric(12,2) not null default 0, -- abaixo disso é acessório/golpe
+  max_price    numeric(12,2),
+  scrape_urls  text[] not null default '{}', -- URLs de lojas para raspagem direta
+  image_url    text,
+  popularity   int not null default 0,       -- ordem de "mais buscados"
+  active       boolean not null default true,
+  created_at   timestamptz not null default now()
+);
+
+-- Ofertas (um anúncio de uma loja para um produto) --------------------
+create table if not exists offers (
+  id              uuid primary key default gen_random_uuid(),
+  product_id      uuid not null references products(id) on delete cascade,
+  source          text not null,   -- mercadolivre | serpapi | lomadee | scraper
+  store           text not null,   -- nome da loja exibido
+  external_id     text not null,
+  title           text not null,
+  url             text not null,
+  affiliate_url   text,
+  image_url       text,
+  last_price      numeric(12,2),
+  last_list_price numeric(12,2),
+  active          boolean not null default true,
+  first_seen_at   timestamptz not null default now(),
+  last_seen_at    timestamptz not null default now(),
+  unique (product_id, source, external_id)
+);
+-- Ficha técnica editável pelo admin: {"summary": "...", "specs": [["Tela","6,1\""]], "note": "..."}
+alter table products add column if not exists specs jsonb;
+alter table products add column if not exists updated_at timestamptz not null default now();
+
+create index if not exists offers_product_idx on offers(product_id) where active;
+
+-- Histórico: 1 ponto por oferta por dia ------------------------------
+create table if not exists price_history (
+  id          bigint generated always as identity primary key,
+  offer_id    uuid not null references offers(id) on delete cascade,
+  product_id  uuid not null references products(id) on delete cascade,
+  price       numeric(12,2) not null,
+  list_price  numeric(12,2),
+  captured_on date not null default (now() at time zone 'America/Sao_Paulo')::date,
+  captured_at timestamptz not null default now(),
+  unique (offer_id, captured_on)
+);
+create index if not exists price_history_product_day_idx on price_history(product_id, captured_on);
+
+-- Chave/valor (guarda o refresh token do Mercado Livre, que rotaciona) -
+create table if not exists kv (
+  key        text primary key,
+  value      text,
+  updated_at timestamptz not null default now()
+);
+
+-- Cliques nos links de afiliado ---------------------------------------
+create table if not exists clicks (
+  id         bigint generated always as identity primary key,
+  offer_id   uuid references offers(id) on delete set null,
+  product_id uuid references products(id) on delete set null,
+  referer    text,
+  created_at timestamptz not null default now()
+);
+
+-- Menor preço do dia por produto --------------------------------------
+create or replace view product_daily with (security_invoker = on) as
+select product_id, captured_on as day, min(price) as min_price
+from price_history
+group by product_id, captured_on;
+
+-- Visão geral: melhor preço atual + estatísticas de 30/90 dias ----------
+create or replace view product_overview with (security_invoker = on) as
+select
+  p.id, p.slug, p.name, p.category, p.image_url, p.popularity, p.active,
+  cur.best_price, cur.best_list_price, cur.best_offer_id, cur.best_store, cur.offers_count,
+  st.min_30d, st.avg_30d, st.max_30d, st.min_90d, st.min_all, st.days_tracked,
+  p.specs, p.query, p.must, p.exclude, p.min_price, p.max_price, p.scrape_urls, p.updated_at
+from products p
+left join lateral (
+  select
+    min(o.last_price)                                              as best_price,
+    (array_agg(o.last_list_price order by o.last_price asc))[1]   as best_list_price,
+    (array_agg(o.id order by o.last_price asc))[1]                 as best_offer_id,
+    (array_agg(o.store order by o.last_price asc))[1]              as best_store,
+    count(*)                                                       as offers_count
+  from offers o
+  where o.product_id = p.id
+    and o.active
+    and o.last_price is not null
+    and o.last_seen_at > now() - interval '3 days'
+) cur on true
+left join lateral (
+  select
+    min(d.min_price) filter (where d.day >= current_date - 30)                          as min_30d,
+    round(avg(d.min_price) filter (where d.day >= current_date - 30 and d.day < current_date), 2) as avg_30d,
+    max(d.min_price) filter (where d.day >= current_date - 30)                          as max_30d,
+    min(d.min_price) filter (where d.day >= current_date - 90)                          as min_90d,
+    min(d.min_price)                                                                    as min_all,
+    count(*)                                                                            as days_tracked
+  from product_daily d
+  where d.product_id = p.id
+) st on true;
+
+-- RLS: leitura pública; escrita só com service role --------------------
+alter table products      enable row level security;
+alter table offers        enable row level security;
+alter table price_history enable row level security;
+alter table kv            enable row level security;
+alter table clicks        enable row level security;
+
+drop policy if exists "public read products" on products;
+create policy "public read products" on products for select using (true);
+drop policy if exists "public read offers" on offers;
+create policy "public read offers" on offers for select using (true);
+drop policy if exists "public read history" on price_history;
+create policy "public read history" on price_history for select using (true);
+-- kv e clicks: sem policy => anon não lê nem escreve (service role ignora RLS)
+
+grant select on product_daily, product_overview to anon, authenticated;
