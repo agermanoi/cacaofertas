@@ -111,6 +111,14 @@ export async function saveSettings(formData: FormData) {
       refreshSeconds: Number(text(formData, "gam_refresh") || 0),
     },
     adsTxt: raw(formData, "ads_txt"),
+    countdown: {
+      enabled: formData.get("cd_enabled") === "on",
+      event: text(formData, "cd_event"),
+      date: text(formData, "cd_date"),
+      before: text(formData, "cd_before"),
+      today: text(formData, "cd_today"),
+      after: text(formData, "cd_after"),
+    },
     seals: {
       safeBrowsing: formData.get("seal_safebrowsing") === "on",
       html: raw(formData, "seals_html"),

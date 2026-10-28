@@ -1,5 +1,5 @@
 import { Flash } from "@/components/admin/Flash";
-import { DEFAULT_SETTINGS, getSettings } from "@/lib/settings";
+import { DEFAULT_SETTINGS, countdownText, getSettings } from "@/lib/settings";
 import { resetColors, saveSettings } from "./actions";
 import { FORMATS, POSITIONS, sizesLabel } from "@/lib/ad-formats";
 
@@ -122,6 +122,45 @@ export default async function SettingsPage({ searchParams }: Props) {
             />
             <p className="hint">Deixe em branco para esconder a faixa.</p>
           </div>
+        </fieldset>
+
+        <fieldset id="contador">
+          <legend>Contador do topo</legend>
+          <label className="check">
+            <input type="checkbox" name="cd_enabled" defaultChecked={s.countdown.enabled} /> Mostrar o contador ao lado do logo
+          </label>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="cd_event">Nome do evento</label>
+              <input id="cd_event" name="cd_event" defaultValue={s.countdown.event} placeholder="Black Friday" />
+            </div>
+            <div className="field">
+              <label htmlFor="cd_date">Data do evento</label>
+              <input id="cd_date" name="cd_date" type="date" defaultValue={s.countdown.date} />
+              <p className="hint">Vazio = próxima Black Friday (última sexta de novembro), calculada sozinha.</p>
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="cd_before">Texto antes da data</label>
+            <input id="cd_before" name="cd_before" defaultValue={s.countdown.before} />
+            <p className="hint">
+              Use <code>{"{dias}"}</code> para a contagem (“30 dias”, “1 dia”) e <code>{"{evento}"}</code> para o nome do evento.
+            </p>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="cd_today">Texto no dia</label>
+              <input id="cd_today" name="cd_today" defaultValue={s.countdown.today} />
+            </div>
+            <div className="field">
+              <label htmlFor="cd_after">Texto depois (opcional)</label>
+              <input id="cd_after" name="cd_after" defaultValue={s.countdown.after} placeholder="Ex.: Ofertas de Natal no ar" />
+              <p className="hint">Vazio = o contador some depois da data.</p>
+            </div>
+          </div>
+          <p className="hint">
+            Hoje aparece: <strong>{countdownText(s.countdown) ?? "(oculto)"}</strong>
+          </p>
         </fieldset>
 
         <fieldset>

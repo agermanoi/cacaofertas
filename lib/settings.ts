@@ -53,6 +53,20 @@ export interface SiteSettings {
   };
   /** Conteúdo do /ads.txt (vendedores autorizados de mídia). */
   adsTxt: string;
+  /** Contador do topo ("Faltam 30 dias para a Black Friday"). */
+  countdown: {
+    enabled: boolean;
+    /** Nome do evento, usado em {evento} */
+    event: string;
+    /** Data do evento (AAAA-MM-DD). Vazio = próxima Black Friday, calculada sozinha. */
+    date: string;
+    /** Texto antes da data. {dias} vira "30 dias" ou "1 dia"; {evento} vira o nome. */
+    before: string;
+    /** Texto no dia do evento. */
+    today: string;
+    /** Texto depois do evento (vazio = esconde o contador). */
+    after: string;
+  };
   /** Selos de confiança no rodapé. */
   seals: {
     /** Link para o relatório público do Google Navegação Segura sobre o domínio */
@@ -84,6 +98,14 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
   adsTxt: "",
+  countdown: {
+    enabled: true,
+    event: "Black Friday",
+    date: "",
+    before: "Faltam {dias} para a {evento}",
+    today: "Hoje é {evento}",
+    after: "",
+  },
   seals: { safeBrowsing: true, html: "" },
   legal: { ownerName: "", document: "", city: "" },
 };
@@ -140,6 +162,14 @@ export function mergeSettings(raw: unknown): SiteSettings {
       };
     })(),
     adsTxt: opt(r.adsTxt).slice(0, 50000),
+    countdown: {
+      enabled: r.countdown?.enabled === undefined ? D.countdown.enabled : Boolean(r.countdown.enabled),
+      event: str(r.countdown?.event, D.countdown.event).slice(0, 60),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(opt(r.countdown?.date)) ? opt(r.countdown?.date) : "",
+      before: str(r.countdown?.before, D.countdown.before).slice(0, 120),
+      today: str(r.countdown?.today, D.countdown.today).slice(0, 120),
+      after: opt(r.countdown?.after).slice(0, 120),
+    },
     seals: {
       safeBrowsing: r.seals?.safeBrowsing === undefined ? D.seals.safeBrowsing : Boolean(r.seals.safeBrowsing),
       html: opt(r.seals?.html).slice(0, SCRIPT_MAX),
@@ -176,4 +206,26 @@ export function cssVars(s: SiteSettings): string {
 export function whatsappDigits(v: string): string {
   const d = v.replace(/\D/g, "");
   return d.length >= 10 && d.length <= 11 ? `55${d}` : d;
+}
+
+/** Texto do contador do topo (null = não mostrar). Datas no horário de Brasília. */
+export function countdownText(c: SiteSettings["countdown"], now = new Date()): string | null {
+  if (!c.enabled) return null;
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(now); // AAAA-MM-DD
+  let target = c.date;
+  if (!target) {
+    // Black Friday deste ano (última sexta de novembro); no ano seguinte, o contador volta sozinho
+    const d = new Date(Date.UTC(Number(today.slice(0, 4)), 10, 30));
+    while (d.getUTCDay() !== 5) d.setUTCDate(d.getUTCDate() - 1);
+    target = d.toISOString().slice(0, 10);
+  }
+  const days = Math.round((Date.parse(target) - Date.parse(today)) / 86_400_000);
+  const fill = (t: string) => {
+    let out = t.replace(/\{evento\}/g, c.event).replace(/\{dias\}/g, `${days} ${days === 1 ? "dia" : "dias"}`);
+    if (days === 1) out = out.replace(/\b(F|f)altam\b/, "$1alta"); // "Falta 1 dia"
+    return out.trim();
+  };
+  if (days > 0) return fill(c.before) || null;
+  if (days === 0) return fill(c.today) || null;
+  return c.after ? fill(c.after) : null;
 }

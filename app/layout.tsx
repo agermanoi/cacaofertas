@@ -1,8 +1,7 @@
 import { siteUrl } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import { blackFriday } from "@/lib/format";
-import { cssVars, getSettings } from "@/lib/settings";
+import { countdownText, cssVars, getSettings } from "@/lib/settings";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import "./globals.css";
 
@@ -41,7 +40,7 @@ function gptInit(g: { networkCode: string; parentAdUnit: string; childUnits: boo
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const s = await getSettings();
-  const { days } = blackFriday();
+  const countdown = countdownText(s.countdown);
   const year = new Date().getFullYear();
   return (
     <html lang="pt-BR">
@@ -73,9 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={s.logoUrl} alt={s.siteName} className="brand-logo" width={240} height={58} />
             </Link>
-            <p className="countdown">
-              {days === 0 ? "Hoje é Black Friday" : `Faltam ${days} ${days === 1 ? "dia" : "dias"} para a Black Friday`}
-            </p>
+            {countdown ? <p className="countdown">{countdown}</p> : null}
             <nav className="top-nav" aria-label="Principal">
               <Link href="/cupons" className="top-link">
                 Cupons
