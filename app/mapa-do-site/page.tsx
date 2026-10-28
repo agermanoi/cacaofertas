@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOverview } from "@/lib/data";
+import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
 
@@ -27,7 +28,9 @@ export default async function MapaDoSite() {
 
       {categories.map(([cat, list]) => (
         <section key={cat}>
-          <h2>{cat}</h2>
+          <h2>
+            <Link href={`/categoria/${categorySlug(cat)}`}>{cat}</Link>
+          </h2>
           <ul>
             {list
               .slice()

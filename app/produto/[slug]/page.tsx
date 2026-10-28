@@ -13,6 +13,7 @@ import { StoreLink } from "@/components/StoreLink";
 import { CouponCard } from "@/components/CouponCard";
 import { expiresLabel, getCouponsForStores } from "@/lib/coupons";
 import { getSpecs } from "@/lib/specs";
+import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
 
@@ -28,7 +29,6 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: `${p.name}: histórico de preço e ficha técnica`,
     description: `${p.name}${price}. Histórico de preço, média dos últimos 30 dias e ficha técnica.${sp ? ` ${sp.summary}` : ""}`.slice(0, 300),
     alternates: { canonical: `/produto/${p.slug}` },
-    openGraph: { images: p.image_url ? [p.image_url] : [] },
   };
 }
 
@@ -72,7 +72,8 @@ export default async function ProductPage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <nav className="crumbs" aria-label="Você está em">
-        <Link href="/">Todos os produtos</Link> <span aria-hidden="true">/</span> {p.category}
+        <Link href="/">Todos os produtos</Link> <span aria-hidden="true">/</span>{" "}
+        <Link href={`/categoria/${categorySlug(p.category)}`}>{p.category}</Link>
       </nav>
 
       <header className="product-head">

@@ -505,5 +505,1278 @@
     ],
     "min_price": 700,
     "popularity": 73
+  },
+  {
+    "slug": "iphone-17-pro-256gb",
+    "name": "iPhone 17 Pro 256GB",
+    "category": "Smartphones",
+    "query": "iphone 17 pro 256gb",
+    "must": [
+      "iphone 17 pro",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo",
+      "max"
+    ],
+    "min_price": 6000,
+    "popularity": 93
+  },
+  {
+    "slug": "iphone-17-pro-max-256gb",
+    "name": "iPhone 17 Pro Max 256GB",
+    "category": "Smartphones",
+    "query": "iphone 17 pro max 256gb",
+    "must": [
+      "iphone 17 pro max",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 7000,
+    "popularity": 89
+  },
+  {
+    "slug": "iphone-air-256gb",
+    "name": "iPhone Air 256GB",
+    "category": "Smartphones",
+    "query": "iphone air 256gb",
+    "must": [
+      "iphone air",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo",
+      "macbook"
+    ],
+    "min_price": 5000,
+    "popularity": 72
+  },
+  {
+    "slug": "iphone-16e-128gb",
+    "name": "iPhone 16e 128GB",
+    "category": "Smartphones",
+    "query": "iphone 16e 128gb",
+    "must": [
+      "iphone 16e",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 2500,
+    "popularity": 84
+  },
+  {
+    "slug": "iphone-15-128gb",
+    "name": "iPhone 15 128GB",
+    "category": "Smartphones",
+    "query": "iphone 15 128gb",
+    "must": [
+      "iphone 15",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo",
+      "pro",
+      "plus"
+    ],
+    "min_price": 2500,
+    "popularity": 88
+  },
+  {
+    "slug": "galaxy-s26-ultra-256gb",
+    "name": "Samsung Galaxy S26 Ultra 256GB",
+    "category": "Smartphones",
+    "query": "samsung galaxy s26 ultra 256gb",
+    "must": [
+      "galaxy s26 ultra",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 5000,
+    "popularity": 86
+  },
+  {
+    "slug": "galaxy-a36-256gb",
+    "name": "Samsung Galaxy A36 5G 256GB",
+    "category": "Smartphones",
+    "query": "samsung galaxy a36 5g 256gb",
+    "must": [
+      "galaxy a36",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 1300,
+    "popularity": 86
+  },
+  {
+    "slug": "galaxy-a26-256gb",
+    "name": "Samsung Galaxy A26 5G 256GB",
+    "category": "Smartphones",
+    "query": "samsung galaxy a26 5g 256gb",
+    "must": [
+      "galaxy a26",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 1000,
+    "popularity": 80
+  },
+  {
+    "slug": "galaxy-a16-128gb",
+    "name": "Samsung Galaxy A16 128GB",
+    "category": "Smartphones",
+    "query": "samsung galaxy a16 128gb",
+    "must": [
+      "galaxy a16",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 700,
+    "popularity": 85
+  },
+  {
+    "slug": "galaxy-a17-128gb",
+    "name": "Samsung Galaxy A17 5G 128GB",
+    "category": "Smartphones",
+    "query": "samsung galaxy a17 5g 128gb",
+    "must": [
+      "galaxy a17",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 700,
+    "popularity": 78
+  },
+  {
+    "slug": "moto-g86-256gb",
+    "name": "Motorola Moto G86 5G 256GB",
+    "category": "Smartphones",
+    "query": "motorola moto g86 5g 256gb",
+    "must": [
+      "g86",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo",
+      "power"
+    ],
+    "min_price": 1100,
+    "popularity": 82
+  },
+  {
+    "slug": "moto-g56-256gb",
+    "name": "Motorola Moto G56 5G 256GB",
+    "category": "Smartphones",
+    "query": "motorola moto g56 5g 256gb",
+    "must": [
+      "g56",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 800,
+    "popularity": 78
+  },
+  {
+    "slug": "moto-g05-128gb",
+    "name": "Motorola Moto G05 128GB",
+    "category": "Smartphones",
+    "query": "motorola moto g05 128gb",
+    "must": [
+      "g05",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 500,
+    "popularity": 75
+  },
+  {
+    "slug": "motorola-edge-60-256gb",
+    "name": "Motorola Edge 60 5G 256GB",
+    "category": "Smartphones",
+    "query": "motorola edge 60 256gb",
+    "must": [
+      "edge 60",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo",
+      "pro",
+      "fusion",
+      "neo"
+    ],
+    "min_price": 1500,
+    "popularity": 76
+  },
+  {
+    "slug": "poco-x7-pro-256gb",
+    "name": "Xiaomi Poco X7 Pro 256GB",
+    "category": "Smartphones",
+    "query": "xiaomi poco x7 pro 256gb",
+    "must": [
+      "poco x7 pro",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 1500,
+    "popularity": 79
+  },
+  {
+    "slug": "redmi-15c-256gb",
+    "name": "Xiaomi Redmi 15C 256GB",
+    "category": "Smartphones",
+    "query": "xiaomi redmi 15c 256gb",
+    "must": [
+      "redmi 15c",
+      "256"
+    ],
+    "exclude": [
+      "capa",
+      "capinha",
+      "pelicula",
+      "película",
+      "case",
+      "carregador",
+      "cabo",
+      "suporte",
+      "usado",
+      "vitrine",
+      "recondicionado",
+      "seminovo"
+    ],
+    "min_price": 600,
+    "popularity": 77
+  },
+  {
+    "slug": "smart-tv-samsung-55-crystal-u8000f",
+    "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000F",
+    "category": "TVs",
+    "query": "smart tv samsung 55 crystal uhd u8000f",
+    "must": [
+      "55",
+      "~u8000f"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa",
+      "miniled"
+    ],
+    "min_price": 2000,
+    "popularity": 93
+  },
+  {
+    "slug": "smart-tv-samsung-65-crystal-u8000f",
+    "name": "Smart TV Samsung 65\" Crystal UHD 4K U8000F",
+    "category": "TVs",
+    "query": "smart tv samsung 65 crystal uhd u8000f",
+    "must": [
+      "65",
+      "~u8000f"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa",
+      "miniled"
+    ],
+    "min_price": 2800,
+    "popularity": 85
+  },
+  {
+    "slug": "smart-tv-samsung-55-qled-q7f",
+    "name": "Smart TV Samsung 55\" QLED 4K Q7F",
+    "category": "TVs",
+    "query": "smart tv samsung 55 qled q7f",
+    "must": [
+      "55",
+      "~q7f"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 2300,
+    "popularity": 80
+  },
+  {
+    "slug": "smart-tv-lg-50-ut8050",
+    "name": "Smart TV LG 50\" 4K UHD UT8050",
+    "category": "TVs",
+    "query": "smart tv lg 50ut8050",
+    "must": [
+      "lg",
+      "50",
+      "~ut8050"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 1700,
+    "popularity": 84
+  },
+  {
+    "slug": "smart-tv-lg-55-ut8050",
+    "name": "Smart TV LG 55\" 4K UHD UT8050",
+    "category": "TVs",
+    "query": "smart tv lg 55ut8050",
+    "must": [
+      "lg",
+      "55",
+      "~ut8050"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 2000,
+    "popularity": 83
+  },
+  {
+    "slug": "smart-tv-lg-55-oled-c5",
+    "name": "Smart TV LG 55\" OLED evo C5",
+    "category": "TVs",
+    "query": "smart tv lg oled55c5",
+    "must": [
+      "lg",
+      "55",
+      "~oled55c5"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 4500,
+    "popularity": 74
+  },
+  {
+    "slug": "smart-tv-tcl-55-p7k",
+    "name": "Smart TV TCL 55\" QLED 4K P7K",
+    "category": "TVs",
+    "query": "smart tv tcl 55 p7k",
+    "must": [
+      "tcl",
+      "55",
+      "~p7k"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 1800,
+    "popularity": 78
+  },
+  {
+    "slug": "smart-tv-tcl-50-p755",
+    "name": "Smart TV TCL 50\" 4K P755",
+    "category": "TVs",
+    "query": "smart tv tcl 50 p755",
+    "must": [
+      "tcl",
+      "50",
+      "~p755"
+    ],
+    "exclude": [
+      "suporte",
+      "controle",
+      "usado",
+      "vitrine",
+      "capa"
+    ],
+    "min_price": 1500,
+    "popularity": 76
+  },
+  {
+    "slug": "notebook-acer-nitro-v15-rtx-4050",
+    "name": "Notebook Gamer Acer Nitro V15 RTX 4050",
+    "category": "Informática",
+    "query": "notebook acer nitro v15 rtx 4050",
+    "must": [
+      "acer",
+      "nitro v",
+      "~4050"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "mochila",
+      "carregador",
+      "fonte",
+      "teclado",
+      "usado",
+      "bateria",
+      "tela",
+      "película"
+    ],
+    "min_price": 3500,
+    "popularity": 85
+  },
+  {
+    "slug": "notebook-lenovo-loq-rtx-3050",
+    "name": "Notebook Gamer Lenovo LOQ RTX 3050",
+    "category": "Informática",
+    "query": "notebook lenovo loq rtx 3050",
+    "must": [
+      "lenovo",
+      "loq",
+      "~3050"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "mochila",
+      "carregador",
+      "fonte",
+      "teclado",
+      "usado",
+      "bateria",
+      "tela",
+      "película"
+    ],
+    "min_price": 3500,
+    "popularity": 82
+  },
+  {
+    "slug": "notebook-samsung-galaxy-book4-i5",
+    "name": "Notebook Samsung Galaxy Book4 Core i5",
+    "category": "Informática",
+    "query": "notebook samsung galaxy book4 i5",
+    "must": [
+      "galaxy book 4|galaxy book4",
+      "~i5"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "mochila",
+      "carregador",
+      "fonte",
+      "teclado",
+      "usado",
+      "bateria",
+      "tela",
+      "película",
+      "pro",
+      "360",
+      "ultra"
+    ],
+    "min_price": 2500,
+    "popularity": 78
+  },
+  {
+    "slug": "notebook-acer-aspire-go-15",
+    "name": "Notebook Acer Aspire Go 15",
+    "category": "Informática",
+    "query": "notebook acer aspire go 15",
+    "must": [
+      "acer",
+      "aspire go"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "mochila",
+      "carregador",
+      "fonte",
+      "teclado",
+      "usado",
+      "bateria",
+      "tela",
+      "película"
+    ],
+    "min_price": 1600,
+    "popularity": 76
+  },
+  {
+    "slug": "mouse-logitech-g203",
+    "name": "Mouse Gamer Logitech G203 Lightsync",
+    "category": "Informática",
+    "query": "mouse logitech g203 lightsync",
+    "must": [
+      "logitech",
+      "~g203"
+    ],
+    "exclude": [
+      "mousepad",
+      "usado",
+      "pé",
+      "feet",
+      "skate"
+    ],
+    "min_price": 80,
+    "popularity": 80
+  },
+  {
+    "slug": "ssd-kingston-nv3-1tb",
+    "name": "SSD Kingston NV3 1TB NVMe",
+    "category": "Informática",
+    "query": "ssd kingston nv3 1tb nvme",
+    "must": [
+      "kingston",
+      "nv3",
+      "1 tb|1tb"
+    ],
+    "exclude": [
+      "usado",
+      "dissipador",
+      "case",
+      "gaveta"
+    ],
+    "min_price": 250,
+    "popularity": 76
+  },
+  {
+    "slug": "headset-hyperx-cloud-stinger-2",
+    "name": "Headset Gamer HyperX Cloud Stinger 2",
+    "category": "Informática",
+    "query": "headset hyperx cloud stinger 2",
+    "must": [
+      "hyperx",
+      "stinger 2"
+    ],
+    "exclude": [
+      "usado",
+      "espuma",
+      "almofada",
+      "capa"
+    ],
+    "min_price": 150,
+    "popularity": 72
+  },
+  {
+    "slug": "impressora-epson-ecotank-l3250",
+    "name": "Impressora Multifuncional Epson EcoTank L3250",
+    "category": "Informática",
+    "query": "impressora epson ecotank l3250",
+    "must": [
+      "epson",
+      "~l3250"
+    ],
+    "exclude": [
+      "tinta",
+      "refil",
+      "usado",
+      "cabeça",
+      "cartucho"
+    ],
+    "min_price": 700,
+    "popularity": 79
+  },
+  {
+    "slug": "ipad-11-a16-128gb",
+    "name": "iPad 11\" (A16) 128GB Wi-Fi",
+    "category": "Tablets",
+    "query": "ipad a16 128gb wifi",
+    "must": [
+      "ipad",
+      "a16|11 geracao|11a geracao",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "teclado",
+      "caneta",
+      "air",
+      "pro",
+      "mini",
+      "cellular"
+    ],
+    "min_price": 2300,
+    "popularity": 88
+  },
+  {
+    "slug": "galaxy-tab-s10-fe-128gb",
+    "name": "Samsung Galaxy Tab S10 FE 128GB",
+    "category": "Tablets",
+    "query": "samsung galaxy tab s10 fe 128gb",
+    "must": [
+      "tab s10 fe",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "teclado",
+      "caneta",
+      "plus",
+      "+",
+      "ultra"
+    ],
+    "min_price": 2000,
+    "popularity": 78
+  },
+  {
+    "slug": "redmi-pad-se-128gb",
+    "name": "Xiaomi Redmi Pad SE 128GB",
+    "category": "Tablets",
+    "query": "xiaomi redmi pad se 128gb",
+    "must": [
+      "redmi pad se",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "teclado",
+      "caneta"
+    ],
+    "min_price": 700,
+    "popularity": 74
+  },
+  {
+    "slug": "playstation-5-pro",
+    "name": "PlayStation 5 Pro",
+    "category": "Games",
+    "query": "playstation 5 pro console",
+    "must": [
+      "playstation 5 pro|ps5 pro"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "skin",
+      "usado",
+      "adesivo",
+      "película",
+      "pelicula",
+      "controle avulso"
+    ],
+    "min_price": 4500,
+    "popularity": 90
+  },
+  {
+    "slug": "controle-dualsense",
+    "name": "Controle sem fio DualSense (PS5)",
+    "category": "Games",
+    "query": "controle dualsense ps5",
+    "must": [
+      "dualsense"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "skin",
+      "usado",
+      "adesivo",
+      "película",
+      "pelicula",
+      "edge",
+      "grip",
+      "gatilho"
+    ],
+    "min_price": 300,
+    "popularity": 87
+  },
+  {
+    "slug": "xbox-series-x",
+    "name": "Xbox Series X",
+    "category": "Games",
+    "query": "console xbox series x",
+    "must": [
+      "xbox series x"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "skin",
+      "usado",
+      "adesivo",
+      "película",
+      "pelicula",
+      "series s",
+      "controle avulso"
+    ],
+    "min_price": 3500,
+    "popularity": 82
+  },
+  {
+    "slug": "nintendo-switch-oled",
+    "name": "Nintendo Switch OLED",
+    "category": "Games",
+    "query": "nintendo switch oled console",
+    "must": [
+      "nintendo switch",
+      "oled"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "skin",
+      "usado",
+      "adesivo",
+      "película",
+      "pelicula",
+      "switch 2",
+      "joy con avulso"
+    ],
+    "min_price": 1800,
+    "popularity": 80
+  },
+  {
+    "slug": "meta-quest-3s-128gb",
+    "name": "Meta Quest 3S 128GB",
+    "category": "Games",
+    "query": "meta quest 3s 128gb",
+    "must": [
+      "quest 3s",
+      "128"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "skin",
+      "usado",
+      "adesivo",
+      "película",
+      "pelicula",
+      "alça",
+      "strap",
+      "lente"
+    ],
+    "min_price": 1800,
+    "popularity": 72
+  },
+  {
+    "slug": "airpods-4",
+    "name": "Apple AirPods 4",
+    "category": "Áudio e Wearables",
+    "query": "apple airpods 4",
+    "must": [
+      "airpods 4"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "pro"
+    ],
+    "min_price": 700,
+    "popularity": 86
+  },
+  {
+    "slug": "jbl-tune-520bt",
+    "name": "Fone JBL Tune 520BT",
+    "category": "Áudio e Wearables",
+    "query": "fone jbl tune 520bt",
+    "must": [
+      "jbl",
+      "520bt|tune 520"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "espuma",
+      "almofada"
+    ],
+    "min_price": 150,
+    "popularity": 84
+  },
+  {
+    "slug": "galaxy-buds-3-fe",
+    "name": "Samsung Galaxy Buds3 FE",
+    "category": "Áudio e Wearables",
+    "query": "samsung galaxy buds3 fe",
+    "must": [
+      "galaxy buds 3 fe|galaxy buds3 fe"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "pro"
+    ],
+    "min_price": 350,
+    "popularity": 76
+  },
+  {
+    "slug": "jbl-charge-6",
+    "name": "Caixa de Som JBL Charge 6",
+    "category": "Áudio e Wearables",
+    "query": "caixa de som jbl charge 6",
+    "must": [
+      "jbl",
+      "charge 6"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine"
+    ],
+    "min_price": 700,
+    "popularity": 78
+  },
+  {
+    "slug": "jbl-go-4",
+    "name": "Caixa de Som JBL Go 4",
+    "category": "Áudio e Wearables",
+    "query": "caixa de som jbl go 4",
+    "must": [
+      "jbl",
+      "go 4"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine"
+    ],
+    "min_price": 200,
+    "popularity": 80
+  },
+  {
+    "slug": "apple-watch-series-11",
+    "name": "Apple Watch Series 11 (GPS)",
+    "category": "Áudio e Wearables",
+    "query": "apple watch series 11 gps",
+    "must": [
+      "apple watch",
+      "series 11"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "ultra",
+      "se",
+      "cellular",
+      "celular"
+    ],
+    "min_price": 2800,
+    "popularity": 80
+  },
+  {
+    "slug": "redmi-watch-5-active",
+    "name": "Xiaomi Redmi Watch 5 Active",
+    "category": "Áudio e Wearables",
+    "query": "xiaomi redmi watch 5 active",
+    "must": [
+      "redmi watch 5 active"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine"
+    ],
+    "min_price": 150,
+    "popularity": 72
+  },
+  {
+    "slug": "fire-tv-stick-4k",
+    "name": "Amazon Fire TV Stick 4K",
+    "category": "Casa inteligente",
+    "query": "fire tv stick 4k",
+    "must": [
+      "fire tv stick 4k"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "usado",
+      "max",
+      "suporte"
+    ],
+    "min_price": 250,
+    "popularity": 85
+  },
+  {
+    "slug": "echo-pop",
+    "name": "Amazon Echo Pop",
+    "category": "Casa inteligente",
+    "query": "amazon echo pop",
+    "must": [
+      "echo pop"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "usado",
+      "suporte"
+    ],
+    "min_price": 200,
+    "popularity": 77
+  },
+  {
+    "slug": "echo-show-5",
+    "name": "Amazon Echo Show 5 (3ª geração)",
+    "category": "Casa inteligente",
+    "query": "amazon echo show 5 3 geracao",
+    "must": [
+      "echo show 5"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "usado",
+      "suporte",
+      "película"
+    ],
+    "min_price": 350,
+    "popularity": 74
+  },
+  {
+    "slug": "kindle-16gb",
+    "name": "Kindle 16GB (11ª geração)",
+    "category": "Casa inteligente",
+    "query": "kindle 16gb 11 geracao",
+    "must": [
+      "kindle",
+      "16"
+    ],
+    "exclude": [
+      "capa",
+      "case",
+      "pelicula",
+      "película",
+      "suporte",
+      "usado",
+      "refil",
+      "peça",
+      "pulseira",
+      "vitrine",
+      "paperwhite",
+      "colorsoft",
+      "scribe",
+      "kids"
+    ],
+    "min_price": 450,
+    "popularity": 80
+  },
+  {
+    "slug": "nespresso-vertuo-pop",
+    "name": "Cafeteira Nespresso Vertuo Pop",
+    "category": "Eletroportáteis",
+    "query": "cafeteira nespresso vertuo pop",
+    "must": [
+      "vertuo pop"
+    ],
+    "exclude": [
+      "capsula",
+      "cápsula",
+      "capsulas",
+      "cápsulas",
+      "usado",
+      "refil",
+      "peça"
+    ],
+    "min_price": 350,
+    "popularity": 76
+  },
+  {
+    "slug": "nespresso-essenza-mini",
+    "name": "Cafeteira Nespresso Essenza Mini",
+    "category": "Eletroportáteis",
+    "query": "cafeteira nespresso essenza mini",
+    "must": [
+      "essenza mini"
+    ],
+    "exclude": [
+      "capsula",
+      "cápsula",
+      "capsulas",
+      "cápsulas",
+      "usado",
+      "refil",
+      "peça"
+    ],
+    "min_price": 300,
+    "popularity": 75
+  },
+  {
+    "slug": "ar-condicionado-lg-dual-inverter-12000",
+    "name": "Ar-condicionado Split LG Dual Inverter 12.000 BTUs",
+    "category": "Eletrodomésticos",
+    "query": "ar condicionado split lg dual inverter 12000 btus",
+    "must": [
+      "lg",
+      "inverter",
+      "12000|12 000"
+    ],
+    "exclude": [
+      "controle",
+      "suporte",
+      "usado",
+      "capa",
+      "peça",
+      "filtro"
+    ],
+    "min_price": 1800,
+    "popularity": 78
   }
 ]

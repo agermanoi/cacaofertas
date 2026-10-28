@@ -6,6 +6,7 @@ import { PriceTag } from "@/components/PriceTag";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { AdSlot } from "@/components/AdSlot";
 import { getSettings } from "@/lib/settings";
+import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
 
@@ -67,6 +68,15 @@ export default async function Home() {
       </section>
 
       <div className="wrap">
+        {products.length ? (
+          <nav className="category-links" aria-label="Categorias">
+            {[...new Set(products.map((p) => p.category))].map((c) => (
+              <Link key={c} href={`/categoria/${categorySlug(c)}`}>
+                {c} <span>{products.filter((p) => p.category === c).length}</span>
+              </Link>
+            ))}
+          </nav>
+        ) : null}
         <AdSlot id="home-topo" format="leaderboard" />
         {items.length ? (
           <Catalog items={items} />

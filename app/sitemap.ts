@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/site";
+import { categorySlug } from "@/lib/categories";
 import type { MetadataRoute } from "next";
 import { getOverview } from "@/lib/data";
 
@@ -15,6 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/politica-de-privacidade`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/termos-de-uso`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/mapa-do-site`, changeFrequency: "weekly", priority: 0.3 },
+    ...[...new Set(products.map((p) => p.category))].map((c) => ({
+      url: `${base}/categoria/${categorySlug(c)}`,
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
     ...products.map((p) => ({
       url: `${base}/produto/${p.slug}`,
       lastModified: new Date(),

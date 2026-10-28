@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     title: { default: `${s.siteName}: histórico de preços para a Black Friday`, template: `%s | ${s.siteName}` },
     description: `${s.tagline} Histórico de preços e menor preço atual dos produtos mais buscados na Black Friday.`,
-    openGraph: { siteName: s.siteName, locale: "pt_BR", type: "website", images: [s.iconUrl] },
+    openGraph: { siteName: s.siteName, locale: "pt_BR", type: "website" },
     alternates: { canonical: "/" },
     // Ícone enviado pelo painel substitui o padrão (app/icon.png e app/apple-icon.png)
     ...(customIcon ? { icons: { icon: s.iconUrl, apple: s.iconUrl } } : {}),

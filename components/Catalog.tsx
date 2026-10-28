@@ -22,7 +22,15 @@ type Sort = "popular" | "drop" | "price";
 const brl = (v: number | null) => (v == null ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-export function Catalog({ items }: { items: CatalogItem[] }) {
+export function Catalog({
+  items,
+  title = "Os mais buscados",
+  showCategories = true,
+}: {
+  items: CatalogItem[];
+  title?: string;
+  showCategories?: boolean;
+}) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("Todos");
   const [sort, setSort] = useState<Sort>("popular");
@@ -43,7 +51,7 @@ export function Catalog({ items }: { items: CatalogItem[] }) {
   return (
     <section className="catalog" aria-labelledby="catalog-title">
       <div className="catalog-head">
-        <h2 id="catalog-title">Os mais buscados</h2>
+        <h2 id="catalog-title">{title}</h2>
         <div className="controls">
           <label className="search">
             <span className="sr-only">Buscar produto</span>
@@ -65,13 +73,15 @@ export function Catalog({ items }: { items: CatalogItem[] }) {
         </div>
       </div>
 
-      <nav className="chips" aria-label="Categorias">
-        {categories.map((c) => (
-          <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(c)}>
-            {c}
-          </button>
-        ))}
-      </nav>
+      {showCategories ? (
+        <nav className="chips" aria-label="Filtrar por categoria">
+          {categories.map((c) => (
+            <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(c)}>
+              {c}
+            </button>
+          ))}
+        </nav>
+      ) : null}
 
       {list.length ? (
         <ol className="rows">
