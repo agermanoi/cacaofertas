@@ -176,12 +176,12 @@
     "popularity": 80
   },
   {
-    "slug": "smart-tv-samsung-55-crystal-du8000",
-    "name": "Smart TV Samsung 55\" Crystal UHD 4K DU8000",
+    "slug": "smart-tv-samsung-50-crystal-du8000",
+    "name": "Smart TV Samsung 50\" Crystal UHD 4K DU8000",
     "category": "TVs",
-    "query": "smart tv samsung 55 crystal uhd 4k du8000",
+    "query": "smart tv samsung 50 crystal uhd 4k du8000",
     "must": [
-      "55",
+      "50",
       "~du8000"
     ],
     "exclude": [
@@ -189,20 +189,22 @@
       "controle",
       "capa",
       "usado",
-      "vitrine"
+      "vitrine",
+      "miniled",
+      "pantalla"
     ],
-    "min_price": 1700,
+    "min_price": 1500,
     "popularity": 96
   },
   {
-    "slug": "smart-tv-lg-50-4k-ur7800",
-    "name": "Smart TV LG 50\" 4K UHD UR7800",
+    "slug": "smart-tv-lg-43-4k-up751c",
+    "name": "Smart TV LG 43\" 4K UHD UP751C",
     "category": "TVs",
-    "query": "smart tv lg 50ur7800psb 4k",
+    "query": "smart tv lg 43up751c0sf 4k",
     "must": [
       "lg",
-      "50",
-      "~ur7800"
+      "43",
+      "~43up751"
     ],
     "exclude": [
       "suporte",
@@ -210,7 +212,7 @@
       "usado",
       "vitrine"
     ],
-    "min_price": 1500,
+    "min_price": 1100,
     "popularity": 88
   },
   {
@@ -233,15 +235,15 @@
     "popularity": 82
   },
   {
-    "slug": "notebook-lenovo-ideapad-slim-3i-i5-13420h",
-    "name": "Notebook Lenovo IdeaPad Slim 3i Core i5-13420H 16GB 512GB",
+    "slug": "notebook-lenovo-ideapad-slim-3i-i5-13420h-24gb",
+    "name": "Notebook Lenovo IdeaPad Slim 3i Core i5-13420H 24GB 512GB",
     "category": "Informática",
-    "query": "notebook lenovo ideapad slim 3i i5-13420h 16gb 512gb",
+    "query": "notebook lenovo ideapad slim 3i i5-13420h 24gb 512gb",
     "must": [
       "lenovo",
       "slim 3|slim 3i",
-      "~13420h|15.3",
-      "16",
+      "~13420h",
+      "24",
       "512"
     ],
     "exclude": [
@@ -252,11 +254,12 @@
       "fonte",
       "teclado",
       "usado",
-      "24 gb",
       "256 gb",
-      "256 ssd"
+      "256 ssd",
+      "16 gb",
+      "16gb"
     ],
-    "min_price": 2200,
+    "min_price": 2400,
     "popularity": 87
   },
   {
@@ -419,14 +422,14 @@
     "popularity": 79
   },
   {
-    "slug": "apple-watch-se-2-gps-40mm",
-    "name": "Apple Watch SE 2ª geração (GPS) 40mm",
+    "slug": "apple-watch-se-2-gps-44mm",
+    "name": "Apple Watch SE 2ª geração (GPS) 44mm",
     "category": "Áudio e Wearables",
-    "query": "apple watch se 2 geracao gps 40mm",
+    "query": "apple watch se 2 geracao gps 44mm",
     "must": [
       "apple watch",
       "se 2|2 geracao|2a geracao",
-      "40"
+      "44"
     ],
     "exclude": [
       "pulseira",
@@ -440,9 +443,9 @@
       "ultra",
       "cellular",
       "celular",
-      "44"
+      "40"
     ],
-    "min_price": 1100,
+    "min_price": 1200,
     "popularity": 77
   },
   {

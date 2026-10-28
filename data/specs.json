@@ -334,44 +334,6 @@
       ]
     ]
   },
-  "notebook-lenovo-ideapad-slim-3i-i5-13420h": {
-    "summary": "Notebook de uso geral com processador Intel de série H (mais forte que os U de entrada), tela 16:10 e 16 GB de RAM.",
-    "specs": [
-      [
-        "Processador",
-        "Intel Core i5-13420H (8 núcleos, 12 threads, até 4,6 GHz)"
-      ],
-      [
-        "Memória",
-        "16 GB DDR5"
-      ],
-      [
-        "Armazenamento",
-        "SSD de 512 GB NVMe PCIe 4.0"
-      ],
-      [
-        "Tela",
-        "15,3\" WUXGA (1920 × 1200), 16:10, 300 nits, antirreflexo"
-      ],
-      [
-        "Vídeo",
-        "Intel UHD Graphics (integrada)"
-      ],
-      [
-        "Portas",
-        "2 USB-A, 1 USB-C (carga e vídeo), HDMI, leitor SD e fone"
-      ],
-      [
-        "Bateria",
-        "50 Wh"
-      ],
-      [
-        "Peso",
-        "1,59 kg"
-      ]
-    ],
-    "note": "Há uma versão com 8 GB de RAM no mesmo modelo. Confira a memória no anúncio."
-  },
   "macbook-air-m4-13": {
     "summary": "MacBook Air de 2025 com chip M4, que já começa com 16 GB de RAM e suporta dois monitores externos com a tampa aberta.",
     "specs": [
@@ -698,106 +660,6 @@
       ]
     ]
   },
-  "apple-watch-se-2-gps-40mm": {
-    "summary": "Apple Watch de entrada lançado em 2022, ainda vendido no Brasil. Tem detecção de acidente e de queda, mas a tela não fica sempre ligada (isso só chegou no SE 3).",
-    "specs": [
-      [
-        "Tamanho",
-        "40 mm (também existe em 44 mm)"
-      ],
-      [
-        "Tela",
-        "OLED LTPO Retina, até 1.000 nits, sem modo sempre ativo"
-      ],
-      [
-        "Chip",
-        "S8, 32 GB de armazenamento"
-      ],
-      [
-        "Bateria",
-        "Até 18 h"
-      ],
-      [
-        "Saúde",
-        "Frequência cardíaca, notificações de ritmo irregular, ciclo"
-      ],
-      [
-        "Segurança",
-        "Detecção de acidente e de queda, SOS de emergência"
-      ],
-      [
-        "Resistência",
-        "À água até 50 m"
-      ]
-    ],
-    "note": "Confira no anúncio se é a 2ª geração (2022) e a versão só GPS de 40 mm."
-  },
-  "smart-tv-samsung-55-crystal-du8000": {
-    "summary": "Linha Crystal UHD 2024 da Samsung: TV 4K de entrada com Tizen, som de 20 W e modo de jogo automático. É a antecessora da U8000F.",
-    "specs": [
-      [
-        "Tela",
-        "55\" LED Crystal UHD 4K (3840 × 2160), 60 Hz"
-      ],
-      [
-        "HDR",
-        "HDR10"
-      ],
-      [
-        "Sistema",
-        "Tizen"
-      ],
-      [
-        "Áudio",
-        "20 W, 2 canais"
-      ],
-      [
-        "Conexões",
-        "3 HDMI"
-      ],
-      [
-        "Jogos",
-        "Modo de jogo automático (ALLM), HGiG e Gaming Hub"
-      ],
-      [
-        "Ano",
-        "2024"
-      ]
-    ]
-  },
-  "smart-tv-lg-50-4k-ur7800": {
-    "summary": "TV 4K de entrada da LG (linha 2023) com processador α5 de 6ª geração, webOS e comandos de voz com ThinQ AI.",
-    "specs": [
-      [
-        "Tela",
-        "50\" LED 4K UHD, 60 Hz"
-      ],
-      [
-        "Processador",
-        "α5 AI 4K Gen6"
-      ],
-      [
-        "HDR",
-        "HDR10 Pro e HLG"
-      ],
-      [
-        "Sistema",
-        "webOS 23"
-      ],
-      [
-        "Áudio",
-        "20 W, 2.0, AI Sound"
-      ],
-      [
-        "Conexões",
-        "3 HDMI (1 com eARC)"
-      ],
-      [
-        "Jogos",
-        "Game Optimizer, ALLM e HGiG"
-      ]
-    ]
-  },
   "cafeteira-dolce-gusto-genio-s-basic": {
     "summary": "Versão de entrada da Genio S: mesma pressão de 15 bar e função XL, sem os ajustes de temperatura da Genio S Plus.",
     "specs": [
@@ -826,5 +688,124 @@
         "110 V ou 220 V (não é bivolt)"
       ]
     ]
+  },
+  "smart-tv-samsung-50-crystal-du8000": {
+    "summary": "Linha Crystal UHD 2024 da Samsung: TV 4K de entrada com Tizen, som de 20 W e modo de jogo automático. É a antecessora da U8000F.",
+    "specs": [
+      [
+        "Tela",
+        "50\" LED Crystal UHD 4K (3840 × 2160), 60 Hz"
+      ],
+      [
+        "HDR",
+        "HDR10"
+      ],
+      [
+        "Sistema",
+        "Tizen"
+      ],
+      [
+        "Áudio",
+        "20 W, 2 canais"
+      ],
+      [
+        "Conexões",
+        "3 HDMI"
+      ],
+      [
+        "Jogos",
+        "Modo de jogo automático (ALLM), HGiG e Gaming Hub"
+      ],
+      [
+        "Ano",
+        "2024"
+      ]
+    ]
+  },
+  "smart-tv-lg-43-4k-up751c": {
+    "summary": "TV 4K compacta da LG com webOS e ThinQ AI, boa opção para quarto ou sala pequena.",
+    "specs": [
+      [
+        "Tela",
+        "43\" LED 4K UHD (3840 × 2160), 60 Hz"
+      ],
+      [
+        "HDR",
+        "HDR10 Pro e HLG"
+      ],
+      [
+        "Sistema",
+        "webOS com ThinQ AI"
+      ],
+      [
+        "Áudio",
+        "20 W, 2.0"
+      ]
+    ],
+    "note": "Linha mais antiga que as atuais da LG. Confira no anúncio o número de HDMI e a versão do sistema."
+  },
+  "notebook-lenovo-ideapad-slim-3i-i5-13420h-24gb": {
+    "summary": "Notebook de uso geral com processador Intel de série H (mais forte que os U de entrada), tela 16:10 e 24 GB de RAM, folga para muitas abas e programas abertos.",
+    "specs": [
+      [
+        "Processador",
+        "Intel Core i5-13420H (8 núcleos, 12 threads, até 4,6 GHz)"
+      ],
+      [
+        "Memória",
+        "24 GB DDR5"
+      ],
+      [
+        "Armazenamento",
+        "SSD de 512 GB NVMe"
+      ],
+      [
+        "Tela",
+        "15,3\" WUXGA (1920 × 1200), 16:10, antirreflexo"
+      ],
+      [
+        "Vídeo",
+        "Intel UHD Graphics (integrada)"
+      ],
+      [
+        "Portas",
+        "USB-A, USB-C (carga e vídeo), HDMI, leitor SD e fone"
+      ]
+    ],
+    "note": "O mesmo modelo existe com 8 GB e 16 GB de RAM. Confira a memória no anúncio."
+  },
+  "apple-watch-se-2-gps-44mm": {
+    "summary": "Apple Watch de entrada lançado em 2022, ainda vendido no Brasil. Tem detecção de acidente e de queda, mas a tela não fica sempre ligada (isso só chegou no SE 3).",
+    "specs": [
+      [
+        "Tamanho",
+        "44 mm (também existe em 40 mm)"
+      ],
+      [
+        "Tela",
+        "OLED LTPO Retina, até 1.000 nits, sem modo sempre ativo"
+      ],
+      [
+        "Chip",
+        "S8, 32 GB de armazenamento"
+      ],
+      [
+        "Bateria",
+        "Até 18 h"
+      ],
+      [
+        "Saúde",
+        "Frequência cardíaca, notificações de ritmo irregular, ciclo"
+      ],
+      [
+        "Segurança",
+        "Detecção de acidente e de queda, SOS de emergência"
+      ],
+      [
+        "Resistência",
+        "À água até 50 m"
+      ]
+    ],
+    "note": "Confira no anúncio se é a 2ª geração (2022) e a versão só GPS de 44 mm."
   }
 }
