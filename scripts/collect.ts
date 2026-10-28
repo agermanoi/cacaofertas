@@ -96,7 +96,18 @@ async function saveOffers(product: Product, offers: OfferInput[]): Promise<numbe
   return rows.length;
 }
 
+/** Chaves que podem ficar no banco (tabela kv) em vez de secret do GitHub. O secret, se existir, tem prioridade. */
+async function loadKeysFromDb() {
+  const map: Record<string, string> = { lomadee_api_key: "LOMADEE_API_KEY", serpapi_key: "SERPAPI_KEY" };
+  const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
+  for (const row of data || []) {
+    const env = map[row.key];
+    if (env && !process.env[env] && row.value) process.env[env] = String(row.value);
+  }
+}
+
 async function main() {
+  await loadKeysFromDb();
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
   const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
