@@ -196,6 +196,8 @@ export function mercadoLivre(db: SupabaseClient): Collector {
           });
         }
       }
+      // Diagnóstico: achou o modelo no catálogo, mas sem ninguém vendendo agora
+      if (hits.length && !out.length) rejected[product.slug] = hits.map((h) => `${h.name} (no catálogo, sem vendedor ativo)`);
       return out;
     },
   };

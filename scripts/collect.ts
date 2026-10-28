@@ -109,6 +109,7 @@ async function main() {
   const stats: Record<string, { ok: number; fail: number; offers: number }> = {};
   const errors: { source: string; slug: string; message: string }[] = [];
   const zeroOffers: string[] = [];
+  const notes: Record<string, string[]> = {};
   for (const c of collectors) stats[c.source] = { ok: 0, fail: 0, offers: 0 };
 
   for (const product of products) {
@@ -122,6 +123,12 @@ async function main() {
             ? raw.filter((o) => o.price >= Number(product.min_price || 0))
             : selectOffers(product, raw, PER_STORE);
         found.push(...picked);
+        if (raw.length && !picked.length) {
+          const ex = raw.slice().sort((a, b) => a.price - b.price)[0];
+          (notes[product.slug] ||= []).push(
+            `${c.source}: ${raw.length} oferta(s) recusada(s) pelo filtro, ex.: ${ex.title} · R$ ${ex.price.toFixed(2)}`
+          );
+        }
         stats[c.source].ok++;
         stats[c.source].offers += picked.length;
       } catch (e) {
@@ -150,7 +157,10 @@ async function main() {
     misses: Object.fromEntries(
       zeroOffers.map((slug) => [
         slug,
-        collectors.flatMap((c) => (c.rejected?.[slug] || []).map((name) => `${c.source}: ${name}`)).slice(0, 8),
+        [
+          ...(notes[slug] || []),
+          ...collectors.flatMap((c) => (c.rejected?.[slug] || []).map((name) => `${c.source}: ${name}`)),
+        ].slice(0, 8),
       ])
     ),
     errorCount: errors.length,
