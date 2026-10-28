@@ -10,6 +10,7 @@ type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: str
 
 const SOURCE: Record<string, string> = {
   mercadolivre: "Mercado Livre API",
+  amazon: "Amazon (SerpAPI)",
   serpapi: "Google Shopping",
   lomadee: "Lomadee",
   scraper: "Raspagem",

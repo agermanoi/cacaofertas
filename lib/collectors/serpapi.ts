@@ -28,7 +28,9 @@ export const serpSample: { store: string; host: string }[] = [];
 export function serpApi(): Collector {
   return {
     source: "serpapi",
-    enabled: () => Boolean(process.env.SERPAPI_KEY),
+    // Desligado por padrão: os links do Google Shopping levam ao Google, sem comissão.
+    // Para religar, defina SERPAPI_GOOGLE_SHOPPING=1 (secret no GitHub ou kv).
+    enabled: () => Boolean(process.env.SERPAPI_KEY) && process.env.SERPAPI_GOOGLE_SHOPPING === "1",
     async collect(product: Product): Promise<OfferInput[]> {
       const params = new URLSearchParams({
         engine: "google_shopping",

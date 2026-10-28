@@ -101,7 +101,7 @@ left join lateral (
   where o.product_id = p.id
     and o.active
     and o.last_price is not null
-    and o.last_seen_at > now() - interval '3 days'
+    and o.last_seen_at > now() - case when o.source = 'amazon' then interval '5 days' else interval '3 days' end
 ) cur on true
 left join lateral (
   select

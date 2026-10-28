@@ -13,6 +13,7 @@ import { mercadoLivre } from "../lib/collectors/mercadolivre";
 import { serpApi, serpApiSearchesLeft, serpSample } from "../lib/collectors/serpapi";
 import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
+import { amazonSerp } from "../lib/collectors/amazon";
 
 const db = adminClient();
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date()); // AAAA-MM-DD
@@ -102,6 +103,7 @@ async function loadKeysFromDb() {
     lomadee_api_key: "LOMADEE_API_KEY",
     serpapi_key: "SERPAPI_KEY",
     amazon_associate_tag: "AMAZON_ASSOCIATE_TAG",
+    serpapi_google_shopping: "SERPAPI_GOOGLE_SHOPPING",
   };
   const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
   for (const row of data || []) {
@@ -115,14 +117,17 @@ async function loadKeysFromDb() {
  * e escolhe os produtos consultados há mais tempo. Devolve os slugs liberados.
  */
 async function serpBudget(products: Product[], collectors: Collector[]): Promise<Set<string>> {
-  if (!collectors.some((c) => c.source === "serpapi")) return new Set();
+  const serpSources = collectors.filter((c) => SERP_SOURCES.has(c.source)).length;
+  if (!serpSources) return new Set();
   const left = await serpApiSearchesLeft();
   const now = new Date();
   const daysInMonth = new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 0).getDate();
   const runsLeft = Math.max(1, (daysInMonth - now.getUTCDate() + 1) * 2 - (now.getUTCHours() >= 12 ? 1 : 0));
   const reserve = Number(process.env.SERPAPI_RESERVE || 5); // sobra para testes manuais
   const budget =
-    left == null ? Number(process.env.SERPAPI_MAX_PER_RUN || 8) : Math.max(0, Math.floor((left - reserve) / runsLeft));
+    left == null
+      ? Number(process.env.SERPAPI_MAX_PER_RUN || 8)
+      : Math.max(0, Math.floor((left - reserve) / runsLeft / serpSources));
 
   const { data } = await db.from("kv").select("value").eq("key", "serpapi_seen").maybeSingle();
   let seen: Record<string, string> = {};
@@ -140,6 +145,8 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
   return new Set(pick.map((p) => p.slug));
 }
 let serpInfo: Record<string, unknown> | null = null;
+/** Fontes que gastam buscas da SerpAPI. */
+const SERP_SOURCES = new Set(["amazon", "serpapi"]);
 
 async function main() {
   await loadKeysFromDb();
@@ -155,7 +162,7 @@ async function main() {
   }
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
-  const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
+  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
 
   console.log(`Coleta ${today} · ${products.length} produtos · fontes: ${collectors.map((c) => c.source).join(", ")}`);
@@ -173,7 +180,7 @@ async function main() {
   for (const product of products) {
     const found: OfferInput[] = [];
     for (const c of collectors) {
-      if (c.source === "serpapi" && !serpAllowed.has(product.slug)) continue;
+      if (SERP_SOURCES.has(c.source) && !serpAllowed.has(product.slug)) continue;
       try {
         const raw = await c.collect(product);
         // URLs de raspagem são escolhidas a dedo: só checa faixa de preço
