@@ -2,8 +2,7 @@ import Link from "next/link";
 import { getDailySeries, getOverview } from "@/lib/data";
 import { verdictFor } from "@/lib/verdict";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
-import { PriceTag } from "@/components/PriceTag";
-import { VerdictBadge } from "@/components/VerdictBadge";
+import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
 import { AdSlot } from "@/components/AdSlot";
 import { getSettings } from "@/lib/settings";
 import { categorySlug } from "@/lib/categories";
@@ -22,11 +21,25 @@ export default async function Home() {
 
   const stores = new Set(products.map((p) => p.best_store).filter(Boolean)).size;
 
-  // Destaque: maior queda real (vs média de 30 dias). Sem histórico ainda, o mais buscado com preço.
+  // Carrossel: maiores quedas reais primeiro; depois os mais buscados com foto. Até 6 produtos.
   const real = items
     .filter((i) => ["record", "below"].includes(i.verdict.kind))
     .sort((a, b) => (b.verdict.vsAvg ?? 0) - (a.verdict.vsAvg ?? 0));
-  const featured = real[0] || items.find((i) => i.product.best_price != null) || null;
+  const popular = items
+    .filter((i) => i.product.best_price != null && !real.includes(i))
+    .sort((a, b) => Number(Boolean(b.product.image_url)) - Number(Boolean(a.product.image_url)) || b.product.popularity - a.product.popularity);
+  const slides: HeroSlide[] = [...real.slice(0, 4), ...popular]
+    .slice(0, 6)
+    .map((i) => ({
+      slug: i.product.slug,
+      name: i.product.name,
+      image: i.product.image_url,
+      price: Number(i.product.best_price),
+      listPrice: i.product.best_list_price != null ? Number(i.product.best_list_price) : null,
+      store: i.product.best_store,
+      kicker: real.includes(i) ? "Queda real hoje" : "Entre os mais buscados",
+      verdict: i.verdict,
+    }));
   const fakes = items.filter((i) => i.verdict.kind === "fake").length;
 
   return (
@@ -45,23 +58,12 @@ export default async function Home() {
             ) : null}
           </div>
 
-          {featured && featured.product.best_price != null ? (
-            <Link href={`/produto/${featured.product.slug}`} className="hero-deal">
-              <span className="hero-deal-kicker">
-                {real[0] ? "Maior queda real de hoje" : "O mais buscado agora"}
-              </span>
-              <span className="hero-deal-name">{featured.product.name}</span>
-              <PriceTag
-                price={Number(featured.product.best_price)}
-                store={featured.product.best_store}
-                size="lg"
-              />
-              <VerdictBadge verdict={featured.verdict} withDetail />
-            </Link>
+          {slides.length ? (
+            <HeroCarousel slides={slides} />
           ) : (
             <div className="hero-deal hero-deal-empty">
               <span className="hero-deal-name">A primeira coleta ainda não rodou.</span>
-              <p>Rode “npm run collect” ou dispare a ação “Coleta de preços” no GitHub para preencher o site.</p>
+              <p>Dispare a ação “Coleta de preços” no GitHub ou use “Coletar agora” no painel.</p>
             </div>
           )}
         </div>
