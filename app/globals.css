@@ -1169,6 +1169,24 @@ button.btn-ghost {
   }
 }
 
+.ml-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.steps {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 68ch;
+}
+.admin-section .form-actions form {
+  margin: 0;
+}
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 900px) {
   .hero-inner {

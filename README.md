@@ -41,7 +41,7 @@ npm run seed             # cadastra os 24 produtos de data/products.json
 
 | Fonte | O que precisa | Custo |
 |---|---|---|
-| **Mercado Livre** | App em developers.mercadolivre.com.br → `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `ML_REDIRECT_URI`. Depois `npm run ml:auth` (abre a URL) e `npm run ml:auth -- TG-codigo`. | Grátis |
+| **Mercado Livre** | App em developers.mercadolivre.com.br com Redirect URI `https://cacaofertas.com.br/admin/mercadolivre`. `ML_CLIENT_ID` e `ML_CLIENT_SECRET` na Vercel e no GitHub. Depois, no painel: **Mercado Livre → Conectar**. (`npm run ml:auth` continua como alternativa.) | Grátis |
 | **SerpAPI** | `SERPAPI_KEY` | ~720 buscas/mês com 24 produtos (plano pago) |
 | **Lomadee** | `LOMADEE_API_KEY` com escopos `products:read` e `shortener:write`. Links de afiliado são gerados automaticamente. | Grátis |
 | **Raspagem** | Coloque URLs de produto em `products.scrape_urls` (Table Editor do Supabase). Lê o JSON-LD das páginas. | Grátis |

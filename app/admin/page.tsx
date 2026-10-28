@@ -45,6 +45,9 @@ export default async function AdminHome({ searchParams }: Props) {
           <Link href="/admin/produtos/novo" className="btn">
             Novo produto
           </Link>
+          <Link href="/admin/mercadolivre" className="btn btn-ghost">
+            Mercado Livre
+          </Link>
           <form action={logout}>
             <button type="submit" className="btn btn-ghost">
               Sair
