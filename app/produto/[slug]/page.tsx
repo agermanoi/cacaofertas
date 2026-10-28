@@ -23,12 +23,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProductBySlug(slug);
   if (!p || !p.active) return { title: "Produto não encontrado" };
+  // Sem oferta no momento: a página continua acessível, mas fora do Google até voltar
+  const noIndex = p.best_price == null ? { robots: { index: false, follow: true } } : {};
   const price = p.best_price != null ? ` por ${money(Number(p.best_price))}` : "";
   const sp = getSpecs(p.slug, p.specs);
   return {
     title: `${p.name}: histórico de preço e ficha técnica`,
     description: `${p.name}${price}. Histórico de preço, média dos últimos 30 dias e ficha técnica.${sp ? ` ${sp.summary}` : ""}`.slice(0, 300),
     alternates: { canonical: `/produto/${p.slug}` },
+    ...noIndex,
   };
 }
 
@@ -36,6 +39,7 @@ export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
   const p = await getProductBySlug(slug);
   if (!p || !p.active) notFound(); // pausado no /admin = fora do site
+  if (p.best_price == null && p.min_all == null) notFound(); // nunca teve preço: ainda não entra no site
 
   const [series, stores, offers] = await Promise.all([
     getDailySeries([p.id], 90),

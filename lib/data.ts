@@ -12,13 +12,19 @@ function configured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
+/**
+ * Produtos visíveis no site: ativos E com preço encontrado nos últimos dias.
+ * Produto recém-cadastrado só aparece depois que a coleta acha o primeiro preço,
+ * e some das listas enquanto nenhuma loja tiver estoque.
+ */
 export async function getOverview(): Promise<ProductOverview[]> {
-  if (demo.enabled()) return demo.overview();
+  if (demo.enabled()) return demo.overview().filter((p) => p.best_price != null);
   if (!configured()) return [];
   const { data, error } = await publicClient()
     .from("product_overview")
     .select("*")
     .eq("active", true)
+    .not("best_price", "is", null)
     .order("popularity", { ascending: false });
   if (error) {
     console.error("[data] overview:", error.message);
