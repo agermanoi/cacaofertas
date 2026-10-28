@@ -16,6 +16,8 @@ export const metadata: Metadata = {
     "Histórico de preços e menor preço atual dos produtos mais buscados na Black Friday. Veja se o desconto é real antes de comprar.",
   openGraph: { siteName: SITE_NAME, locale: "pt_BR", type: "website" },
   alternates: { canonical: "/" },
+  // Validação de sites parceiros (gera <meta name="lomadee" content="...">)
+  verification: { other: { lomadee: process.env.NEXT_PUBLIC_LOMADEE_VERIFICATION || "2324685" } },
 };
 
 export const viewport: Viewport = { themeColor: "#14213D" };
