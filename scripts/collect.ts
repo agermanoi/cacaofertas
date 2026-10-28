@@ -97,12 +97,14 @@ async function saveOffers(product: Product, offers: OfferInput[]): Promise<numbe
 }
 
 async function main() {
-  const slugs = process.argv.slice(2);
+  // Aceita slugs separados por espaço ou vírgula
+  const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
   const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
 
   console.log(`Coleta ${today} · ${products.length} produtos · fontes: ${collectors.map((c) => c.source).join(", ")}`);
   if (!collectors.length) throw new Error("Nenhuma fonte configurada. Veja o .env.example.");
+  if (!products.length) throw new Error(`Nenhum produto ativo encontrado${slugs.length ? ` para: ${slugs.join(", ")}` : ""}.`);
 
   const stats: Record<string, { ok: number; fail: number; offers: number }> = {};
   const errors: { source: string; slug: string; message: string }[] = [];

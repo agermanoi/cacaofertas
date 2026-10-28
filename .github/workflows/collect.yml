@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       slugs:
-        description: "Slugs separados por espaço (vazio = todos)"
+        description: "Slugs separados por espaço ou vírgula (vazio = todos)"
         required: false
         default: ""
 
