@@ -10,7 +10,7 @@ import { adminClient } from "../lib/supabase";
 import { selectOffers } from "../lib/match";
 import type { Collector, OfferInput, Product } from "../lib/types";
 import { mercadoLivre } from "../lib/collectors/mercadolivre";
-import { serpApi } from "../lib/collectors/serpapi";
+import { serpApi, serpApiSearchesLeft, serpSample } from "../lib/collectors/serpapi";
 import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
 
@@ -110,6 +110,37 @@ async function loadKeysFromDb() {
   }
 }
 
+/**
+ * Divide o saldo mensal da SerpAPI entre as coletas que faltam no mês (2 por dia)
+ * e escolhe os produtos consultados há mais tempo. Devolve os slugs liberados.
+ */
+async function serpBudget(products: Product[], collectors: Collector[]): Promise<Set<string>> {
+  if (!collectors.some((c) => c.source === "serpapi")) return new Set();
+  const left = await serpApiSearchesLeft();
+  const now = new Date();
+  const daysInMonth = new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 0).getDate();
+  const runsLeft = Math.max(1, (daysInMonth - now.getUTCDate() + 1) * 2 - (now.getUTCHours() >= 12 ? 1 : 0));
+  const reserve = Number(process.env.SERPAPI_RESERVE || 5); // sobra para testes manuais
+  const budget =
+    left == null ? Number(process.env.SERPAPI_MAX_PER_RUN || 8) : Math.max(0, Math.floor((left - reserve) / runsLeft));
+
+  const { data } = await db.from("kv").select("value").eq("key", "serpapi_seen").maybeSingle();
+  let seen: Record<string, string> = {};
+  try {
+    seen = JSON.parse(data?.value || "{}");
+  } catch {}
+  const pick = products
+    .slice()
+    .sort((a, b) => (seen[a.slug] || "").localeCompare(seen[b.slug] || "") || b.popularity - a.popularity)
+    .slice(0, Math.min(budget, products.length));
+  for (const p of pick) seen[p.slug] = now.toISOString();
+  if (pick.length) await db.from("kv").upsert({ key: "serpapi_seen", value: JSON.stringify(seen), updated_at: now.toISOString() });
+  console.log(`SerpAPI: saldo ${left ?? "?"} · ${runsLeft} coletas no mês · ${pick.length} produtos nesta coleta`);
+  serpInfo = { left, runsLeft, budget, used: pick.length };
+  return new Set(pick.map((p) => p.slug));
+}
+let serpInfo: Record<string, unknown> | null = null;
+
 async function main() {
   await loadKeysFromDb();
   // Diagnóstico: quais lojas a conta Lomadee enxerga (só na coleta completa)
@@ -131,6 +162,8 @@ async function main() {
   if (!collectors.length) throw new Error("Nenhuma fonte configurada. Veja o .env.example.");
   if (!products.length) throw new Error(`Nenhum produto ativo encontrado${slugs.length ? ` para: ${slugs.join(", ")}` : ""}.`);
 
+  const serpAllowed = await serpBudget(products, collectors);
+
   const stats: Record<string, { ok: number; fail: number; offers: number }> = {};
   const errors: { source: string; slug: string; message: string }[] = [];
   const zeroOffers: string[] = [];
@@ -140,6 +173,7 @@ async function main() {
   for (const product of products) {
     const found: OfferInput[] = [];
     for (const c of collectors) {
+      if (c.source === "serpapi" && !serpAllowed.has(product.slug)) continue;
       try {
         const raw = await c.collect(product);
         // URLs de raspagem são escolhidas a dedo: só checa faixa de preço
@@ -189,6 +223,7 @@ async function main() {
       ])
     ),
     errorCount: errors.length,
+    serpapi: serpInfo ? { ...serpInfo, sample: serpSample.slice(0, 30) } : undefined,
   };
   await db.from("kv").upsert({ key: "last_collect", value: JSON.stringify(summary), updated_at: summary.at });
   // A raspagem sem URLs cadastradas sempre "dá certo"; ela não conta como fonte funcionando.
