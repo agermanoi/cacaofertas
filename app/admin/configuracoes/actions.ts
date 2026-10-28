@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
 import { ADMIN_COOKIE, verifySession } from "@/lib/admin-auth";
-import { DEFAULT_SETTINGS, mergeSettings, type SiteSettings } from "@/lib/settings";
+import { DEFAULT_SETTINGS, SCRIPT_MAX, mergeSettings, type SiteSettings } from "@/lib/settings";
 import { demo } from "@/lib/mock";
 
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -41,6 +41,7 @@ async function upload(file: File, kind: "logo" | "icone"): Promise<string> {
 }
 
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
+const raw = (f: FormData, k: string) => String(f.get(k) ?? "").replace(/\r\n/g, "\n").trim();
 
 export async function saveSettings(formData: FormData) {
   await requireAdmin();
@@ -56,6 +57,14 @@ export async function saveSettings(formData: FormData) {
   if (icon instanceof File && icon.size > 0) iconUrl = await upload(icon, "icone");
   if (formData.get("logo_reset") === "on") logoUrl = DEFAULT_SETTINGS.logoUrl;
   if (formData.get("icon_reset") === "on") iconUrl = DEFAULT_SETTINGS.iconUrl;
+
+  const ga = text(formData, "ga_id").toUpperCase();
+  if (ga && !/^G-[A-Z0-9]{4,20}$/.test(ga)) back({ erro: "O ID do Google Analytics deve ter o formato G-XXXXXXXXXX." });
+  const gtm = text(formData, "gtm_id").toUpperCase();
+  if (gtm && !/^GTM-[A-Z0-9]{4,12}$/.test(gtm)) back({ erro: "O ID do Tag Manager deve ter o formato GTM-XXXXXXX." });
+  for (const k of ["scripts_head", "scripts_bodyStart", "scripts_bodyEnd"]) {
+    if (raw(formData, k).length > SCRIPT_MAX) back({ erro: `Um dos campos de script passa de ${SCRIPT_MAX} caracteres.` });
+  }
 
   const email = text(formData, "contact_email");
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) back({ erro: "O e-mail de contato não parece válido." });
@@ -78,6 +87,15 @@ export async function saveSettings(formData: FormData) {
       email,
       whatsapp: text(formData, "contact_whatsapp"),
       instagram: text(formData, "contact_instagram").replace(/^@/, ""),
+    },
+    analytics: {
+      gaId: text(formData, "ga_id"),
+      gtmId: text(formData, "gtm_id"),
+    },
+    scripts: {
+      head: raw(formData, "scripts_head"),
+      bodyStart: raw(formData, "scripts_bodyStart"),
+      bodyEnd: raw(formData, "scripts_bodyEnd"),
     },
     legal: {
       ownerName: text(formData, "legal_ownerName"),

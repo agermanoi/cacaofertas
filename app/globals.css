@@ -1478,3 +1478,5 @@ button.btn-ghost {
 }
 .page-text.page-wide { max-width: 980px; }
 .contact-form .check input { margin-top: 4px; flex: none; }
+.admin-form textarea.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; }
+.injected { display: contents; }

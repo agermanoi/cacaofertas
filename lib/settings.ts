@@ -27,6 +27,17 @@ export interface SiteSettings {
     whatsapp: string;
     instagram: string;
   };
+  /** Google Analytics 4 (G-XXXX) e Google Tag Manager (GTM-XXXX). Vazio = desligado. */
+  analytics: {
+    gaId: string;
+    gtmId: string;
+  };
+  /** HTML livre inserido nas páginas públicas (pixels, verificações, chat etc.). */
+  scripts: {
+    head: string;
+    bodyStart: string;
+    bodyEnd: string;
+  };
   legal: {
     /** Nome do responsável pelo site (pessoa ou empresa) usado nas páginas legais. */
     ownerName: string;
@@ -47,8 +58,14 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     "Acompanhamos os produtos mais buscados da Black Friday duas vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”, também.",
   announcement: "",
   contact: { email: "", whatsapp: "", instagram: "" },
+  analytics: { gaId: "", gtmId: "" },
+  scripts: { head: "", bodyStart: "", bodyEnd: "" },
   legal: { ownerName: "", document: "", city: "" },
 };
+
+export const SCRIPT_MAX = 20000;
+const GA = /^G-[A-Z0-9]{4,20}$/;
+const GTM = /^GTM-[A-Z0-9]{4,12}$/;
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -74,6 +91,15 @@ export function mergeSettings(raw: unknown): SiteSettings {
     heroText: str(r.heroText, D.heroText),
     announcement: opt(r.announcement),
     contact: { email: opt(r.contact?.email), whatsapp: opt(r.contact?.whatsapp), instagram: opt(r.contact?.instagram) },
+    analytics: {
+      gaId: GA.test(opt(r.analytics?.gaId).toUpperCase()) ? opt(r.analytics?.gaId).toUpperCase() : "",
+      gtmId: GTM.test(opt(r.analytics?.gtmId).toUpperCase()) ? opt(r.analytics?.gtmId).toUpperCase() : "",
+    },
+    scripts: {
+      head: opt(r.scripts?.head).slice(0, SCRIPT_MAX),
+      bodyStart: opt(r.scripts?.bodyStart).slice(0, SCRIPT_MAX),
+      bodyEnd: opt(r.scripts?.bodyEnd).slice(0, SCRIPT_MAX),
+    },
     legal: { ownerName: opt(r.legal?.ownerName), document: opt(r.legal?.document), city: opt(r.legal?.city) },
   };
 }

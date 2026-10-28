@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { blackFriday } from "@/lib/format";
 import { cssVars, getSettings } from "@/lib/settings";
+import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -41,8 +42,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap"
         />
         <style dangerouslySetInnerHTML={{ __html: cssVars(s) }} />
+        <HeadInjections s={s} />
       </head>
       <body>
+        <BodyStartInjections s={s} />
         <a className="skip" href="#conteudo">
           Pular para o conteúdo
         </a>
@@ -88,6 +91,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </div>
         </footer>
+        <BodyEndInjections s={s} />
       </body>
     </html>
   );

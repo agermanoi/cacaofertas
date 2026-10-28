@@ -142,6 +142,48 @@ export default async function SettingsPage({ searchParams }: Props) {
           <p className="hint">Aparecem na página de Contato e nas páginas de privacidade e termos.</p>
         </fieldset>
 
+        <fieldset id="scripts">
+          <legend>Scripts e rastreamento</legend>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="ga_id">Google Analytics 4</label>
+              <input id="ga_id" name="ga_id" defaultValue={s.analytics.gaId} placeholder="G-XXXXXXXXXX" autoComplete="off" />
+              <p className="hint">Só o ID. O código do Google é inserido automaticamente.</p>
+            </div>
+            <div className="field">
+              <label htmlFor="gtm_id">Google Tag Manager (opcional)</label>
+              <input id="gtm_id" name="gtm_id" defaultValue={s.analytics.gtmId} placeholder="GTM-XXXXXXX" autoComplete="off" />
+              <p className="hint">Se o GA já estiver configurado dentro do GTM, deixe o campo do GA vazio para não contar em dobro.</p>
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="scripts_head">Códigos no &lt;head&gt;</label>
+            <textarea
+              id="scripts_head"
+              name="scripts_head"
+              rows={6}
+              className="code"
+              defaultValue={s.scripts.head}
+              spellCheck={false}
+              placeholder={'<meta name="google-site-verification" content="..." />\n<script async src="https://pagead2.googlesyndication.com/..."></script>'}
+            />
+            <p className="hint">Para Meta Pixel, AdSense, verificação do Search Console etc. Aceita &lt;script&gt;, &lt;meta&gt;, &lt;link&gt;, &lt;style&gt; e &lt;noscript&gt;.</p>
+          </div>
+          <div className="field">
+            <label htmlFor="scripts_bodyStart">Códigos no início do &lt;body&gt;</label>
+            <textarea id="scripts_bodyStart" name="scripts_bodyStart" rows={4} className="code" defaultValue={s.scripts.bodyStart} spellCheck={false} />
+          </div>
+          <div className="field">
+            <label htmlFor="scripts_bodyEnd">Códigos no rodapé (antes do &lt;/body&gt;)</label>
+            <textarea id="scripts_bodyEnd" name="scripts_bodyEnd" rows={4} className="code" defaultValue={s.scripts.bodyEnd} spellCheck={false} />
+            <p className="hint">Para widgets de chat e scripts que podem carregar por último.</p>
+          </div>
+          <p className="hint">
+            Cole só códigos de fontes confiáveis: eles rodam em todas as páginas. Um código com erro pode quebrar o visual ou
+            deixar o site lento. Se algo estranho acontecer, apague o campo e salve.
+          </p>
+        </fieldset>
+
         <fieldset>
           <legend>Dados do responsável</legend>
           <p className="hint">
