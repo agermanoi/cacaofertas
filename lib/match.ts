@@ -38,6 +38,12 @@ function hasTerm(title: string, term: string): boolean {
   });
 }
 
+/** Só as palavras obrigatórias e proibidas, sem olhar preço. */
+export function titleMatches(product: Product, rawTitle: string): boolean {
+  const title = norm(rawTitle);
+  return product.must.every((m) => hasTerm(title, m)) && !product.exclude.some((x) => hasTerm(title, x));
+}
+
 export function matchesProduct(product: Product, offer: OfferInput): boolean {
   const title = norm(offer.title);
   if (!offer.price || !Number.isFinite(offer.price)) return false;
