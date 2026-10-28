@@ -91,7 +91,7 @@
     "slug": "redmi-note-14-256gb",
     "name": "Xiaomi Redmi Note 14 (4G) 256GB",
     "category": "Smartphones",
-    "query": "redmi note 14 256gb",
+    "query": "xiaomi redmi note 14 4g 256gb",
     "must": [
       "redmi",
       "note",
@@ -136,7 +136,7 @@
     "slug": "nintendo-switch-2",
     "name": "Nintendo Switch 2",
     "category": "Games",
-    "query": "nintendo switch 2 console",
+    "query": "console nintendo switch 2 256gb",
     "must": [
       "switch 2"
     ],
@@ -179,9 +179,8 @@
     "slug": "smart-tv-samsung-55-crystal-u8000f",
     "name": "Smart TV Samsung 55\" Crystal UHD 4K U8000F",
     "category": "TVs",
-    "query": "smart tv samsung 55 crystal uhd u8000f",
+    "query": "55 crystal uhd u8000f 4k smart tv samsung",
     "must": [
-      "samsung",
       "55",
       "~u8000f"
     ],
@@ -199,7 +198,7 @@
     "slug": "smart-tv-lg-50-4k-ua8550",
     "name": "Smart TV LG 50\" 4K UHD UA8550",
     "category": "TVs",
-    "query": "smart tv lg 50 4k ua8550",
+    "query": "smart tv lg 50ua8550psa 4k",
     "must": [
       "lg",
       "50",
@@ -237,9 +236,10 @@
     "slug": "notebook-lenovo-ideapad-slim-3i-i5-13420h",
     "name": "Notebook Lenovo IdeaPad Slim 3i Core i5-13420H 16GB 512GB",
     "category": "Informática",
-    "query": "notebook lenovo ideapad slim 3i i5 13420h 16gb 512gb",
+    "query": "notebook lenovo ideapad slim 3i i5-13420h 16gb 512gb",
     "must": [
-      "ideapad",
+      "lenovo",
+      "slim 3|slim 3i",
       "~13420h",
       "16"
     ],
@@ -250,7 +250,10 @@
       "carregador",
       "fonte",
       "teclado",
-      "usado"
+      "usado",
+      "24 gb",
+      "256 gb",
+      "256 ssd"
     ],
     "min_price": 2200,
     "popularity": 87
@@ -280,7 +283,7 @@
     "slug": "monitor-lg-ultragear-27gs60f",
     "name": "Monitor Gamer LG UltraGear 27\" 27GS60F 180Hz",
     "category": "Informática",
-    "query": "monitor lg ultragear 27gs60f",
+    "query": "monitor gamer lg ultragear 27gs60f-b",
     "must": [
       "~27gs60f"
     ],
@@ -356,7 +359,7 @@
     "slug": "cafeteira-dolce-gusto-genio-s-plus",
     "name": "Cafeteira Dolce Gusto Genio S Plus",
     "category": "Eletroportáteis",
-    "query": "cafeteira dolce gusto genio s plus",
+    "query": "cafeteira dolce gusto genio s plus dgs2",
     "must": [
       "genio s",
       "plus"
@@ -414,7 +417,7 @@
     "slug": "apple-watch-se-3-gps",
     "name": "Apple Watch SE 3 (GPS)",
     "category": "Áudio e Wearables",
-    "query": "apple watch se 3 gps",
+    "query": "apple watch se 3 gps 40mm",
     "must": [
       "apple watch",
       "se 3"
@@ -435,7 +438,7 @@
     "slug": "galaxy-watch-8",
     "name": "Samsung Galaxy Watch 8",
     "category": "Áudio e Wearables",
-    "query": "galaxy watch 8",
+    "query": "samsung galaxy watch8 44mm smartwatch",
     "must": [
       "galaxy watch",
       "8"
@@ -473,7 +476,7 @@
     "slug": "kindle-paperwhite",
     "name": "Kindle Paperwhite 16 GB (12ª geração)",
     "category": "Casa inteligente",
-    "query": "kindle paperwhite 16gb 12 geração",
+    "query": "amazon kindle paperwhite 16gb 12 geracao",
     "must": [
       "paperwhite",
       "16"

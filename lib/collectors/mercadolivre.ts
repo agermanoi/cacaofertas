@@ -112,7 +112,7 @@ export function mercadoLivre(db: SupabaseClient): Collector {
     rejected,
     enabled: () => Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET),
     async collect(product: Product): Promise<OfferInput[]> {
-      const params = new URLSearchParams({ site_id: "MLB", status: "active", q: product.query, limit: "20" });
+      const params = new URLSearchParams({ site_id: "MLB", status: "active", q: product.query, limit: "50" });
       const search = await get<{ results?: CatalogHit[] }>(`/products/search?${params}`);
 
       // Só examina produtos de catálogo cujo nome passa nas palavras obrigatórias/proibidas
