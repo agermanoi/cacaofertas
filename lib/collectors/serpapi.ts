@@ -1,6 +1,6 @@
 import type { Collector, OfferInput, Product } from "../types";
 import { httpJson, parsePrice } from "../http";
-import { toAffiliate } from "../affiliate";
+import { isBlockedStore, normalizeStore, toAffiliate } from "../affiliate";
 
 /**
  * Google Shopping via SerpAPI — compara várias lojas numa consulta.
@@ -49,7 +49,9 @@ export function serpApi(): Collector {
           const price = r.extracted_price ?? parsePrice(r.price);
           const url: string | undefined = r.link || r.product_link;
           if (!price || !url) return null;
-          const store = String(r.source || "Loja").trim();
+          const rawStore = String(r.source || "Loja").trim();
+          if (isBlockedStore(rawStore) || /usado|seminovo|recondicionado|vitrine/i.test(String(r.second_hand_condition || r.condition || ""))) return null;
+          const store = normalizeStore(rawStore);
           if (serpSample.length < 30) {
             let host = "";
             try {

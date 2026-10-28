@@ -82,3 +82,37 @@ export function storeFromUrl(url: string): string {
     return "Loja";
   }
 }
+
+/**
+ * Lojas que não entram no comparador: usados/recondicionados, marketplaces
+ * estrangeiros e programas de pontos (preço não é em reais à vista).
+ */
+const BLOCKED_STORES = [
+  /enjoei/i, /\bolx\b/i, /trocafy/i, /usado/i, /troca ?game/i, /^ebay/i, /aliexpress/i,
+  /latam ?pass/i, /livelo/i, /smiles/i, /esfera/i, /recondicionad/i, /seminovo/i, /refurb/i,
+];
+
+export function isBlockedStore(name: string): boolean {
+  return BLOCKED_STORES.some((r) => r.test(name));
+}
+
+/** Unifica variações do nome da mesma loja ("Amazon.com.br - Seller" → "Amazon"). */
+const STORE_ALIASES: [RegExp, string][] = [
+  [/^amazon/i, "Amazon"],
+  [/^mercado ?livre|^mercadolivre/i, "Mercado Livre"],
+  [/^shopee/i, "Shopee"],
+  [/^magalu|^magazine ?luiza/i, "Magalu"],
+  [/^americanas/i, "Americanas"],
+  [/^ponto ?frio|^pontofrio|^ponto$/i, "Ponto"],
+  [/^casas ?bahia/i, "Casas Bahia"],
+  [/^kabum/i, "KaBuM!"],
+  [/^carrefour/i, "Carrefour"],
+  [/^extra(\.com)?/i, "Extra"],
+  [/^fast ?shop/i, "Fast Shop"],
+];
+
+export function normalizeStore(name: string): string {
+  const n = name.trim();
+  for (const [r, v] of STORE_ALIASES) if (r.test(n)) return v;
+  return n;
+}
