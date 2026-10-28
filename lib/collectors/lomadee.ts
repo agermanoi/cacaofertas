@@ -1,6 +1,7 @@
 import type { Collector, OfferInput, Product } from "../types";
 import { httpJson, http, sleep } from "../http";
 import { storeFromUrl } from "../affiliate";
+import { titleMatches } from "../match";
 
 /**
  * Lomadee (rede de afiliados) — catálogo de produtos das lojas parceiras.
@@ -13,37 +14,70 @@ import { storeFromUrl } from "../affiliate";
 const base = () => (process.env.LOMADEE_API_URL || "https://api.lomadee.com.br").replace(/\/$/, "");
 const headers = () => ({ "x-api-key": process.env.LOMADEE_API_KEY!, "content-type": "application/json" });
 
+/**
+ * A busca da Lomadee casa QUALQUER palavra ("smart tv lg 43" traz "Armário Atlanta Smart"),
+ * então buscamos primeiro pelo termo mais específico (código do modelo) e filtramos pelo título.
+ */
+export function lomadeeQueries(product: Pick<Product, "query" | "must">): string[] {
+  const must = product.must || [];
+  const codes = must.filter((t) => t.startsWith("~")).map((t) => t.split("|")[0].slice(1));
+  const words = must
+    .map((t) => t.split("|")[0])
+    .filter((t) => !t.startsWith("~") && !/^\d+$/.test(t.trim()))
+    .sort((a, b) => b.length - a.length);
+  const out = [...codes, words.slice(0, 2).join(" "), product.query];
+  return [...new Set(out.map((q) => q.trim()).filter((q) => q.length > 2))];
+}
+
 export function lomadee(): Collector {
+  const rejected: Record<string, string[]> = {};
   return {
     source: "lomadee",
+    rejected,
     enabled: () => Boolean(process.env.LOMADEE_API_KEY),
     async collect(product: Product): Promise<OfferInput[]> {
-      const params = new URLSearchParams({ search: product.query, limit: "50", isAvailable: "true" });
-      const min = Math.round(Number(product.min_price || 0) * 100);
-      const max = product.max_price ? Math.round(Number(product.max_price) * 100) : 100_000_000;
-      if (min > 0) params.set("price", `${min}:${max}`);
-
-      const json = await httpJson<{ data: any[] }>(`${base()}/affiliate/products?${params}`, { headers: headers() });
-      await sleep(1100); // respeita 60 req/min
-
       const out: OfferInput[] = [];
-      for (const p of json.data || []) {
-        const opt = (p.options || []).find((o: any) => o.available) || p.options?.[0];
-        const pricing = opt?.pricing?.[0];
-        if (!pricing?.price || !p.url) continue;
-        out.push({
-          source: "lomadee",
-          store: storeFromUrl(p.url),
-          externalId: `${p.organizationId}:${p.id}`,
-          title: String(opt?.name || p.name),
-          url: String(p.url),
-          affiliateUrl: null, // gerado sob demanda por lomadeeAffiliateLink()
-          imageUrl: opt?.images?.[0]?.url || p.images?.[0]?.url || null,
-          price: pricing.price / 100,
-          listPrice: pricing.listPrice ? pricing.listPrice / 100 : null,
-          meta: { organizationId: String(p.organizationId) },
-        });
+      const seen = new Set<string>();
+      const refused: string[] = [];
+      delete rejected[product.slug];
+
+      for (const q of lomadeeQueries(product)) {
+        const params = new URLSearchParams({ search: q, limit: "100", isAvailable: "true" });
+        const min = Math.round(Number(product.min_price || 0) * 100);
+        const max = product.max_price ? Math.round(Number(product.max_price) * 100) : 100_000_000;
+        if (min > 0) params.set("price", `${min}:${max}`);
+
+        const json = await httpJson<{ data: any[] }>(`${base()}/affiliate/products?${params}`, { headers: headers() });
+        await sleep(1100); // respeita 60 req/min
+
+        for (const p of json.data || []) {
+          const opt = (p.options || []).find((o: any) => o.available) || p.options?.[0];
+          const pricing = opt?.pricing?.[0];
+          const title = String(opt?.name || p.name || "");
+          if (!pricing?.price || !p.url || !title) continue;
+          const externalId = `${p.organizationId}:${p.id}`;
+          if (seen.has(externalId)) continue;
+          seen.add(externalId);
+          if (!titleMatches(product, title)) {
+            if (refused.length < 6) refused.push(`${title} (busca "${q}")`);
+            continue;
+          }
+          out.push({
+            source: "lomadee",
+            store: storeFromUrl(p.url),
+            externalId,
+            title,
+            url: String(p.url),
+            affiliateUrl: null, // gerado sob demanda por lomadeeAffiliateLink()
+            imageUrl: opt?.images?.[0]?.url || p.images?.[0]?.url || null,
+            price: pricing.price / 100,
+            listPrice: pricing.listPrice ? pricing.listPrice / 100 : null,
+            meta: { organizationId: String(p.organizationId) },
+          });
+        }
+        if (out.length) break;
       }
+      if (!out.length && refused.length) rejected[product.slug] = refused;
       return out;
     },
   };
