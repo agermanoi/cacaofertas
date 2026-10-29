@@ -20,9 +20,9 @@ const BUCKET = "brand";
 
 export interface SocialConfig {
   enabled: boolean;
-  /** auto = publica sozinho depois de cada coleta; approval = cria na fila e espera o "Publicar" no painel */
+  /** auto = publica sozinho nos horários; approval = cria na fila e espera o "Publicar" no painel */
   mode: "auto" | "approval";
-  /** posts por coleta (a coleta roda 2x por dia) */
+  /** produtos por horário de produto */
   perRun: number;
   instagram: boolean;
   facebook: boolean;
@@ -37,6 +37,13 @@ export interface SocialConfig {
   hashtags: string;
   /** linha extra no fim da legenda */
   footer: string;
+  /** horários (Brasília) dos posts de produtos */
+  productHours: number[];
+  /** posts de cupom nos horários em couponHours */
+  coupons: boolean;
+  couponHours: number[];
+  /** desconto mínimo do cupom: % (ou R$ ≥ 3× esse número quando o desconto é em reais) */
+  couponMinPct: number;
 }
 
 export const DEFAULT_SOCIAL: SocialConfig = {
@@ -51,7 +58,19 @@ export const DEFAULT_SOCIAL: SocialConfig = {
   fallback: true,
   hashtags: "#ofertas #promoção #descontos #blackfriday #achadinhos #cacaofertas",
   footer: "Preços mudam rápido: confira no site antes de comprar.",
+  productHours: [10, 20],
+  coupons: true,
+  couponHours: [12, 15, 18],
+  couponMinPct: 10,
 };
+
+/** "10, 20" → [10, 20] (horas válidas, sem repetir, em ordem). */
+export function parseHours(v: unknown, d: number[]): number[] {
+  const list = Array.isArray(v) ? v : typeof v === "string" ? v.split(/[^0-9]+/) : null;
+  if (!list) return d;
+  const out = [...new Set(list.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n >= 0 && n <= 23))].sort((a, b) => a - b);
+  return out.slice(0, 12);
+}
 
 export function parseSocial(raw: unknown): SocialConfig {
   let r: Partial<SocialConfig> = {};
@@ -78,6 +97,10 @@ export function parseSocial(raw: unknown): SocialConfig {
     fallback: bool(r.fallback, D.fallback),
     hashtags: typeof r.hashtags === "string" ? r.hashtags.trim().slice(0, 600) : D.hashtags,
     footer: typeof r.footer === "string" ? r.footer.trim().slice(0, 300) : D.footer,
+    productHours: r.productHours === undefined ? D.productHours : parseHours(r.productHours, D.productHours),
+    coupons: bool(r.coupons, D.coupons),
+    couponHours: r.couponHours === undefined ? D.couponHours : parseHours(r.couponHours, D.couponHours),
+    couponMinPct: num(r.couponMinPct, D.couponMinPct, 1, 90),
   };
 }
 
@@ -230,8 +253,10 @@ export async function pickCandidates(db: SupabaseClient, cfg: SocialConfig, limi
 /* ------------------------------------------------------------------- arte */
 
 /** Busca a arte PNG do site, converte para JPEG e guarda no Storage. Devolve a URL pública. */
-export async function renderToStorage(db: SupabaseClient, slug: string, format: "feed" | "story"): Promise<string> {
-  const src = `${siteUrl()}/social/${encodeURIComponent(slug)}/${format}?t=${Date.now()}`;
+export async function renderToStorage(db: SupabaseClient, slug: string, format: "feed" | "story", couponId?: string): Promise<string> {
+  const src = couponId
+    ? `${siteUrl()}/social/cupom/${couponId}/${format}?t=${Date.now()}`
+    : `${siteUrl()}/social/${encodeURIComponent(slug)}/${format}?t=${Date.now()}`;
   const res = await fetch(src, { cache: "no-store" });
   const type = res.headers.get("content-type") || "";
   if (!res.ok || !type.startsWith("image/png")) throw new Error(`Arte ${format} indisponível (${res.status} ${type}) em ${src}`);
@@ -252,7 +277,7 @@ export async function renderToStorage(db: SupabaseClient, slug: string, format: 
   const path = `social/${day}/${slug}-${format}-${Date.now().toString(36)}.jpg`;
   const { error } = await db.storage
     .from(BUCKET)
-    .upload(path, jpg, { contentType: "image/jpeg", upsert: false, cacheControl: "31536000" });
+    .upload(path, Buffer.from(jpg), { contentType: "image/jpeg", upsert: false, cacheControl: "31536000" });
   if (error) throw new Error(`Upload da arte: ${error.message}`);
   return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
@@ -387,4 +412,206 @@ export function atStore(store: string): string {
   if (/^casas\b/i.test(s)) return `nas ${s}`;
   if (/^(mercado|carrefour|extra|ponto|pão de açúcar|walmart|submarino|shoptime|kabum)/i.test(s)) return `no ${s}`;
   return `na ${s}`;
+}
+
+/* ---------------------------------------------------------------- cupons */
+
+export interface CouponRow {
+  id: string;
+  store: string;
+  title: string;
+  code: string | null;
+  discount: string | null;
+  expires_at: string | null;
+  highlight: boolean;
+}
+
+/** "26% OFF" → { pct: 26 }; "R$ 50 OFF" → { brl: 50 }. */
+export function parseDiscount(d: string | null): { pct?: number; brl?: number } {
+  if (!d) return {};
+  const pct = d.match(/(\d{1,2})\s*%/);
+  if (pct) return { pct: Number(pct[1]) };
+  const brl = d.match(/R\$\s*([\d.]+)(?:,\d+)?/i);
+  if (brl) return { brl: Number(brl[1].replace(/\./g, "")) };
+  return {};
+}
+
+/** Lojas com nome de verdade (a importação às vezes traz o título no lugar da loja). */
+function realStore(store: string): boolean {
+  return Boolean(store.trim()) && !/\b(off|desconto|frete|cupom|compra|pix|exclusivo|aqui)\b/i.test(store);
+}
+
+/** Validade em texto: "Válido até 31/10" (horário de Brasília). */
+export function validity(expires: string | null): string {
+  if (!expires) return "Por tempo limitado";
+  const d = new Date(expires);
+  const fmt = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" }).format(d);
+  const today = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" }).format(new Date());
+  return fmt === today ? "Válido só hoje" : `Válido até ${fmt}`;
+}
+
+/**
+ * Cupons para postar: com código, ainda valendo por pelo menos 6 h, desconto mínimo,
+ * sem repetir o cupom em 14 dias nem a loja em 3 dias. Destaques do painel primeiro,
+ * depois o maior desconto.
+ */
+export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit = 1): Promise<CouponRow[]> {
+  const soon = new Date(Date.now() + 6 * 3600_000).toISOString();
+  const { data } = await db
+    .from("coupons")
+    .select("id,store,title,code,discount,expires_at,highlight")
+    .eq("active", true)
+    .not("code", "is", null)
+    .or(`expires_at.is.null,expires_at.gt.${soon}`)
+    .limit(1000);
+  const { data: recent } = await db
+    .from("social_posts")
+    .select("coupon_id,slug,created_at")
+    .eq("kind", "coupon")
+    .gte("created_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
+    .in("status", ["queued", "publishing", "published"]);
+  const usedCoupons = new Set((recent || []).map((r) => r.coupon_id));
+  const storeCut = Date.now() - 3 * 86_400_000;
+  const usedStores = new Set((recent || []).filter((r) => new Date(r.created_at).getTime() > storeCut).map((r) => r.slug));
+
+  const score = (c: CouponRow) => {
+    const d = parseDiscount(c.discount);
+    const value = d.pct ?? (d.brl ? d.brl / 3 : 0);
+    return (c.highlight ? 1000 : 0) + value;
+  };
+  const ok = ((data || []) as CouponRow[]).filter((c) => {
+    if (!c.code || !realStore(c.store) || usedCoupons.has(c.id) || usedStores.has(couponSlug(c))) return false;
+    if (c.highlight) return true;
+    const d = parseDiscount(c.discount);
+    return (d.pct ?? 0) >= cfg.couponMinPct || (d.brl ?? 0) >= cfg.couponMinPct * 3;
+  });
+  ok.sort((a, b) => score(b) - score(a));
+  const out: CouponRow[] = [];
+  for (const c of ok) {
+    if (out.some((o) => couponSlug(o) === couponSlug(c))) continue;
+    out.push(c);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** Identificador da loja no histórico (para não repetir a loja em seguida). */
+export function couponSlug(c: { store: string }): string {
+  return `cupom-${c.store
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
+}
+
+export function couponCaptions(c: CouponRow, cfg: SocialConfig): { ig: string; fb: string } {
+  const host = siteUrl().replace(/^https?:\/\//, "");
+  const title = c.title.replace(/\s+/g, " ").trim();
+  const lines = [
+    `🎟️ Cupom ${c.store}${c.discount ? `: ${c.discount}` : ""}`,
+    title,
+    "",
+    `👉 Código: ${c.code}`,
+    `⏰ ${validity(c.expires_at)}`,
+  ];
+  const tags = [...new Set(`${cfg.hashtags} #cupom #cupomdedesconto ${hashtagOf(c.store)}`.split(/\s+/).filter((t) => /^#\S+$/.test(t)))]
+    .slice(0, 25)
+    .join(" ");
+  const compose = (link: string) => {
+    const parts = [lines.join("\n"), "", link, "Confira as regras na loja: alguns cupons valem só para a primeira compra ou produtos selecionados."];
+    if (tags) parts.push("", tags);
+    return parts.join("\n").trim();
+  };
+  return {
+    ig: compose(`🔗 Todos os cupons no link da bio → ${host}/cupons`).slice(0, 2200),
+    fb: compose(`🔗 Ir para a loja: ${siteUrl()}/c/${c.id}`).slice(0, 5000),
+  };
+}
+
+export async function queueCoupon(db: SupabaseClient, c: CouponRow, cfg: SocialConfig): Promise<number> {
+  const slug = couponSlug(c);
+  const feed = await renderToStorage(db, slug, "feed", c.id);
+  const story = cfg.story ? await renderToStorage(db, slug, "story", c.id) : null;
+  const { ig, fb } = couponCaptions(c, cfg);
+  const { data, error } = await db
+    .from("social_posts")
+    .insert({ kind: "coupon", coupon_id: c.id, slug, status: "queued", caption: ig, fb_caption: fb, feed_url: feed, story_url: story, reason: "coupon" })
+    .select("id")
+    .single();
+  if (error) throw new Error(`Fila: ${error.message}`);
+  return Number(data.id);
+}
+
+/* ------------------------------------------------------------- agendador */
+
+/** Hora e dia em Brasília. */
+export function brNow(d = new Date()): { hour: number; key: string } {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" })
+      .formatToParts(d)
+      .map((p) => [p.type, p.value])
+  );
+  return { hour: Number(parts.hour), key: `${parts.year}-${parts.month}-${parts.day}T${parts.hour}` };
+}
+
+export interface TickResult {
+  hour: number;
+  skipped?: string;
+  queued: string[];
+  published: string[];
+  errors: string[];
+}
+
+/**
+ * Chamado de hora em hora (pg_cron no Supabase). Nos horários de produto, posta as ofertas;
+ * nos de cupom, um cupom. Cada hora roda uma vez só, mesmo se chamado de novo.
+ * deadlineMs: para de começar posts novos depois desse tempo (limite da função na Vercel).
+ */
+export async function runTick(db: SupabaseClient, opts: { force?: "product" | "coupon"; deadlineMs?: number } = {}): Promise<TickResult> {
+  const start = Date.now();
+  const deadline = opts.deadlineMs ?? 40_000;
+  const cfg = await getSocialConfig(db);
+  const { hour, key } = brNow();
+  const res: TickResult = { hour, queued: [], published: [], errors: [] };
+
+  const doProducts = opts.force ? opts.force === "product" : cfg.productHours.includes(hour);
+  const doCoupons = opts.force ? opts.force === "coupon" : cfg.coupons && cfg.couponHours.includes(hour);
+  if (!opts.force && !cfg.enabled) return { ...res, skipped: "desligado" };
+  if (!doProducts && !doCoupons) return { ...res, skipped: "fora do horário" };
+
+  if (!opts.force) {
+    // trava da hora: só a primeira chamada passa
+    const { data: last } = await db.from("kv").select("value").eq("key", "social_tick").maybeSingle();
+    if (last?.value === key) return { ...res, skipped: "já rodou nesta hora" };
+    await db.from("kv").upsert({ key: "social_tick", value: key, updated_at: new Date().toISOString() });
+  }
+  const acc = await getMetaAccount(db);
+  if (!acc.pageToken) return { ...res, errors: ["Facebook/Instagram não conectados."] };
+
+  const jobs: { label: string; make: () => Promise<number> }[] = [];
+  if (doProducts) for (const c of await pickCandidates(db, cfg)) jobs.push({ label: c.p.slug, make: () => queuePost(db, c, cfg) });
+  if (doCoupons) for (const c of await pickCoupons(db, cfg, 1)) jobs.push({ label: `${couponSlug(c)} (${c.code})`, make: () => queueCoupon(db, c, cfg) });
+
+  for (const j of jobs) {
+    if (Date.now() - start > deadline) {
+      res.errors.push(`${j.label}: ficou para o próximo horário (tempo esgotado)`);
+      continue;
+    }
+    try {
+      const id = await j.make();
+      res.queued.push(j.label);
+      if (cfg.mode === "auto") {
+        const r = await publishPost(db, id, cfg);
+        if (r.ok) res.published.push(j.label);
+        if (r.error) res.errors.push(`${j.label}: ${r.error}`);
+      }
+    } catch (e) {
+      res.errors.push(`${j.label}: ${(e as Error).message}`);
+    }
+  }
+  await db
+    .from("kv")
+    .upsert({ key: "social_last_run", value: JSON.stringify({ at: new Date().toISOString(), mode: cfg.mode, ...res }), updated_at: new Date().toISOString() });
+  return res;
 }

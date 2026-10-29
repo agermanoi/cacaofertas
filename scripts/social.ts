@@ -3,6 +3,9 @@
  *
  *   npm run social                 escolhe as ofertas do momento (conforme o painel)
  *   npm run social -- iphone-15    força um produto (ignora "já postado")
+ *   npm run social -- cupom        posta o próximo cupom da vez
+ *
+ * No dia a dia quem chama é o agendador (/api/social/tick, de hora em hora pelo Supabase).
  *
  * Modo "aprovação": só cria na fila; o post sai quando você clica em Publicar no painel.
  * Modo "automático": cria e publica na hora.
@@ -11,7 +14,7 @@ import "dotenv/config";
 import { adminClient } from "../lib/supabase";
 import type { ProductOverview } from "../lib/types";
 import { verdictFor } from "../lib/verdict";
-import { getMetaAccount, getSocialConfig, pickCandidates, publishPost, queuePost, type Candidate } from "../lib/social";
+import { getMetaAccount, getSocialConfig, pickCandidates, publishPost, queuePost, runTick, type Candidate } from "../lib/social";
 
 const db = adminClient();
 
@@ -19,6 +22,11 @@ async function main() {
   const cfg = await getSocialConfig(db);
   const acc = await getMetaAccount(db);
   const slugs = process.argv.slice(2).flatMap((a) => a.split(",")).map((s) => s.trim()).filter(Boolean);
+  if (slugs[0] === "cupom" || slugs[0] === "produtos") {
+    const r = await runTick(db, { force: slugs[0] === "cupom" ? "coupon" : "product", deadlineMs: 300_000 });
+    console.log(JSON.stringify(r, null, 2));
+    return;
+  }
   const summary: Record<string, unknown> = { at: new Date().toISOString(), mode: cfg.mode, queued: [], published: [], errors: [] };
 
   if (!slugs.length && !cfg.enabled) {

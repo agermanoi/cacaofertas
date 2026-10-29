@@ -8,7 +8,7 @@ import { ADMIN_COOKIE, verifySession } from "@/lib/admin-auth";
 import { demo } from "@/lib/mock";
 import { verdictFor } from "@/lib/verdict";
 import type { ProductOverview } from "@/lib/types";
-import { getSocialConfig, parseSocial, pickCandidates, publishPost, queuePost } from "@/lib/social";
+import { getSocialConfig, parseSocial, pickCandidates, pickCoupons, publishPost, queueCoupon, queuePost } from "@/lib/social";
 
 function back(msg: { ok?: string; erro?: string }): never {
   redirect(`/admin/social?${new URLSearchParams(msg as Record<string, string>)}`);
@@ -37,6 +37,10 @@ export async function saveSocial(formData: FormData) {
     fallback: on(formData, "fallback"),
     hashtags: text(formData, "hashtags"),
     footer: text(formData, "footer"),
+    productHours: text(formData, "productHours"),
+    coupons: on(formData, "coupons"),
+    couponHours: text(formData, "couponHours"),
+    couponMinPct: Number(text(formData, "couponMinPct")),
   });
   const { error } = await adminClient()
     .from("kv")
@@ -55,6 +59,24 @@ export async function createPost(formData: FormData) {
   const now = on(formData, "now");
 
   let list;
+  if (slug === "__cupom") {
+    const coupons = await pickCoupons(db, cfg, 1);
+    if (!coupons.length) back({ erro: "Nenhum cupom novo para postar agora (os bons já foram postados nos últimos dias)." });
+    let cid: number;
+    try {
+      cid = await queueCoupon(db, coupons[0], cfg);
+    } catch (e) {
+      back({ erro: `Não foi possível gerar a arte do cupom: ${(e as Error).message}` });
+    }
+    if (now) {
+      const r = await publishPost(db, cid, cfg);
+      revalidatePath("/admin/social");
+      if (!r.ok) back({ erro: `Não publicou: ${r.error}` });
+      back({ ok: r.error ? `Cupom publicado com avisos: ${r.error}` : `Cupom ${coupons[0].store} publicado!` });
+    }
+    revalidatePath("/admin/social");
+    back({ ok: `Cupom ${coupons[0].store} criado na fila.` });
+  }
   if (slug) {
     const { data } = await db.from("product_overview").select("*").eq("slug", slug).not("best_price", "is", null).maybeSingle();
     if (!data) back({ erro: "Produto sem preço no momento." });

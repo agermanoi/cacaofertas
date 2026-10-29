@@ -234,3 +234,8 @@ alter table login_attempts enable row level security;
 -- views leem com a permissão de quem consulta (anon só vê o que as policies liberam)
 alter view product_overview set (security_invoker = on);
 alter view product_daily set (security_invoker = on);
+
+-- Posts de cupom
+alter table social_posts add column if not exists kind text not null default 'product' check (kind in ('product','coupon'));
+alter table social_posts add column if not exists coupon_id uuid references coupons(id) on delete set null;
+-- Agendador: pg_cron chama /api/social/tick de hora em hora (ver migração social_cron)

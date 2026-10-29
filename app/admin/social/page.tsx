@@ -27,7 +27,7 @@ type Post = {
 
 const when = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) : "";
-const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado" };
+const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado", coupon: "Cupom" };
 const STATUS: Record<string, string> = {
   queued: "Na fila",
   publishing: "Publicando…",
@@ -107,7 +107,7 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
         <legend>Publicação automática</legend>
         <label className="check">
           <input type="checkbox" name="enabled" defaultChecked={cfg.enabled} />
-          <span>Ligado: preparar posts depois de cada coleta (9h17 e 21h17)</span>
+          <span>Ligado: postar nos horários abaixo</span>
         </label>
         <div className="field-row">
           <div className="field">
@@ -118,9 +118,20 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
             </select>
           </div>
           <div className="field">
-            <label htmlFor="perRun">Posts por coleta</label>
+            <label htmlFor="perRun">Produtos por horário</label>
             <input id="perRun" name="perRun" type="number" min={1} max={5} defaultValue={cfg.perRun} />
-            <p className="hint">2 por coleta = até 4 por dia.</p>
+          </div>
+        </div>
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="productHours">Horários dos produtos</label>
+            <input id="productHours" name="productHours" defaultValue={cfg.productHours.join(", ")} placeholder="10, 20" />
+            <p className="hint">Horas cheias, horário de Brasília, separadas por vírgula. A coleta de preços roda às 9h e às 21h.</p>
+          </div>
+          <div className="field">
+            <label htmlFor="couponHours">Horários dos cupons (1 cupom por horário)</label>
+            <input id="couponHours" name="couponHours" defaultValue={cfg.couponHours.join(", ")} placeholder="12, 15, 18" />
+            <p className="hint">O post sai nos primeiros minutos da hora.</p>
           </div>
         </div>
         <div className="social-checks">
@@ -156,6 +167,17 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
           <input type="checkbox" name="fallback" defaultChecked={cfg.fallback} />
           <span>Sem queda real no momento, postar os mais buscados com o menor preço do dia</span>
         </label>
+        <label className="check">
+          <input type="checkbox" name="coupons" defaultChecked={cfg.coupons} />
+          <span>Postar cupons (com código, valendo por mais 6 h, sem repetir o cupom em 14 dias nem a loja em 3)</span>
+        </label>
+        <div className="field">
+          <label htmlFor="couponMinPct">Desconto mínimo do cupom (%)</label>
+          <input id="couponMinPct" name="couponMinPct" type="number" min={1} max={90} defaultValue={cfg.couponMinPct} />
+          <p className="hint">
+            Cupom em reais conta a partir de 3× esse valor (10% ⇒ R$ 30 OFF). Cupom marcado como destaque no painel sempre pode entrar.
+          </p>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -255,6 +277,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
             <label htmlFor="slug">Produto</label>
             <select id="slug" name="slug" defaultValue="" className="social-select">
               <option value="">Próxima oferta da vez (escolha automática)</option>
+              <option value="__cupom">Próximo cupom da vez (escolha automática)</option>
               {products.map((p) => (
                 <option key={p.slug} value={p.slug}>
                   {p.name} · {Number(p.best_price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
@@ -307,7 +330,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                   <img src={p.feed_url} alt="" loading="lazy" width={72} height={90} />
                 ) : null}
                 <span>
-                  <strong>{p.caption.split("\n")[1] || p.slug}</strong>
+                  <strong>{p.reason === "coupon" ? p.caption.split("\n")[0].replace(/^🎟️\s*/, "") : p.caption.split("\n")[1] || p.slug}</strong>
                   <span className="social-meta">
                     {when(p.published_at)}
                     {p.ig_permalink ? (
