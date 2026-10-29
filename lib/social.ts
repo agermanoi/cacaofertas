@@ -144,7 +144,7 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig): { ig: stri
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
   const host = siteUrl().replace(/^https?:\/\//, "");
   const lines: string[] = [headline(v), p.name, ""];
-  lines.push(`💰 ${brl(price)}${p.best_store ? ` na ${p.best_store}` : ""}`);
+  lines.push(`💰 ${brl(price)}${p.best_store ? ` ${atStore(p.best_store)}` : ""}`);
   if (list && list > price * 1.02 && v.kind !== "fake") {
     lines.push(`De ${brl(list)} (−${Math.round((1 - price / list) * 100)}%)`);
   }
@@ -213,7 +213,18 @@ export async function pickCandidates(db: SupabaseClient, cfg: SocialConfig, limi
   const popular: Candidate[] = all
     .filter((c) => !real.some((r) => r.p.id === c.p.id) && ["normal", "learning"].includes(c.v.kind))
     .map((c) => ({ ...c, reason: "popular" as const }));
-  return [...real, ...popular].slice(0, limit);
+  // varia a categoria: o mais buscado de cada uma primeiro, depois o resto
+  const seen = new Set(real.map((r) => r.p.category));
+  const firsts: Candidate[] = [];
+  const others: Candidate[] = [];
+  for (const c of popular) {
+    if (seen.has(c.p.category)) others.push(c);
+    else {
+      seen.add(c.p.category);
+      firsts.push(c);
+    }
+  }
+  return [...real, ...firsts, ...others].slice(0, limit);
 }
 
 /* ------------------------------------------------------------------- arte */
@@ -368,4 +379,12 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
     })
     .eq("id", id);
   return { ok: any, error: errors.join(" | ") || undefined };
+}
+
+/** "na Amazon", "no Mercado Livre", "nas Casas Bahia". */
+export function atStore(store: string): string {
+  const s = store.trim();
+  if (/^casas\b/i.test(s)) return `nas ${s}`;
+  if (/^(mercado|carrefour|extra|ponto|pão de açúcar|walmart|submarino|shoptime|kabum)/i.test(s)) return `no ${s}`;
+  return `na ${s}`;
 }

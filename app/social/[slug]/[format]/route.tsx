@@ -3,6 +3,7 @@ import { getProductBySlug } from "@/lib/data";
 import { verdictFor } from "@/lib/verdict";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
+import { atStore } from "@/lib/social";
 
 /**
  * Arte dos posts do Instagram/Facebook.
@@ -132,7 +133,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             ) : null}
           </div>
           <div style={{ display: "flex", fontSize: 32, fontWeight: 700, color: "#3B4553", marginTop: 14 }}>
-            {p.best_store ? `na ${p.best_store}` : "menor preço entre as lojas"}
+            {p.best_store ? atStore(p.best_store) : "menor preço entre as lojas"}
             {good && v.detail ? ` · ${v.detail.replace(/\.$/, "")}` : ""}
           </div>
         </div>
