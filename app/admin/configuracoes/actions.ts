@@ -91,7 +91,8 @@ export async function saveSettings(formData: FormData) {
     contact: {
       email,
       whatsapp: text(formData, "contact_whatsapp"),
-      instagram: text(formData, "contact_instagram").replace(/^@/, ""),
+      instagram: text(formData, "contact_instagram"),
+      facebook: text(formData, "contact_facebook"),
     },
     analytics: {
       gaId: text(formData, "ga_id"),

@@ -175,11 +175,17 @@ export default async function SettingsPage({ searchParams }: Props) {
               <input id="contact_whatsapp" name="contact_whatsapp" defaultValue={s.contact.whatsapp} placeholder="(11) 99999-9999" />
             </div>
           </div>
-          <div className="field">
-            <label htmlFor="contact_instagram">Instagram (opcional)</label>
-            <input id="contact_instagram" name="contact_instagram" defaultValue={s.contact.instagram} placeholder="cacaofertas" />
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="contact_instagram">Instagram (opcional)</label>
+              <input id="contact_instagram" name="contact_instagram" defaultValue={s.contact.instagram} placeholder="cacaofertas.com.br" />
+            </div>
+            <div className="field">
+              <label htmlFor="contact_facebook">Facebook (opcional)</label>
+              <input id="contact_facebook" name="contact_facebook" defaultValue={s.contact.facebook} placeholder="cacaofertas.com.br" />
+            </div>
           </div>
-          <p className="hint">Aparecem na página de Contato e nas páginas de privacidade e termos.</p>
+          <p className="hint">Só o usuário ou o link do perfil. Aparecem no rodapé, na página de Contato e para o Google como perfis oficiais do site.</p>
         </fieldset>
 
         <fieldset id="scripts">

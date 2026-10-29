@@ -26,6 +26,8 @@ export interface SiteSettings {
     email: string;
     whatsapp: string;
     instagram: string;
+    /** Endereço da página no Facebook (só o nome de usuário, ex.: cacaofertas.com.br) */
+    facebook: string;
   };
   /** Google Analytics 4 (G-XXXX) e Google Tag Manager (GTM-XXXX). Vazio = desligado. */
   analytics: {
@@ -93,7 +95,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroText:
     "Acompanhamos os produtos mais buscados da Black Friday duas vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”, também.",
   announcement: "",
-  contact: { email: "", whatsapp: "", instagram: "" },
+  contact: { email: "", whatsapp: "", instagram: "", facebook: "" },
   analytics: { gaId: "", gtmId: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
@@ -117,6 +119,15 @@ const GTM = /^GTM-[A-Z0-9]{4,12}$/;
 const HEX = /^#[0-9a-f]{6}$/i;
 
 /** Junta o que veio do banco com os padrões, descartando valores inválidos. */
+/** Aceita "@usuario", "usuario" ou a URL do perfil e guarda só o usuário. */
+function handle(v: unknown, host: string): string {
+  if (typeof v !== "string") return "";
+  let t = v.trim();
+  const m = t.match(new RegExp(`${host.replace(".", "\\.")}/([^/?#]+)`, "i"));
+  if (m) t = m[1];
+  return t.replace(/^@/, "").replace(/[^A-Za-z0-9._-]/g, "").slice(0, 60);
+}
+
 export function mergeSettings(raw: unknown): SiteSettings {
   const r = (raw && typeof raw === "object" ? raw : {}) as Partial<SiteSettings>;
   const str = (v: unknown, d: string) => (typeof v === "string" && v.trim() ? v.trim() : d);
@@ -137,7 +148,12 @@ export function mergeSettings(raw: unknown): SiteSettings {
     heroTitle: str(r.heroTitle, D.heroTitle),
     heroText: str(r.heroText, D.heroText),
     announcement: opt(r.announcement),
-    contact: { email: opt(r.contact?.email), whatsapp: opt(r.contact?.whatsapp), instagram: opt(r.contact?.instagram) },
+    contact: {
+      email: opt(r.contact?.email),
+      whatsapp: opt(r.contact?.whatsapp),
+      instagram: handle(r.contact?.instagram, "instagram.com"),
+      facebook: handle(r.contact?.facebook, "facebook.com"),
+    },
     analytics: {
       gaId: GA.test(opt(r.analytics?.gaId).toUpperCase()) ? opt(r.analytics?.gaId).toUpperCase() : "",
       gtmId: GTM.test(opt(r.analytics?.gtmId).toUpperCase()) ? opt(r.analytics?.gtmId).toUpperCase() : "",
