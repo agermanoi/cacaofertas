@@ -222,3 +222,15 @@ create index if not exists social_posts_product_idx on social_posts(product_id, 
 create index if not exists social_posts_status_idx on social_posts(status, created_at desc);
 alter table social_posts enable row level security;
 -- sem policy: só o service role (painel e coleta) lê e escreve
+
+-- ---------- Tentativas de login erradas (bloqueio por IP) ----------
+create table if not exists login_attempts (
+  id bigint generated always as identity primary key,
+  ip text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists login_attempts_ip_idx on login_attempts(ip, created_at desc);
+alter table login_attempts enable row level security;
+-- views leem com a permissão de quem consulta (anon só vê o que as policies liberam)
+alter view product_overview set (security_invoker = on);
+alter view product_daily set (security_invoker = on);

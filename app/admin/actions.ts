@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
@@ -31,12 +31,36 @@ function refreshSite(...slugs: (string | null | undefined)[]) {
 
 /* ---------------- Sessão ---------------- */
 
+const MAX_FAILS = 8; // tentativas erradas por IP
+const WINDOW_MIN = 15; // na janela de minutos
+
+async function clientIp(): Promise<string> {
+  const h = await headers();
+  return (h.get("x-real-ip") || h.get("x-forwarded-for")?.split(",")[0] || "desconhecido").trim().slice(0, 64);
+}
+
 export async function login(formData: FormData) {
   const password = String(formData.get("senha") || "");
   const voltar = String(formData.get("voltar") || "");
+  const keep = voltar ? `&voltar=${encodeURIComponent(voltar)}` : "";
+  const ip = await clientIp();
+  const db = demo.enabled() ? null : adminClient();
+  const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
+
+  // bloqueio por IP depois de várias senhas erradas (contra força bruta)
+  if (db) {
+    const { count } = await db.from("login_attempts").select("id", { count: "exact", head: true }).eq("ip", ip).gte("created_at", since);
+    if ((count ?? 0) >= MAX_FAILS) redirect(`/admin/login?erro=bloqueado${keep}`);
+  }
   if (!checkPassword(password)) {
-    await sleep(900); // atrasa tentativas por força bruta
-    redirect(`/admin/login?erro=1${voltar ? `&voltar=${encodeURIComponent(voltar)}` : ""}`);
+    if (db) await db.from("login_attempts").insert({ ip });
+    await sleep(900); // atrasa cada tentativa errada
+    redirect(`/admin/login?erro=1${keep}`);
+  }
+  if (db) {
+    await db.from("login_attempts").delete().eq("ip", ip);
+    // limpeza: registros com mais de 1 dia
+    await db.from("login_attempts").delete().lt("created_at", new Date(Date.now() - 86_400_000).toISOString());
   }
   const jar = await cookies();
   jar.set(ADMIN_COOKIE, await createSession(), {

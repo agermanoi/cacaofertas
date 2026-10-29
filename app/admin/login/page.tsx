@@ -24,7 +24,9 @@ export default async function LoginPage({ searchParams }: Props) {
       {saiu ? <p className="flash flash-ok">Você saiu do painel.</p> : null}
       {erro ? (
         <p className="flash flash-erro" role="alert">
-          Senha incorreta. Tente de novo.
+          {erro === "bloqueado"
+            ? "Muitas tentativas erradas. Por segurança, o acesso deste endereço ficou bloqueado por 15 minutos."
+            : "Senha incorreta. Tente de novo."}
         </p>
       ) : null}
       <form action={login} className="admin-form narrow">
