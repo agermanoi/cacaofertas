@@ -1901,3 +1901,125 @@ button.btn-ghost {
 .social-retry {
   margin-top: 6px;
 }
+
+/* ---------- Admin: métricas ---------- */
+.metric-periods {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.metric-periods a {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #d5dae1;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.metric-periods a[aria-current="page"] {
+  background: var(--primary, #ff7800);
+  border-color: var(--primary, #ff7800);
+}
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e3e7ec;
+  border-radius: 14px;
+}
+.metric-label {
+  font-size: 0.8125rem;
+  color: #5b6573;
+  font-weight: 700;
+}
+.metric-value {
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+.metric-hint {
+  font-size: 0.75rem;
+  color: #5b6573;
+}
+.metric-chart {
+  margin: 0;
+}
+.metric-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.metric-chart .grid {
+  stroke: #e3e7ec;
+}
+.metric-chart .axis {
+  font-size: 11px;
+  fill: #5b6573;
+}
+.metric-chart .bar-views {
+  fill: #f7a535;
+}
+.metric-chart .bar-clicks {
+  fill: #17212f;
+}
+.metric-chart figcaption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #5b6573;
+  margin-top: 4px;
+}
+.metric-chart .key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-left: 10px;
+}
+.metric-chart .key-views {
+  background: #f7a535;
+  margin-left: 0;
+}
+.metric-chart .key-clicks {
+  background: #17212f;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0 20px;
+}
+.metric-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.metric-table th,
+.metric-table td {
+  text-align: left;
+  padding: 7px 6px;
+  border-bottom: 1px solid #eef0f3;
+  vertical-align: top;
+}
+.metric-table th {
+  font-size: 0.75rem;
+  color: #5b6573;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.metric-table .num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.metric-table td a {
+  word-break: break-word;
+}

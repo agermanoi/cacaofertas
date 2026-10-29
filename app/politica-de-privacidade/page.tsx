@@ -67,6 +67,12 @@ export default async function Privacidade() {
         </a>
         . Você também pode bloquear ou apagar cookies nas configurações do navegador.
       </p>
+      <p>
+        Para saber quais páginas e ofertas interessam mais, contamos visitas e cliques sem cookies: registramos a página,
+        o site de origem (por exemplo, Instagram ou Google) e o tipo de aparelho. Para contar visitantes únicos usamos um
+        código que muda todo dia, gerado a partir do endereço de rede e do navegador; o endereço de rede não é guardado e o
+        código não permite identificar você.
+      </p>
 
       <h2>Com quem compartilhamos</h2>
       <p>

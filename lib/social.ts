@@ -630,3 +630,47 @@ export async function runTick(db: SupabaseClient, opts: { force?: "product" | "c
     .upsert({ key: "social_last_run", value: JSON.stringify({ at: new Date().toISOString(), mode: cfg.mode, ...res }), updated_at: new Date().toISOString() });
   return res;
 }
+
+/* -------------------------------------------------------------- métricas */
+
+export interface SocialStats {
+  igFollowers: number | null;
+  igMedia: number | null;
+  fbFollowers: number | null;
+  recent: { id: string; caption: string; likes: number; comments: number; permalink: string; at: string }[];
+  error?: string;
+}
+
+/** Seguidores e curtidas/comentários dos últimos posts (permissões que o app já tem). */
+export async function getSocialStats(acc: MetaAccount): Promise<SocialStats> {
+  const out: SocialStats = { igFollowers: null, igMedia: null, fbFollowers: null, recent: [] };
+  if (!acc.pageToken) return { ...out, error: "não conectado" };
+  const t = acc.pageToken;
+  const get = (path: string, params: Record<string, string>) =>
+    Promise.race([graphGet(path, { ...params, access_token: t }), sleep(6000).then(() => Promise.reject(new Error("tempo esgotado")))]);
+  const [ig, fb, media] = await Promise.allSettled([
+    acc.igId ? get(`/${acc.igId}`, { fields: "followers_count,media_count" }) : Promise.reject(new Error("sem Instagram")),
+    get(`/${acc.pageId}`, { fields: "followers_count,fan_count" }),
+    acc.igId
+      ? get(`/${acc.igId}/media`, { fields: "id,caption,like_count,comments_count,permalink,timestamp", limit: "12" })
+      : Promise.reject(new Error("sem Instagram")),
+  ]);
+  if (ig.status === "fulfilled") {
+    out.igFollowers = ig.value.followers_count ?? null;
+    out.igMedia = ig.value.media_count ?? null;
+  }
+  if (fb.status === "fulfilled") out.fbFollowers = fb.value.followers_count ?? fb.value.fan_count ?? null;
+  if (media.status === "fulfilled") {
+    out.recent = (media.value.data || []).map((m: any) => ({
+      id: String(m.id),
+      caption: String(m.caption || "").split("\n").slice(0, 2).join(" · ").slice(0, 90),
+      likes: Number(m.like_count || 0),
+      comments: Number(m.comments_count || 0),
+      permalink: String(m.permalink || ""),
+      at: String(m.timestamp || ""),
+    }));
+  }
+  const errs = [ig, fb, media].filter((r) => r.status === "rejected").map((r) => (r as PromiseRejectedResult).reason?.message);
+  if (errs.length === 3) out.error = errs[0];
+  return out;
+}

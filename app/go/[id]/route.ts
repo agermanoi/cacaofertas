@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminClient } from "@/lib/supabase";
+import { clickMeta } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -31,14 +32,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { data: offer } = await db.from("offers").select("id, product_id, url, affiliate_url").eq("id", id).maybeSingle();
   if (!offer) return NextResponse.redirect(new URL("/", req.url));
 
-  // não bloqueia o redirecionamento se o registro falhar
-  await db
-    .from("clicks")
-    .insert({ offer_id: offer.id, product_id: offer.product_id, referer: req.headers.get("referer")?.slice(0, 300) })
-    .then(
-      () => undefined,
-      () => undefined
-    );
+  // não bloqueia o redirecionamento se o registro falhar; robôs não contam
+  const meta = await clickMeta(req.headers);
+  if (meta) {
+    await db
+      .from("clicks")
+      .insert({ offer_id: offer.id, product_id: offer.product_id, referer: req.headers.get("referer")?.slice(0, 300), ...meta })
+      .then(
+        () => undefined,
+        () => undefined
+      );
+  }
 
   const target = await withAmazonTag(db, offer.affiliate_url || offer.url);
   const res = NextResponse.redirect(target, 302);

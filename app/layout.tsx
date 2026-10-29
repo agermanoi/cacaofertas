@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { countdownText, cssVars, getSettings } from "@/lib/settings";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
+import { PageTracker } from "@/components/PageTracker";
 import "./globals.css";
 
 const SITE_URL = siteUrl();
@@ -179,6 +180,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         <BodyEndInjections s={s} />
+        <PageTracker />
       </body>
     </html>
   );

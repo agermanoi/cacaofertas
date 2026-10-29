@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminClient } from "@/lib/supabase";
+import { clickMeta } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +45,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.redirect(new URL("/cupons", req.url));
   }
 
-  await db.rpc("increment_coupon_click", { cid: c.id }).then(
-    () => undefined,
-    () => undefined
-  );
+  const meta = await clickMeta(req.headers);
+  if (meta) {
+    await Promise.all([
+      db.rpc("increment_coupon_click", { cid: c.id }).then(
+        () => undefined,
+        () => undefined
+      ),
+      db
+        .from("clicks")
+        .insert({ coupon_id: c.id, referer: req.headers.get("referer")?.slice(0, 300), ...meta })
+        .then(
+          () => undefined,
+          () => undefined
+        ),
+    ]);
+  }
 
   let target = c.affiliate_url || c.url;
 
