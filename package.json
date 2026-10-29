@@ -10,7 +10,8 @@
     "lint": "tsc --noEmit",
     "collect": "tsx scripts/collect.ts",
     "seed": "tsx scripts/seed.ts",
-    "ml:auth": "tsx scripts/ml-auth.ts"
+    "ml:auth": "tsx scripts/ml-auth.ts",
+    "meta:setup": "tsx scripts/meta-setup.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
