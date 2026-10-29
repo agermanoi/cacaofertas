@@ -238,4 +238,74 @@ alter view product_daily set (security_invoker = on);
 -- Posts de cupom
 alter table social_posts add column if not exists kind text not null default 'product' check (kind in ('product','coupon'));
 alter table social_posts add column if not exists coupon_id uuid references coupons(id) on delete set null;
--- Agendador: pg_cron chama /api/social/tick de hora em hora (ver migração social_cron)
+create index if not exists social_posts_coupon_idx on social_posts(coupon_id, created_at desc);
+
+-- ---------- Métricas próprias (sem cookies) ----------
+create table if not exists page_views (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  path text not null,
+  ref_host text,
+  source text not null default 'direto',
+  device text not null default 'desktop',
+  visitor text            -- hash diário (dia + IP + navegador); não identifica ninguém
+);
+create index if not exists page_views_created_idx on page_views(created_at desc);
+alter table page_views enable row level security;
+
+alter table clicks add column if not exists coupon_id uuid references coupons(id) on delete set null;
+alter table clicks add column if not exists visitor text;
+alter table clicks add column if not exists source text;
+create index if not exists clicks_created_idx on clicks(created_at desc);
+
+-- Resumo do painel /admin/metricas (só service role)
+create or replace function site_stats(p_days int) returns jsonb
+language sql stable set search_path = public as $$
+with b as (select (date_trunc('day', now() at time zone 'America/Sao_Paulo') - make_interval(days => greatest(p_days, 1) - 1)) at time zone 'America/Sao_Paulo' as since),
+pv as (select *, (created_at at time zone 'America/Sao_Paulo')::date as day from page_views where created_at >= (select since from b)),
+ck as (select *, (created_at at time zone 'America/Sao_Paulo')::date as day from clicks where created_at >= (select since from b)),
+days as (select generate_series(((select since from b) at time zone 'America/Sao_Paulo')::date, (now() at time zone 'America/Sao_Paulo')::date, interval '1 day')::date as day)
+select jsonb_build_object(
+  'views', (select count(*) from pv),
+  'visitors', (select count(distinct (day, visitor)) from pv where visitor is not null),
+  'offer_clicks', (select count(*) from ck where coupon_id is null),
+  'coupon_clicks', (select count(*) from ck where coupon_id is not null),
+  'daily', (select coalesce(jsonb_agg(jsonb_build_object(
+        'day', d.day,
+        'views', (select count(*) from pv where pv.day = d.day),
+        'visitors', (select count(distinct visitor) from pv where pv.day = d.day),
+        'clicks', (select count(*) from ck where ck.day = d.day)) order by d.day), '[]'::jsonb) from days d),
+  'pages', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select path, count(*) n from pv group by path order by n desc limit 15) x),
+  'sources', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select source, count(*) n, count(distinct (day, visitor)) v from pv group by source order by n desc) x),
+  'devices', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select device, count(*) n from pv group by device order by n desc) x),
+  'products', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select p.name, p.slug, count(*) n from ck join products p on p.id = ck.product_id
+      where ck.coupon_id is null group by p.name, p.slug order by n desc limit 12) x),
+  'stores', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select coalesce(o.store, c.store) store, count(*) n from ck
+      left join offers o on o.id = ck.offer_id left join coupons c on c.id = ck.coupon_id
+      group by 1 order by n desc limit 12) x),
+  'coupons', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select c.store, c.code, c.title, count(*) n from ck join coupons c on c.id = ck.coupon_id
+      group by c.store, c.code, c.title order by n desc limit 10) x),
+  'click_sources', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select coalesce(source, 'site') source, count(*) n from ck group by 1 order by n desc) x)
+);
+$$;
+revoke all on function site_stats(int) from public, anon, authenticated;
+
+-- ---------- Agendador dos posts (pg_cron + pg_net) ----------
+-- Troque o domínio abaixo pelo do site. Roda no minuto 3 de cada hora;
+-- os horários de produto e de cupom são escolhidos no painel (Admin → Redes sociais).
+create extension if not exists pg_net;
+create extension if not exists pg_cron;
+insert into kv (key, value) values ('social_cron_secret', encode(extensions.gen_random_bytes(24), 'hex'))
+  on conflict (key) do nothing;
+select cron.unschedule(jobid) from cron.job where jobname = 'social-tick';
+select cron.schedule('social-tick', '3 * * * *', $cron$
+  select net.http_post(
+    url := 'https://cacaofertas.com.br/api/social/tick',
+    headers := jsonb_build_object('authorization', 'Bearer ' || (select value from public.kv where key = 'social_cron_secret'), 'content-type', 'application/json'),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 60000
+  );
+$cron$);
