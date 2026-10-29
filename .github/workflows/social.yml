@@ -1,0 +1,31 @@
+name: Posts nas redes sociais
+
+on:
+  workflow_dispatch:
+    inputs:
+      slugs:
+        description: "Forçar produtos (slugs separados por vírgula). Vazio = escolha automática"
+        required: false
+        default: ""
+
+concurrency:
+  group: social
+  cancel-in-progress: false
+
+jobs:
+  social:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Gerar e publicar
+        run: npm run social -- ${{ github.event.inputs.slugs }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://cacaofertas.com.br

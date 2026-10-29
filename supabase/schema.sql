@@ -197,3 +197,28 @@ language sql security definer set search_path = public as $$
 $$;
 revoke all on function increment_coupon_click(uuid) from public, anon, authenticated;
 grant execute on function increment_coupon_click(uuid) to service_role;
+
+-- ---------- Posts nas redes sociais (Instagram / Facebook) ----------
+create table if not exists social_posts (
+  id          bigint generated always as identity primary key,
+  product_id  uuid references products(id) on delete set null,
+  slug        text not null,
+  status      text not null default 'queued' check (status in ('queued','publishing','published','failed','discarded')),
+  caption     text not null,
+  fb_caption  text,
+  feed_url    text,
+  story_url   text,
+  price       numeric,
+  reason      text,
+  ig_media_id text,
+  ig_story_id text,
+  fb_post_id  text,
+  ig_permalink text,
+  error       text,
+  created_at  timestamptz not null default now(),
+  published_at timestamptz
+);
+create index if not exists social_posts_product_idx on social_posts(product_id, created_at desc);
+create index if not exists social_posts_status_idx on social_posts(status, created_at desc);
+alter table social_posts enable row level security;
+-- sem policy: só o service role (painel e coleta) lê e escreve
