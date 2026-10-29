@@ -2,7 +2,7 @@ import { adminClient } from "@/lib/supabase";
 import { demo } from "@/lib/mock";
 import { Flash } from "@/components/admin/Flash";
 import { DEFAULT_SOCIAL, getMetaAccount, getSocialConfig, type MetaAccount, type SocialConfig } from "@/lib/social";
-import { createPost, discardPost, publishQueued, saveCaption, saveSocial } from "./actions";
+import { createPost, discardPost, publishQueued, retryPost, saveCaption, saveSocial } from "./actions";
 
 // publicar no Instagram espera o processamento da imagem (até ~50 s)
 export const maxDuration = 60;
@@ -352,6 +352,12 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                       </>
                     ) : null}
                     {p.error ? <span className="muted"> · {p.error}</span> : null}
+                    {p.error ? (
+                      <form action={retryPost} className="social-retry">
+                        <input type="hidden" name="id" value={p.id} />
+                        <button className="btn btn-small">Tentar de novo o que faltou</button>
+                      </form>
+                    ) : null}
                   </span>
                 </span>
               </li>

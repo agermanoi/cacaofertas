@@ -322,21 +322,32 @@ async function graphGet(path: string, params: Record<string, string>) {
 }
 
 /** Instagram: cria o contêiner, espera processar e publica. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const notReady = (e: unknown) => /pronta|not ready|aguarde|wait a moment|try again/i.test(String((e as Error)?.message || e));
+
 async function igPublish(acc: MetaAccount, params: Record<string, string>): Promise<string> {
   const { id } = await graphPost(`/${acc.igId}/media`, { ...params, access_token: acc.pageToken });
-  for (let i = 0; i < 20; i++) {
-    const st = await graphGet(`/${id}`, { fields: "status_code", access_token: acc.pageToken });
+  for (let i = 0; i < 15; i++) {
+    const st = await graphGet(`/${id}`, { fields: "status_code", access_token: acc.pageToken }).catch(() => ({}) as any);
     if (st.status_code === "FINISHED") break;
     if (st.status_code === "ERROR" || st.status_code === "EXPIRED") throw new Error(`Instagram recusou a imagem (${st.status_code}).`);
-    await new Promise((r) => setTimeout(r, 2500));
+    await sleep(2000);
   }
-  const out = await graphPost(`/${acc.igId}/media_publish`, { creation_id: id, access_token: acc.pageToken });
-  return String(out.id);
+  // mesmo com "FINISHED" o Instagram às vezes ainda responde "mídia não está pronta": tenta de novo
+  for (let i = 0; ; i++) {
+    try {
+      const out = await graphPost(`/${acc.igId}/media_publish`, { creation_id: id, access_token: acc.pageToken });
+      return String(out.id);
+    } catch (e) {
+      if (i >= 5 || !notReady(e)) throw e;
+      await sleep(3000);
+    }
+  }
 }
 
 /**
- * Publica um post da fila nas redes ligadas. Erro numa rede não impede a outra;
- * o resultado (ids, link, erro) fica gravado no post.
+ * Publica um post nas redes ligadas. Erro numa rede não impede a outra; o resultado (ids, link, erro)
+ * fica gravado no post. Num post já publicado em parte, tenta só as redes que faltaram.
  */
 export async function publishPost(db: SupabaseClient, id: number, cfgIn?: SocialConfig): Promise<{ ok: boolean; error?: string }> {
   const cfg = cfgIn || (await getSocialConfig(db));
@@ -346,40 +357,42 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
   // trava contra clique duplo / duas execuções
   const { data: post } = await db
     .from("social_posts")
-    .update({ status: "publishing", error: null })
+    .update({ status: "publishing" })
     .eq("id", id)
-    .in("status", ["queued", "failed"])
+    .in("status", ["queued", "failed", "published"])
     .select("*")
     .maybeSingle();
-  if (!post) return { ok: false, error: "Post não está na fila (já publicado ou descartado)." };
+  if (!post) return { ok: false, error: "Post não está na fila (já publicando ou descartado)." };
 
   const upd: Record<string, unknown> = {};
   const errors: string[] = [];
-  let any = false;
+  const wasPublished = Boolean(post.ig_media_id || post.ig_story_id || post.fb_post_id);
 
-  if (cfg.instagram && acc.igId && post.feed_url) {
-    try {
-      upd.ig_media_id = await igPublish(acc, { image_url: post.feed_url, caption: post.caption });
-      any = true;
+  const instagram = async () => {
+    if (!cfg.instagram || !acc.igId || !post.feed_url) return;
+    if (!post.ig_media_id) {
       try {
-        const m = await graphGet(`/${upd.ig_media_id}`, { fields: "permalink", access_token: acc.pageToken });
-        upd.ig_permalink = m.permalink || null;
-      } catch {
-        /* sem link, tudo bem */
+        upd.ig_media_id = await igPublish(acc, { image_url: post.feed_url, caption: post.caption });
+        try {
+          const m = await graphGet(`/${upd.ig_media_id}`, { fields: "permalink", access_token: acc.pageToken });
+          upd.ig_permalink = m.permalink || null;
+        } catch {
+          /* sem link, tudo bem */
+        }
+      } catch (e) {
+        errors.push(`Instagram: ${(e as Error).message}`);
       }
-    } catch (e) {
-      errors.push(`Instagram: ${(e as Error).message}`);
     }
-    if (cfg.story && post.story_url) {
+    if (cfg.story && post.story_url && !post.ig_story_id) {
       try {
         upd.ig_story_id = await igPublish(acc, { image_url: post.story_url, media_type: "STORIES" });
-        any = true;
       } catch (e) {
         errors.push(`Stories: ${(e as Error).message}`);
       }
     }
-  }
-  if (cfg.facebook && acc.pageId && post.feed_url) {
+  };
+  const facebook = async () => {
+    if (!cfg.facebook || !acc.pageId || !post.feed_url || post.fb_post_id) return;
     try {
       const out = await graphPost(`/${acc.pageId}/photos`, {
         url: post.feed_url,
@@ -387,11 +400,13 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
         access_token: acc.pageToken,
       });
       upd.fb_post_id = String(out.post_id || out.id);
-      any = true;
     } catch (e) {
       errors.push(`Facebook: ${(e as Error).message}`);
     }
-  }
+  };
+  // as duas redes ao mesmo tempo (cabe no limite de tempo da função)
+  await Promise.all([instagram(), facebook()]);
+  const any = wasPublished || Boolean(upd.ig_media_id || upd.ig_story_id || upd.fb_post_id);
   if (!any && !errors.length) errors.push("Nenhuma rede ligada nas configurações (Instagram/Facebook).");
 
   await db
@@ -400,7 +415,7 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
       ...upd,
       status: any ? "published" : "failed",
       error: errors.length ? errors.join(" | ").slice(0, 1000) : null,
-      published_at: any ? new Date().toISOString() : null,
+      published_at: any ? post.published_at || new Date().toISOString() : null,
     })
     .eq("id", id);
   return { ok: any, error: errors.join(" | ") || undefined };

@@ -136,3 +136,14 @@ export async function discardPost(formData: FormData) {
   revalidatePath("/admin/social");
   back({ ok: "Post descartado." });
 }
+
+/** Post publicado em parte (ex.: saiu no Facebook e falhou no Instagram): tenta só o que faltou. */
+export async function retryPost(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!Number.isFinite(id)) back({ erro: "Post inválido." });
+  const r = await publishPost(adminClient(), id);
+  revalidatePath("/admin/social");
+  if (r.error) back({ erro: `Ainda com erro: ${r.error}` });
+  back({ ok: "Publicado no que faltava!" });
+}
