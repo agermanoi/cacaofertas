@@ -137,9 +137,11 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
   if (!serpSources) return new Set();
   const left = await serpApiSearchesLeft();
   const now = new Date();
-  const renewDay = Math.min(28, Math.max(1, Number(process.env.SERPAPI_RENEW_DAY || 1)));
-  let renew = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), renewDay));
-  if (renew <= now) renew = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, renewDay));
+  const renewDay = Math.min(31, Math.max(1, Number(process.env.SERPAPI_RENEW_DAY || 1)));
+  // dia 31 em mês de 30 dias (ou 29/30/31 em fevereiro) vira o último dia do mês
+  const renewIn = (y: number, m: number) => new Date(Date.UTC(y, m, Math.min(renewDay, new Date(Date.UTC(y, m + 1, 0)).getUTCDate())));
+  let renew = renewIn(now.getUTCFullYear(), now.getUTCMonth());
+  if (renew <= now) renew = renewIn(now.getUTCFullYear(), now.getUTCMonth() + 1);
   // coletas agendadas (00:17 e 12:17 UTC) de agora até a renovação, com peso
   const weight = (d: Date) => {
     const bf = blackFriday(d.getUTCFullYear()).getTime();
