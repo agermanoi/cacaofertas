@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ProductOverview } from "./types";
 import { verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
+import { tiktokSendDraft } from "./tiktok";
 
 /**
  * Publicação automática no Instagram e na Página do Facebook (Meta Graph API).
@@ -28,6 +29,8 @@ export interface SocialConfig {
   facebook: boolean;
   /** também publica nos Stories do Instagram */
   story: boolean;
+  /** manda rascunho para a caixa de entrada do TikTok (arte vertical + legenda) */
+  tiktok: boolean;
   /** dias até o mesmo produto poder voltar (antes disso, só se o preço cair mais 3%) */
   repeatDays: number;
   /** queda mínima vs média de 30 dias, em %, para contar como oferta real */
@@ -53,6 +56,7 @@ export const DEFAULT_SOCIAL: SocialConfig = {
   instagram: true,
   facebook: true,
   story: false,
+  tiktok: false,
   repeatDays: 7,
   minDrop: 7,
   fallback: true,
@@ -92,6 +96,7 @@ export function parseSocial(raw: unknown): SocialConfig {
     instagram: bool(r.instagram, D.instagram),
     facebook: bool(r.facebook, D.facebook),
     story: bool(r.story, D.story),
+    tiktok: bool(r.tiktok, D.tiktok),
     repeatDays: num(r.repeatDays, D.repeatDays, 1, 60),
     minDrop: num(r.minDrop, D.minDrop, 1, 80),
     fallback: bool(r.fallback, D.fallback),
@@ -285,7 +290,7 @@ export async function renderToStorage(db: SupabaseClient, slug: string, format: 
 /** Cria o post na fila (arte + legendas). */
 export async function queuePost(db: SupabaseClient, c: Candidate, cfg: SocialConfig): Promise<number> {
   const feed = await renderToStorage(db, c.p.slug, "feed");
-  const story = cfg.story ? await renderToStorage(db, c.p.slug, "story") : null;
+  const story = cfg.story || cfg.tiktok ? await renderToStorage(db, c.p.slug, "story") : null;
   const { ig, fb } = buildCaptions(c.p, cfg);
   const { data, error } = await db
     .from("social_posts")
@@ -404,10 +409,24 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
       errors.push(`Facebook: ${(e as Error).message}`);
     }
   };
-  // as duas redes ao mesmo tempo (cabe no limite de tempo da função)
-  await Promise.all([instagram(), facebook()]);
-  const any = wasPublished || Boolean(upd.ig_media_id || upd.ig_story_id || upd.fb_post_id);
-  if (!any && !errors.length) errors.push("Nenhuma rede ligada nas configurações (Instagram/Facebook).");
+  const tiktok = async () => {
+    if (!cfg.tiktok || !post.story_url || post.tiktok_publish_id) return;
+    try {
+      const lines = String(post.caption).split("\n");
+      const title = (post.kind === "coupon" ? lines[0] : lines[1] || lines[0]).replace(/^[^\p{L}\p{N}]+/u, "").trim();
+      upd.tiktok_publish_id = await tiktokSendDraft(db, {
+        imageUrl: post.story_url,
+        title,
+        description: String(post.caption).replace("Link na bio →", "Link na bio:"),
+      });
+    } catch (e) {
+      errors.push(`TikTok: ${(e as Error).message}`);
+    }
+  };
+  // as redes ao mesmo tempo (cabe no limite de tempo da função)
+  await Promise.all([instagram(), facebook(), tiktok()]);
+  const any = wasPublished || Boolean(upd.ig_media_id || upd.ig_story_id || upd.fb_post_id || upd.tiktok_publish_id);
+  if (!any && !errors.length) errors.push("Nenhuma rede ligada nas configurações (Instagram, Facebook ou TikTok).");
 
   await db
     .from("social_posts")
@@ -547,7 +566,7 @@ export function couponCaptions(c: CouponRow, cfg: SocialConfig): { ig: string; f
 export async function queueCoupon(db: SupabaseClient, c: CouponRow, cfg: SocialConfig): Promise<number> {
   const slug = couponSlug(c);
   const feed = await renderToStorage(db, slug, "feed", c.id);
-  const story = cfg.story ? await renderToStorage(db, slug, "story", c.id) : null;
+  const story = cfg.story || cfg.tiktok ? await renderToStorage(db, slug, "story", c.id) : null;
   const { ig, fb } = couponCaptions(c, cfg);
   const { data, error } = await db
     .from("social_posts")

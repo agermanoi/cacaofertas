@@ -32,6 +32,7 @@ export async function saveSocial(formData: FormData) {
     instagram: on(formData, "instagram"),
     facebook: on(formData, "facebook"),
     story: on(formData, "story"),
+    tiktok: on(formData, "tiktok"),
     repeatDays: Number(text(formData, "repeatDays")),
     minDrop: Number(text(formData, "minDrop")),
     fallback: on(formData, "fallback"),

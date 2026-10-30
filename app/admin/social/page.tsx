@@ -20,6 +20,7 @@ type Post = {
   ig_permalink: string | null;
   ig_media_id: string | null;
   fb_post_id: string | null;
+  tiktok_publish_id: string | null;
   error: string | null;
   created_at: string;
   published_at: string | null;
@@ -89,6 +90,9 @@ function Connection({ acc }: { acc: MetaAccount | null }) {
             )}
           </li>
           {acc!.status?.at ? <li className="hint">Conectado em {when(acc!.status.at)}. O token da Página não expira.</li> : null}
+          <li>
+            <strong>TikTok:</strong> <a href="/admin/tiktok">configurar e conectar</a>
+          </li>
         </ul>
       ) : (
         <p className="hint">
@@ -146,6 +150,12 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
           <label className="check">
             <input type="checkbox" name="facebook" defaultChecked={cfg.facebook} />
             <span>Página do Facebook</span>
+          </label>
+          <label className="check">
+            <input type="checkbox" name="tiktok" defaultChecked={cfg.tiktok} />
+            <span>
+              TikTok (rascunho na caixa de entrada, <a href="/admin/tiktok">conectar</a>)
+            </span>
           </label>
         </div>
       </fieldset>
@@ -351,6 +361,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                         </a>
                       </>
                     ) : null}
+                    {p.tiktok_publish_id ? " · TikTok (rascunho enviado)" : null}
                     {p.error ? <span className="muted"> · {p.error}</span> : null}
                     {p.error ? (
                       <form action={retryPost} className="social-retry">

@@ -2023,3 +2023,23 @@ button.btn-ghost {
 .metric-table td a {
   word-break: break-word;
 }
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.kv-table th,
+.kv-table td {
+  text-align: left;
+  padding: 7px 6px;
+  border-bottom: 1px solid #eef0f3;
+  vertical-align: top;
+}
+.kv-table th {
+  width: 34%;
+  color: #5b6573;
+  font-weight: 700;
+}
+.kv-table code {
+  word-break: break-all;
+}
