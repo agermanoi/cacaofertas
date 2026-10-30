@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase";
 import { Flash } from "@/components/admin/Flash";
-import { TIKTOK_SCOPES, TIKTOK_STATE_COOKIE, tiktokExchangeCode, tiktokRedirectUri, tiktokStatus, tiktokUrlPrefix } from "@/lib/tiktok";
+import { TIKTOK_SCOPES, TIKTOK_STATE_COOKIE, tiktokExchangeCode, tiktokRedirectUri, tiktokStatus } from "@/lib/tiktok";
 import { siteUrl } from "@/lib/site";
 import { disconnectTiktok, saveTiktokKeys, saveVerifyFile, startTiktokConnect } from "./actions";
 
@@ -74,7 +74,7 @@ export default async function TiktokPage({ searchParams }: Props) {
             </tr>
             <tr>
               <th>URL prefix a verificar</th>
-              <td><code>{tiktokUrlPrefix()}</code></td>
+              <td><code>{site}/</code></td>
             </tr>
           </tbody>
         </table>
@@ -103,7 +103,7 @@ export default async function TiktokPage({ searchParams }: Props) {
       <section className="admin-section">
         <h2>3. Verificar o endereço das artes</h2>
         <p className="hint">
-          No app do TikTok, em URL properties, adicione o prefixo <code>{tiktokUrlPrefix()}</code>. O TikTok dá um arquivo
+          No app do TikTok, em URL properties, adicione o prefixo <code>{site}/</code> (vale para o site, os Termos, a Privacidade e as artes). O TikTok dá um arquivo
           .txt para baixar: cole aqui o nome e o conteúdo, salve e clique em Verificar lá.
         </p>
         <form action={saveVerifyFile} className="admin-form">
@@ -121,8 +121,8 @@ export default async function TiktokPage({ searchParams }: Props) {
             <p className="hint">
               Publicados:{" "}
               {st.verifyFiles.map((f) => (
-                <a key={f} href={`/tiktok/${f}`} target="_blank" rel="noopener">
-                  /tiktok/{f}{" "}
+                <a key={f} href={`/${f}`} target="_blank" rel="noopener">
+                  /{f}{" "}
                 </a>
               ))}
             </p>

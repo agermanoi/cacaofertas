@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Arquivo de verificação do TikTok na raiz (https://SITE/tiktokXXXX.txt) → servido pela rota /tiktok/
+  async rewrites() {
+    return [{ source: "/:file(tiktok[A-Za-z0-9_-]+\\.txt)", destination: "/tiktok/:file" }];
+  },
   // Cabeçalhos de segurança em todas as páginas
   async headers() {
     return [

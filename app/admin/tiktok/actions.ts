@@ -36,7 +36,7 @@ export async function saveVerifyFile(formData: FormData) {
   if (!content || content.length > 2000) back({ erro: "Cole o conteúdo do arquivo de verificação." });
   await tiktokSaveVerifyFile(adminClient(), name, content);
   revalidatePath("/admin/tiktok");
-  back({ ok: `Arquivo publicado em /tiktok/${name}. Agora clique em Verificar no site do TikTok.` });
+  back({ ok: `Arquivo publicado em /${name}. Agora clique em Verify no site do TikTok.` });
 }
 
 export async function startTiktokConnect() {
