@@ -1,4 +1,5 @@
 import { adminClient } from "@/lib/supabase";
+import { tiktokPublishStatus } from "@/lib/tiktok";
 import { demo } from "@/lib/mock";
 import { Flash } from "@/components/admin/Flash";
 import { DEFAULT_SOCIAL, getMetaAccount, getSocialConfig, type MetaAccount, type SocialConfig } from "@/lib/social";
@@ -263,6 +264,21 @@ function QueueItem({ p }: { p: Post }) {
 export default async function Social({ searchParams }: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { ok, erro } = await searchParams;
   const { cfg, acc, queue, history, products, lastRun } = await load();
+  // situação dos rascunhos do TikTok das últimas 48 h (o TikTok processa depois do envio)
+  const ttRecent = history.filter((p) => p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 48 * 3600_000).slice(0, 6);
+  const ttStatus = new Map<number, { status: string; reason?: string }>();
+  if (ttRecent.length) {
+    const db = adminClient();
+    const results = await Promise.all(ttRecent.map((p) => tiktokPublishStatus(db, p.tiktok_publish_id!)));
+    ttRecent.forEach((p, i) => ttStatus.set(p.id, results[i]));
+  }
+  const TT: Record<string, string> = {
+    PROCESSING_DOWNLOAD: "TikTok baixando a arte",
+    PROCESSING_UPLOAD: "TikTok processando",
+    SEND_TO_USER_INBOX: "rascunho na caixa de entrada do TikTok",
+    PUBLISH_COMPLETE: "publicado no TikTok",
+    FAILED: "TikTok recusou",
+  };
 
   return (
     <div className="wrap admin-page">
@@ -361,7 +377,14 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                         </a>
                       </>
                     ) : null}
-                    {p.tiktok_publish_id ? " · TikTok (rascunho enviado)" : null}
+                    {p.tiktok_publish_id ? (
+                      <>
+                        {" · TikTok: "}
+                        {ttStatus.get(p.id)
+                          ? `${TT[ttStatus.get(p.id)!.status] || ttStatus.get(p.id)!.status}${ttStatus.get(p.id)!.reason ? ` (${ttStatus.get(p.id)!.reason})` : ""}`
+                          : "rascunho enviado"}
+                      </>
+                    ) : null}
                     {p.error ? <span className="muted"> · {p.error}</span> : null}
                     {p.error ? (
                       <form action={retryPost} className="social-retry">

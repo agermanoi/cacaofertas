@@ -241,3 +241,24 @@ export async function tiktokSaveKeys(db: SupabaseClient, clientKey: string, clie
   if (clientSecret) values.tiktok_client_secret = clientSecret;
   if (Object.keys(values).length) await kvSet(db, values);
 }
+
+/** Situação de um envio (PROCESSING_DOWNLOAD, SEND_TO_USER_INBOX, PUBLISH_COMPLETE, FAILED…). */
+export async function tiktokPublishStatus(db: SupabaseClient, publishId: string): Promise<{ status: string; reason?: string }> {
+  try {
+    const token = await accessToken(db);
+    const res = await fetch(`${API}/v2/post/publish/status/fetch/`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json; charset=UTF-8" },
+      body: JSON.stringify({ publish_id: publishId }),
+      cache: "no-store",
+    });
+    const json = (await res.json().catch(() => ({}))) as {
+      data?: { status?: string; fail_reason?: string };
+      error?: { code?: string; message?: string };
+    };
+    if (json.error?.code && json.error.code !== "ok") return { status: "ERRO", reason: json.error.message || json.error.code };
+    return { status: json.data?.status || "desconhecido", reason: json.data?.fail_reason || undefined };
+  } catch (e) {
+    return { status: "ERRO", reason: (e as Error).message };
+  }
+}
