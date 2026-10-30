@@ -110,6 +110,7 @@ async function loadKeysFromDb() {
     afilio_affid: "AFILIO_AFFID",
     afilio_siteid: "AFILIO_SITEID",
     afilio_feeds: "AFILIO_FEEDS",
+    serpapi_renew_day: "SERPAPI_RENEW_DAY",
   };
   const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
   for (const row of data || []) {
@@ -118,22 +119,45 @@ async function loadKeysFromDb() {
   }
 }
 
+/** Sexta-feira da Black Friday (dia seguinte à 4ª quinta-feira de novembro), em UTC. */
+function blackFriday(year: number): Date {
+  const nov1 = new Date(Date.UTC(year, 10, 1));
+  const firstThu = 1 + ((4 - nov1.getUTCDay() + 7) % 7);
+  return new Date(Date.UTC(year, 10, firstThu + 21 + 1));
+}
+
 /**
- * Divide o saldo mensal da SerpAPI entre as coletas que faltam no mês (2 por dia)
- * e escolhe os produtos consultados há mais tempo. Devolve os slugs liberados.
+ * Divide o saldo da SerpAPI entre as coletas que faltam até o plano renovar
+ * (SERPAPI_RENEW_DAY ou kv serpapi_renew_day; padrão dia 1). As coletas da semana
+ * da Black Friday (7 dias antes até a Cyber Monday) pesam 3×, para sobrar busca nos dias
+ * que mais importam. Escolhe os produtos consultados há mais tempo. Devolve os slugs liberados.
  */
 async function serpBudget(products: Product[], collectors: Collector[]): Promise<Set<string>> {
   const serpSources = collectors.filter((c) => SERP_SOURCES.has(c.source)).length;
   if (!serpSources) return new Set();
   const left = await serpApiSearchesLeft();
   const now = new Date();
-  const daysInMonth = new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 0).getDate();
-  const runsLeft = Math.max(1, (daysInMonth - now.getUTCDate() + 1) * 2 - (now.getUTCHours() >= 12 ? 1 : 0));
+  const renewDay = Math.min(28, Math.max(1, Number(process.env.SERPAPI_RENEW_DAY || 1)));
+  let renew = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), renewDay));
+  if (renew <= now) renew = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, renewDay));
+  // coletas agendadas (00:17 e 12:17 UTC) de agora até a renovação, com peso
+  const weight = (d: Date) => {
+    const bf = blackFriday(d.getUTCFullYear()).getTime();
+    const t = d.getTime();
+    return t >= bf - 7 * 86_400_000 && t < bf + 4 * 86_400_000 ? 3 : 1;
+  };
+  let total = 0;
+  let runsLeft = 0;
+  for (let t = new Date(now); t < renew; t = new Date(t.getTime() + 12 * 3600_000)) {
+    total += weight(t);
+    runsLeft++;
+  }
+  total = Math.max(1, total);
   const reserve = Number(process.env.SERPAPI_RESERVE || 5); // sobra para testes manuais
   const budget =
     left == null
       ? Number(process.env.SERPAPI_MAX_PER_RUN || 8)
-      : Math.max(0, Math.floor((left - reserve) / runsLeft / serpSources));
+      : Math.max(0, Math.floor(((left - reserve) * weight(now)) / total / serpSources));
 
   const { data } = await db.from("kv").select("value").eq("key", "serpapi_seen").maybeSingle();
   let seen: Record<string, string> = {};
@@ -146,8 +170,8 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
     .slice(0, Math.min(budget, products.length));
   for (const p of pick) seen[p.slug] = now.toISOString();
   if (pick.length) await db.from("kv").upsert({ key: "serpapi_seen", value: JSON.stringify(seen), updated_at: now.toISOString() });
-  console.log(`SerpAPI: saldo ${left ?? "?"} · ${runsLeft} coletas no mês · ${pick.length} produtos nesta coleta`);
-  serpInfo = { left, runsLeft, budget, used: pick.length };
+  console.log(`SerpAPI: saldo ${left ?? "?"} · ${runsLeft} coletas até renovar em ${renew.toISOString().slice(0, 10)} · ${pick.length} produtos nesta coleta`);
+  serpInfo = { left, runsLeft, budget, used: pick.length, renew: renew.toISOString().slice(0, 10) };
   return new Set(pick.map((p) => p.slug));
 }
 let serpInfo: Record<string, unknown> | null = null;
