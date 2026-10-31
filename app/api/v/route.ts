@@ -21,7 +21,16 @@ export async function POST(req: NextRequest) {
   const { source, refHost } = sourceOf({ utm: body.u, ref: body.r, ua, host });
   await adminClient()
     .from("page_views")
-    .insert({ path, ref_host: refHost?.slice(0, 120) || null, source, device: deviceOf(ua), visitor: await visitorHash(clientIp(req.headers), ua) })
+    .insert({
+      path,
+      ref_host: refHost?.slice(0, 120) || null,
+      source,
+      device: deviceOf(ua),
+      visitor: await visitorHash(clientIp(req.headers), ua),
+      // geolocalização aproximada que a Vercel já calcula pelo IP (o IP não é guardado)
+      country: req.headers.get("x-vercel-ip-country")?.slice(0, 2) || null,
+      city: decodeURIComponent(req.headers.get("x-vercel-ip-city") || "").slice(0, 60) || null,
+    })
     .then(
       () => undefined,
       () => undefined

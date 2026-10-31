@@ -48,17 +48,26 @@ const SOURCE_LABEL: Record<string, string> = {
   site: "Site",
 };
 
-async function load(days: number): Promise<{ s: Stats; social: SocialStats | null; posts: number; error?: string }> {
-  if (demo.enabled()) return { s: EMPTY, social: null, posts: 0 };
+async function load(
+  days: number
+): Promise<{ s: Stats; geo: { country: string; city: string; n: number; v: number }[]; social: SocialStats | null; posts: number; error?: string }> {
+  if (demo.enabled()) return { s: EMPTY, geo: [], social: null, posts: 0 };
   const db = adminClient();
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
-  const [stats, acc, posts] = await Promise.all([
+  const [stats, acc, posts, geo] = await Promise.all([
     db.rpc("site_stats", { p_days: days }),
     getMetaAccount(db),
     db.from("social_posts").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", since),
+    db.rpc("site_geo", { p_days: days }),
   ]);
   const social = acc.pageToken ? await getSocialStats(acc) : null;
-  return { s: { ...EMPTY, ...((stats.data as Stats) || {}) }, social, posts: posts.count ?? 0, error: stats.error?.message };
+  return {
+    s: { ...EMPTY, ...((stats.data as Stats) || {}) },
+    geo: ((geo.data as { country: string; city: string; n: number; v: number }[]) || []),
+    social,
+    posts: posts.count ?? 0,
+    error: stats.error?.message,
+  };
 }
 
 function Card({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -164,7 +173,7 @@ function Table({ title, head, rows, empty }: { title: string; head: string[]; ro
 export default async function Metricas({ searchParams }: { searchParams: Promise<{ dias?: string }> }) {
   const { dias } = await searchParams;
   const days = PERIODS.includes(Number(dias)) ? Number(dias) : 7;
-  const { s, social, posts, error } = await load(days);
+  const { s, geo, social, posts, error } = await load(days);
   const clicks = s.offer_clicks + s.coupon_clicks;
   const external = s.sources.filter((x) => x.source !== "interno");
 
@@ -239,6 +248,12 @@ export default async function Metricas({ searchParams }: { searchParams: Promise
           head={["Cupom", "Cliques"]}
           rows={s.coupons.map((x) => [`${x.store} · ${x.code || x.title}`, int(x.n)])}
           empty="Nenhum clique em cupom no período."
+        />
+        <Table
+          title="De onde (país e cidade)"
+          head={["Local", "Visitas", "Visitantes"]}
+          rows={geo.map((g) => [`${g.city !== "?" ? `${g.city}, ` : ""}${g.country === "?" ? "desconhecido" : g.country}`, int(g.n), int(g.v)])}
+          empty="Sem visitas com localização no período (a contagem por local começou agora)."
         />
         <Table
           title="Aparelho e origem dos cliques"
