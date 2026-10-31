@@ -52,6 +52,11 @@ export default async function Hoje() {
               📸 Instagram
             </a>
           ) : null}
+          {s.contact.tiktok ? (
+            <a href={`https://www.tiktok.com/@${s.contact.tiktok}`} rel="noopener">
+              🎵 TikTok
+            </a>
+          ) : null}
         </nav>
       </header>
 

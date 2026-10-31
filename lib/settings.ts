@@ -28,6 +28,8 @@ export interface SiteSettings {
     instagram: string;
     /** Endereço da página no Facebook (só o nome de usuário, ex.: cacaofertas.com.br) */
     facebook: string;
+    /** Perfil no TikTok (só o usuário, sem @) */
+    tiktok: string;
   };
   /** Google Analytics 4 (G-XXXX) e Google Tag Manager (GTM-XXXX). Vazio = desligado. */
   analytics: {
@@ -95,7 +97,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroText:
     "Acompanhamos os produtos mais buscados da Black Friday duas vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”, também.",
   announcement: "",
-  contact: { email: "", whatsapp: "", instagram: "", facebook: "" },
+  contact: { email: "", whatsapp: "", instagram: "", facebook: "", tiktok: "" },
   analytics: { gaId: "", gtmId: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
@@ -153,6 +155,7 @@ export function mergeSettings(raw: unknown): SiteSettings {
       whatsapp: opt(r.contact?.whatsapp),
       instagram: handle(r.contact?.instagram, "instagram.com"),
       facebook: handle(r.contact?.facebook, "facebook.com"),
+      tiktok: handle(r.contact?.tiktok, "tiktok.com"),
     },
     analytics: {
       gaId: GA.test(opt(r.analytics?.gaId).toUpperCase()) ? opt(r.analytics?.gaId).toUpperCase() : "",

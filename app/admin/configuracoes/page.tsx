@@ -185,6 +185,10 @@ export default async function SettingsPage({ searchParams }: Props) {
               <input id="contact_facebook" name="contact_facebook" defaultValue={s.contact.facebook} placeholder="cacaofertas.com.br" />
             </div>
           </div>
+          <div className="field">
+            <label htmlFor="contact_tiktok">TikTok (opcional)</label>
+            <input id="contact_tiktok" name="contact_tiktok" defaultValue={s.contact.tiktok} placeholder="cacaofertas.com.br" />
+          </div>
           <p className="hint">Só o usuário ou o link do perfil. Aparecem no rodapé, na página de Contato e para o Google como perfis oficiais do site.</p>
         </fieldset>
 

@@ -75,6 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               sameAs: [
                 s.contact.instagram ? `https://www.instagram.com/${s.contact.instagram}/` : null,
                 s.contact.facebook ? `https://www.facebook.com/${s.contact.facebook}/` : null,
+                s.contact.tiktok ? `https://www.tiktok.com/@${s.contact.tiktok}` : null,
               ].filter(Boolean),
             }),
           }}
@@ -107,7 +108,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={s.logoUrl} alt="" className="foot-logo" width={180} height={44} />
               <p className="foot-tagline">{s.tagline}</p>
-              {s.contact.instagram || s.contact.facebook ? (
+              {s.contact.instagram || s.contact.facebook || s.contact.tiktok ? (
                 <div className="foot-social" aria-label="Redes sociais">
                   {s.contact.instagram ? (
                     <a href={`https://www.instagram.com/${s.contact.instagram}/`} target="_blank" rel="noopener" aria-label="Instagram">
@@ -124,6 +125,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         <path
                           fill="currentColor"
                           d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H8v3h2.5V21h3Z"
+                        />
+                      </svg>
+                    </a>
+                  ) : null}
+                  {s.contact.tiktok ? (
+                    <a href={`https://www.tiktok.com/@${s.contact.tiktok}`} target="_blank" rel="noopener" aria-label="TikTok">
+                      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M16.6 3c.3 2.2 1.6 3.7 3.9 3.9v3a7 7 0 0 1-3.8-1.2v6.1A5.8 5.8 0 1 1 10.9 9v3.1a2.8 2.8 0 1 0 2.7 2.8V3h3Z"
                         />
                       </svg>
                     </a>

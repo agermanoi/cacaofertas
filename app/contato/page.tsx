@@ -82,7 +82,7 @@ export default async function Contato({ searchParams }: Props) {
         <aside className="contact-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/mascote.png" alt="" className="contact-mascot" width={212} height={160} />
-          {s.contact.email || wa || s.contact.instagram || s.contact.facebook ? (
+          {s.contact.email || wa || s.contact.instagram || s.contact.facebook || s.contact.tiktok ? (
             <dl>
               {s.contact.email ? (
                 <>
@@ -118,6 +118,16 @@ export default async function Contato({ searchParams }: Props) {
                   <dd>
                     <a href={`https://www.facebook.com/${s.contact.facebook}/`} rel="noopener">
                       facebook.com/{s.contact.facebook}
+                    </a>
+                  </dd>
+                </>
+              ) : null}
+              {s.contact.tiktok ? (
+                <>
+                  <dt>TikTok</dt>
+                  <dd>
+                    <a href={`https://www.tiktok.com/@${s.contact.tiktok}`} rel="noopener">
+                      @{s.contact.tiktok}
                     </a>
                   </dd>
                 </>
