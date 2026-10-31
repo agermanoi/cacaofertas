@@ -48,6 +48,7 @@ export async function saveSocial(formData: FormData) {
     .upsert({ key: "social_config", value: JSON.stringify(cfg), updated_at: new Date().toISOString() });
   if (error) back({ erro: `Não foi possível salvar: ${error.message}` });
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   back({ ok: "Configurações das redes salvas." });
 }
 
@@ -72,10 +73,12 @@ export async function createPost(formData: FormData) {
     if (now) {
       const r = await publishPost(db, cid, cfg);
       revalidatePath("/admin/social");
+  revalidatePath("/hoje");
       if (!r.ok) back({ erro: `Não publicou: ${r.error}` });
       back({ ok: r.error ? `Cupom publicado com avisos: ${r.error}` : `Cupom ${coupons[0].store} publicado!` });
     }
     revalidatePath("/admin/social");
+  revalidatePath("/hoje");
     back({ ok: `Cupom ${coupons[0].store} criado na fila.` });
   }
   if (slug) {
@@ -97,10 +100,12 @@ export async function createPost(formData: FormData) {
   if (now) {
     const r = await publishPost(db, id, cfg);
     revalidatePath("/admin/social");
+  revalidatePath("/hoje");
     if (!r.ok) back({ erro: `Não publicou: ${r.error}` });
     back({ ok: r.error ? `Publicado com avisos: ${r.error}` : "Publicado!" });
   }
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   back({ ok: "Post criado na fila. Revise a legenda e clique em Publicar." });
 }
 
@@ -114,6 +119,7 @@ export async function publishQueued(formData: FormData) {
   if (caption) await db.from("social_posts").update({ caption: caption.slice(0, 2200), fb_caption: (fb || caption).slice(0, 5000) }).eq("id", id);
   const r = await publishPost(db, id);
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   if (!r.ok) back({ erro: `Não publicou: ${r.error}` });
   back({ ok: r.error ? `Publicado com avisos: ${r.error}` : "Publicado!" });
 }
@@ -126,6 +132,7 @@ export async function saveCaption(formData: FormData) {
   if (Number.isFinite(id) && caption)
     await adminClient().from("social_posts").update({ caption: caption.slice(0, 2200), fb_caption: (fb || caption).slice(0, 5000) }).eq("id", id);
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   back({ ok: "Legenda salva." });
 }
 
@@ -135,6 +142,7 @@ export async function discardPost(formData: FormData) {
   if (Number.isFinite(id))
     await adminClient().from("social_posts").update({ status: "discarded" }).eq("id", id).in("status", ["queued", "failed"]);
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   back({ ok: "Post descartado." });
 }
 
@@ -145,6 +153,7 @@ export async function retryPost(formData: FormData) {
   if (!Number.isFinite(id)) back({ erro: "Post inválido." });
   const r = await publishPost(adminClient(), id);
   revalidatePath("/admin/social");
+  revalidatePath("/hoje");
   if (r.error) back({ erro: `Ainda com erro: ${r.error}` });
   back({ ok: "Publicado no que faltava!" });
 }

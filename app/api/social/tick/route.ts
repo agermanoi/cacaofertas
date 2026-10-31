@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
 import { safeEqual } from "@/lib/admin-auth";
 import { runTick } from "@/lib/social";
@@ -22,5 +23,7 @@ export async function POST(req: NextRequest) {
   const f = req.nextUrl.searchParams.get("force");
   const force = f === "coupon" || f === "product" ? f : undefined;
   const result = await runTick(db, { force, deadlineMs: 40_000 });
+  // a página do link na bio mostra o que acabou de sair
+  if (result.published.length || result.queued.length) revalidatePath("/hoje");
   return NextResponse.json({ ok: true, ...result });
 }

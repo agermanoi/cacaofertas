@@ -2043,3 +2043,8 @@ button.btn-ghost {
 .kv-table code {
   word-break: break-all;
 }
+.today-posted h2,
+.today-more { font-size: 1.15rem; margin: 0 0 10px; }
+.today-new { color: var(--brand); font-size: 1rem; }
+.today-when { font-size: 0.78rem; font-weight: 700; color: #5b6573; }
+.today-coupon-item { display: grid; gap: 6px; }
