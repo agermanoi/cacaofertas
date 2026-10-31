@@ -309,3 +309,19 @@ select cron.schedule('social-tick', '3 * * * *', $cron$
     timeout_milliseconds := 60000
   );
 $cron$);
+
+-- Local aproximado das visitas (cabeçalhos de geolocalização da Vercel; IP não é guardado)
+alter table page_views add column if not exists country text;
+alter table page_views add column if not exists city text;
+create or replace function site_geo(p_days int) returns jsonb
+language sql stable set search_path = public as $$
+  select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+    select coalesce(country, '?') country, coalesce(city, '?') city, count(*) n, count(distinct visitor) v
+    from page_views
+    where created_at >= now() - make_interval(days => greatest(p_days, 1))
+    group by 1, 2 order by n desc limit 15) x;
+$$;
+revoke all on function site_geo(int) from public, anon, authenticated;
+
+-- TikTok
+alter table social_posts add column if not exists tiktok_publish_id text;
