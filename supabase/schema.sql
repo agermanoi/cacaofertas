@@ -78,9 +78,30 @@ create table if not exists clicks (
 
 -- Menor preço do dia por produto --------------------------------------
 create or replace view product_daily with (security_invoker = on) as
-select product_id, captured_on as day, min(price) as min_price
-from price_history
-group by product_id, captured_on;
+-- Menor preço do dia por produto. O preço de uma oferta vale até a próxima leitura
+-- (no máximo 3 dias; 5 na Amazon, que é consultada em rodízio pela SerpAPI), igual ao
+-- que o site mostra como "preço de hoje". Sem isso o gráfico serrilha nos dias em que
+-- a fonte mais barata não foi consultada.
+with h as (
+  select ph.product_id, ph.price, ph.captured_on,
+         lead(ph.captured_on) over (partition by ph.offer_id order by ph.captured_on) as next_on,
+         case when o.source = 'amazon' then 5 else 3 end as win
+  from price_history ph
+  join offers o on o.id = ph.offer_id
+),
+x as (
+  select h.product_id, d::date as day, h.price
+  from h
+  cross join lateral generate_series(
+    h.captured_on,
+    least(coalesce(h.next_on - 1, (now() at time zone 'America/Sao_Paulo')::date),
+          h.captured_on + h.win - 1,
+          (now() at time zone 'America/Sao_Paulo')::date),
+    interval '1 day') d
+)
+select product_id, day, min(price) as min_price
+from x
+group by product_id, day;
 
 -- Visão geral: melhor preço atual + estatísticas de 30/90 dias ----------
 create or replace view product_overview with (security_invoker = on) as
