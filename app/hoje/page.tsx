@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOverview } from "@/lib/data";
-import { verdictFor } from "@/lib/verdict";
+import { isInflated, verdictFor } from "@/lib/verdict";
 import { expiresLabel, getCoupons, type Coupon } from "@/lib/coupons";
 import { adminClient } from "@/lib/supabase";
 import { CouponCard } from "@/components/CouponCard";
@@ -69,7 +69,7 @@ export default async function Hoje() {
     .filter((i) => ["record", "below"].includes(i.v.kind))
     .sort((a, b) => (b.v.vsAvg ?? 0) - (a.v.vsAvg ?? 0));
   const rest = items
-    .filter((i) => !real.includes(i) && i.v.kind !== "fake")
+    .filter((i) => !real.includes(i) && !isInflated(i.v.kind))
     .sort((a, b) => Number(Boolean(b.p.image_url)) - Number(Boolean(a.p.image_url)) || b.p.popularity - a.p.popularity);
   const list = [...real, ...rest].slice(0, 12);
   const topCoupons = coupons.filter((c) => c.code && !postedCoupons.has(c.id)).slice(0, 4);

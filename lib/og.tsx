@@ -58,6 +58,7 @@ export const VERDICT_COLORS: Record<string, { bg: string; fg: string }> = {
   normal: { bg: "#EEF0F3", fg: "#3B4553" },
   above: { bg: "#FFF3E0", fg: "#8A4B00" },
   fake: { bg: "#FFF3E0", fg: "#8A4B00" },
+  half: { bg: "#FDE7E7", fg: "#A11A1A" },
   learning: { bg: "#EEF0F3", fg: "#3B4553" },
   empty: { bg: "#EEF0F3", fg: "#3B4553" },
 };

@@ -42,6 +42,11 @@ export default function ComoFunciona() {
           O preço “de” anunciado está mais de 15% acima do maior valor que vimos nos últimos 30 dias, e o preço de hoje
           está dentro da média. O produto pode valer a pena, mas o desconto real é menor que o anunciado.
         </dd>
+        <dt className="v-half">Metade do dobro</dt>
+        <dd>
+          O caso clássico da Black Friday: a loja anuncia uns 50% de desconto em cima de um preço “de” que não vimos nos
+          últimos 30 dias, e o preço de hoje está na média. Na prática, o desconto é quase nenhum.
+        </dd>
       </dl>
 
       <h2>Links de afiliado</h2>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getDailySeries, getOverview } from "@/lib/data";
-import { verdictFor } from "@/lib/verdict";
+import { isInflated, verdictFor } from "@/lib/verdict";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
 import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
 import { AdSlot } from "@/components/AdSlot";
@@ -40,7 +40,7 @@ export default async function Home() {
       kicker: real.includes(i) ? "Queda real hoje" : "Entre os mais buscados",
       verdict: i.verdict,
     }));
-  const fakes = items.filter((i) => i.verdict.kind === "fake").length;
+  const fakes = items.filter((i) => isInflated(i.verdict.kind)).length;
 
   return (
     <>

@@ -2,7 +2,7 @@ import { PNG } from "pngjs";
 import jpeg from "jpeg-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ProductOverview } from "./types";
-import { verdictFor, type Verdict } from "./verdict";
+import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
 
@@ -173,7 +173,7 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig): { ig: stri
   const host = siteUrl().replace(/^https?:\/\//, "");
   const lines: string[] = [headline(v), p.name, ""];
   lines.push(`💰 ${brl(price)}${p.best_store ? ` ${atStore(p.best_store)}` : ""}`);
-  if (list && list > price * 1.02 && v.kind !== "fake") {
+  if (list && list > price * 1.02 && !isInflated(v.kind)) {
     lines.push(`De ${brl(list)} (−${Math.round((1 - price / list) * 100)}%)`);
   }
   if (v.kind === "record" || v.kind === "below") {

@@ -320,6 +320,10 @@ h2 {
   background: var(--warn-bg);
   color: var(--warn);
 }
+.v-half .verdict-label {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
 .v-learning .verdict-label,
 .v-empty .verdict-label {
   background: transparent;

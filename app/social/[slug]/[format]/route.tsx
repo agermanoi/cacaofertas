@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getProductBySlug } from "@/lib/data";
-import { verdictFor } from "@/lib/verdict";
+import { isInflated, verdictFor } from "@/lib/verdict";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
 import { atStore } from "@/lib/social";
@@ -31,7 +31,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const v = verdictFor(p);
   const price = Number(p.best_price);
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
-  const showList = list != null && list > price * 1.02 && v.kind !== "fake";
+  const showList = list != null && list > price * 1.02 && !isInflated(v.kind);
   const badge =
     v.kind === "record"
       ? "MENOR PREÇO JÁ VISTO"

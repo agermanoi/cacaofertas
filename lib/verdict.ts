@@ -1,6 +1,9 @@
 import type { ProductOverview } from "./types";
 
-export type VerdictKind = "record" | "below" | "normal" | "above" | "fake" | "learning" | "empty";
+export type VerdictKind = "record" | "below" | "normal" | "above" | "fake" | "half" | "learning" | "empty";
+
+/** Desconto anunciado que não se sustenta no histórico (os dois níveis). */
+export const isInflated = (k: VerdictKind) => k === "fake" || k === "half";
 
 export interface Verdict {
   kind: VerdictKind;
@@ -38,6 +41,16 @@ export function verdictFor(p: ProductOverview): Verdict {
   // Só depois de 15 dias de histórico: antes disso o "maior preço em 30 dias" ainda é curto
   // demais e quase todo preço "de" (o preço de tabela da loja) passaria do limite.
   if (list && max && days >= FAKE_MIN_DAYS && list > max * 1.15 && vsAvg < 0.03) {
+    const announced = 1 - best / list;
+    // anunciado como ~50% off (o "de" é o dobro do "por") e o preço de hoje está na média
+    if (announced >= 0.45) {
+      return {
+        kind: "half",
+        label: "Metade do dobro",
+        detail: `Anunciado com ${Math.round(announced * 100)}% de desconto, mas o preço de hoje está na média dos últimos 30 dias.`,
+        vsAvg,
+      };
+    }
     return {
       kind: "fake",
       label: "Desconto menor do que parece",
