@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { breadcrumbLd } from "@/lib/seo";
+import { categorySlug as catSlugForCrumb } from "@/lib/categories";
+import { siteUrl } from "@/lib/site";
 import { getDailySeries, getOffers, getProductBySlug, getStoreSeries } from "@/lib/data";
 import { verdictFor } from "@/lib/verdict";
 import { money } from "@/lib/format";
@@ -28,7 +31,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const price = p.best_price != null ? ` por ${money(Number(p.best_price))}` : "";
   const sp = getSpecs(p.slug, p.specs);
   return {
-    title: `${p.name}: histórico de preço e ficha técnica`,
+    title: `${p.name}: menor preço hoje, histórico e ficha técnica`,
     description: `${p.name}${price}. Histórico de preço, média dos últimos 30 dias e ficha técnica.${sp ? ` ${sp.summary}` : ""}`.slice(0, 300),
     alternates: { canonical: `/produto/${p.slug}` },
     ...noIndex,
@@ -54,6 +57,8 @@ export default async function ProductPage({ params }: Params) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${siteUrl()}/produto/${p.slug}#produto`,
+    url: `${siteUrl()}/produto/${p.slug}`,
     name: p.name,
     image: p.image_url || undefined,
     category: p.category,
@@ -67,6 +72,7 @@ export default async function ProductPage({ params }: Params) {
             lowPrice: Number(offers[0].last_price),
             highPrice: Number(offers[offers.length - 1].last_price),
             offerCount: offers.length,
+            url: `${siteUrl()}/produto/${p.slug}`,
           }
         : undefined,
   };
@@ -74,6 +80,18 @@ export default async function ProductPage({ params }: Params) {
   return (
     <article className="wrap product">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbLd([
+              { name: "Início", path: "/" },
+              { name: p.category, path: `/categoria/${catSlugForCrumb(p.category)}` },
+              { name: p.name, path: `/produto/${p.slug}` },
+            ])
+          ),
+        }}
+      />
 
       <nav className="crumbs" aria-label="Você está em">
         <Link href="/">Todos os produtos</Link> <span aria-hidden="true">/</span>{" "}

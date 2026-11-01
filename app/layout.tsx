@@ -73,7 +73,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${SITE_URL}/#site`,
+                  name: s.siteName,
+                  alternateName: SITE_URL.replace(/^https?:\/\//, ""),
+                  url: SITE_URL,
+                  inLanguage: "pt-BR",
+                  publisher: { "@id": `${SITE_URL}/#org` },
+                },
+                {
               "@type": "Organization",
+              "@id": `${SITE_URL}/#org`,
               name: s.siteName,
               url: SITE_URL,
               logo: s.logoUrl.startsWith("/") ? `${SITE_URL}${s.logoUrl}` : s.logoUrl,
@@ -82,6 +94,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 s.contact.facebook ? `https://www.facebook.com/${s.contact.facebook}/` : null,
                 s.contact.tiktok ? `https://www.tiktok.com/@${s.contact.tiktok}` : null,
               ].filter(Boolean),
+                },
+              ],
             }),
           }}
         />

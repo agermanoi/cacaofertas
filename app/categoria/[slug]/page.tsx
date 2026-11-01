@@ -1,3 +1,5 @@
+import { breadcrumbLd } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -61,7 +63,7 @@ export default async function CategoryPage({ params }: Params) {
     itemListElement: products.slice(0, 50).map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `/produto/${p.slug}`,
+      url: `${siteUrl()}/produto/${p.slug}`,
       name: p.name,
     })),
   };
@@ -69,6 +71,17 @@ export default async function CategoryPage({ params }: Params) {
   return (
     <div className="wrap category-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbLd([
+              { name: "Início", path: "/" },
+              { name, path: `/categoria/${slug}` },
+            ])
+          ),
+        }}
+      />
       <nav className="crumbs" aria-label="Você está em">
         <Link href="/">Todos os produtos</Link> <span aria-hidden="true">/</span> {name}
       </nav>

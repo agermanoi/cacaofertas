@@ -1,3 +1,4 @@
+import { breadcrumbLd } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -92,6 +93,18 @@ export default async function EventPage({ params }: Props) {
             "@type": "FAQPage",
             mainEntity: qa.map((x) => ({ "@type": "Question", name: x.q, acceptedAnswer: { "@type": "Answer", text: x.a } })),
           }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbLd([
+              { name: "Início", path: "/" },
+              { name: "Calendário de promoções", path: "/datas" },
+              { name: e.name, path: `/datas/${e.slug}` },
+            ])
+          ),
         }}
       />
       <header className="event-hero">

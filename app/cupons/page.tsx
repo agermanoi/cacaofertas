@@ -2,14 +2,18 @@ import type { Metadata } from "next";
 import { getCoupons, expiresLabel, type Coupon } from "@/lib/coupons";
 import { CouponCard } from "@/components/CouponCard";
 import { AdSlot } from "@/components/AdSlot";
+import { monthYear } from "@/lib/seo";
 
 export const revalidate = 900;
 
-export const metadata: Metadata = {
-  title: "Cupons de desconto para a Black Friday",
-  description: "Cupons de desconto válidos hoje nas principais lojas, com validade e regras. Atualizado várias vezes por dia.",
-  alternates: { canonical: "/cupons" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const when = monthYear();
+  return {
+    title: `Cupons de desconto válidos hoje (${when})`,
+    description: `Cupons de desconto válidos em ${when} nas lojas parceiras, com código, validade e regras. Atualizado várias vezes por dia.`,
+    alternates: { canonical: "/cupons" },
+  };
+}
 
 /** Quantas lojas aparecem antes do "ver todas" e quantos cupons por loja antes do "ver mais". */
 const TOP_STORES = 12;
