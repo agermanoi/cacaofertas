@@ -2,11 +2,12 @@ import { ImageResponse } from "next/og";
 import { getOverview } from "@/lib/data";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
-import { eventDeals, getPublicEvents } from "@/lib/events";
+import { daysBetween, eventDeals, getPublicEvents, todayBR } from "@/lib/events";
 import { publicClient } from "@/lib/supabase";
 
 /**
  * Artes das datas do varejo:
+ *   /social/evento/[slug]/contagem/feed|story  "Faltam 7 dias para o 11.11" + o preço para bater
  *   /social/evento/[slug]/vespera/feed|story   "Amanhã é 11.11" + o preço para bater
  *   /social/evento/[slug]/resumo/feed|story    "11.11: o que foi desconto de verdade"
  */
@@ -18,7 +19,7 @@ const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string; kind: string; format: string }> }) {
   const { slug, kind, format } = await params;
   const fmt = format === "story" ? "story" : format === "feed" ? "feed" : null;
-  if (!fmt || (kind !== "vespera" && kind !== "resumo")) return new Response("Não encontrado", { status: 404 });
+  if (!fmt || !["contagem", "vespera", "resumo"].includes(kind)) return new Response("Não encontrado", { status: 404 });
   const ev = (await getPublicEvents()).find((e) => e.slug === slug);
   if (!ev) return new Response("Data não encontrada", { status: 404 });
 
@@ -28,7 +29,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
 
   type Row = { name: string; img: string | null; line: string; tag?: string };
   let rows: Row[] = [];
-  if (kind === "vespera") {
+  const daysLeft = daysBetween(todayBR(), ev.date);
+  if (kind === "vespera" || kind === "contagem") {
     const top = products
       .slice()
       .sort((a, b) => Number(Boolean(b.image_url)) - Number(Boolean(a.image_url)) || b.popularity - a.popularity)
@@ -50,9 +52,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
     }));
   }
   const [logo, mascot] = await Promise.all([imageData(s.logoUrl), imageData("/brand/mascote.png")]);
-  const title = kind === "vespera" ? `Amanhã é ${ev.name}` : `${ev.name}: desconto de verdade`;
+  const title =
+    kind === "contagem"
+      ? daysLeft === 1
+        ? "Falta 1 dia"
+        : `Faltam ${daysLeft} dias`
+      : kind === "vespera"
+        ? `Amanhã é ${ev.name}`
+        : `${ev.name}: desconto de verdade`;
   const sub =
-    kind === "vespera"
+    kind === "contagem"
+      ? `para ${ev.article} ${ev.name}. O preço para bater: quanto custa hoje e o menor preço que já vimos.`
+      : kind === "vespera"
       ? "O preço para bater: quanto custa hoje e o menor preço que já vimos."
       : rows.length
         ? "Preço na data comparado com a média dos 30 dias anteriores."
@@ -164,7 +175,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             fontWeight: 900,
           }}
         >
-          <span>{kind === "vespera" ? "Amanhã: os descontos reais" : "Lista completa no link da bio"}</span>
+          <span>
+            {kind === "contagem" ? "Siga para não perder" : kind === "vespera" ? "Amanhã: os descontos reais" : "Lista completa no link da bio"}
+          </span>
           <span>{siteHost()}</span>
         </div>
       </div>

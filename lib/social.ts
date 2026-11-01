@@ -5,7 +5,7 @@ import type { ProductOverview } from "./types";
 import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
-import { addDays, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
+import { addDays, daysBetween, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
 
 /**
  * Publicação automática no Instagram e na Página do Facebook (Meta Graph API).
@@ -50,6 +50,8 @@ export interface SocialConfig {
   couponMinPct: number;
   /** horários dos produtos no dia de uma data com posts especiais (11.11, Black Friday…) */
   eventHours: number[];
+  /** posts de contagem regressiva ("faltam 7 dias para o 11.11"), em dias antes da data, às 19h */
+  teaserDays: number[];
 }
 
 export const DEFAULT_SOCIAL: SocialConfig = {
@@ -70,6 +72,7 @@ export const DEFAULT_SOCIAL: SocialConfig = {
   couponHours: [12, 15, 18],
   couponMinPct: 10,
   eventHours: [9, 12, 15, 18, 21],
+  teaserDays: [14, 7, 3],
 };
 
 /** "10, 20" → [10, 20] (horas válidas, sem repetir, em ordem). */
@@ -111,6 +114,15 @@ export function parseSocial(raw: unknown): SocialConfig {
     couponHours: r.couponHours === undefined ? D.couponHours : parseHours(r.couponHours, D.couponHours),
     couponMinPct: num(r.couponMinPct, D.couponMinPct, 1, 90),
     eventHours: r.eventHours === undefined ? D.eventHours : parseHours(r.eventHours, D.eventHours),
+    teaserDays:
+      r.teaserDays === undefined
+        ? D.teaserDays
+        : (Array.isArray(r.teaserDays) ? r.teaserDays : String(r.teaserDays).split(/[^0-9]+/))
+            .map(Number)
+            .filter((n) => Number.isInteger(n) && n >= 2 && n <= 60)
+            .filter((n, i, a) => a.indexOf(n) === i)
+            .sort((a, b) => b - a)
+            .slice(0, 6),
   };
 }
 
@@ -594,17 +606,29 @@ export async function queueCoupon(db: SupabaseClient, c: CouponRow, cfg: SocialC
 
 const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-/** Legendas da véspera ("amanhã é 11.11") e do resumo ("o que foi desconto de verdade"). */
+export type EventPostKind = "contagem" | "vespera" | "resumo";
+
+/** Legendas da contagem ("faltam 7 dias"), da véspera ("amanhã é 11.11") e do resumo. */
 export async function eventCaptions(
   db: SupabaseClient,
   ev: EventRow,
-  kind: "vespera" | "resumo",
+  kind: EventPostKind,
   cfg: SocialConfig
 ): Promise<{ ig: string; fb: string }> {
   const host = siteUrl().replace(/^https?:\/\//, "");
   const url = `${siteUrl()}/datas/${ev.slug}`;
   const lines: string[] = [];
-  if (kind === "vespera") {
+  if (kind === "contagem") {
+    const d = daysBetween(todayBR(), ev.date);
+    lines.push(
+      `⏳ ${d === 1 ? "Falta 1 dia" : `Faltam ${d} dias`} para ${ev.article} ${ev.name}!`,
+      "",
+      "Muita loja sobe o preço antes da data para o desconto parecer maior. A gente acompanha os preços duas vezes por dia e, no dia, mostra quais descontos são de verdade.",
+      "Até lá, veja no site o preço para bater de cada produto.",
+      "",
+      "🔔 Siga para não perder."
+    );
+  } else if (kind === "vespera") {
     lines.push(`🛍️ Amanhã é ${ev.name}!`, "", "Antes de comprar, veja o preço para bater: quanto cada produto custa hoje e o menor preço que já vimos.", "Amanhã a gente mostra quais descontos são de verdade.");
   } else {
     const { data } = await db.from("product_overview").select("*").eq("active", true).not("best_price", "is", null);
@@ -624,8 +648,8 @@ export async function eventCaptions(
   };
 }
 
-export async function queueEventPost(db: SupabaseClient, ev: EventRow, kind: "vespera" | "resumo", cfg: SocialConfig): Promise<number> {
-  const slug = `data-${ev.slug}-${kind}`;
+export async function queueEventPost(db: SupabaseClient, ev: EventRow, kind: EventPostKind, cfg: SocialConfig): Promise<number> {
+  const slug = kind === "contagem" ? `data-${ev.slug}-contagem-${daysBetween(todayBR(), ev.date)}` : `data-${ev.slug}-${kind}`;
   const path = `/social/evento/${ev.slug}/${kind}`;
   const feed = await renderToStorage(db, slug, "feed", undefined, path);
   const story = cfg.story || cfg.tiktok ? await renderToStorage(db, slug, "story", undefined, path) : null;
@@ -666,7 +690,7 @@ export interface TickResult {
  */
 export async function runTick(
   db: SupabaseClient,
-  opts: { force?: "product" | "coupon" | "vespera" | "resumo"; event?: string; deadlineMs?: number } = {}
+  opts: { force?: "product" | "coupon" | EventPostKind; event?: string; deadlineMs?: number } = {}
 ): Promise<TickResult> {
   const start = Date.now();
   const deadline = opts.deadlineMs ?? 40_000;
@@ -681,13 +705,18 @@ export async function runTick(
   const evEve = opts.event ? events.find((e) => e.slug === opts.event) || null : events.find((e) => e.date === addDays(today, 1)) || null;
   const evRecap = opts.event ? events.find((e) => e.slug === opts.event) || null : events.find((e) => e.date === addDays(today, -1)) || null;
 
+  // contagem regressiva (19h): datas a N dias, N na lista de dias do painel
+  const evTeasers = opts.event
+    ? events.filter((e) => e.slug === opts.event)
+    : events.filter((e) => cfg.teaserDays.includes(daysBetween(today, e.date)));
   const productHours = evToday ? cfg.eventHours : cfg.productHours;
   const doProducts = opts.force ? opts.force === "product" : productHours.includes(hour);
   const doCoupons = opts.force ? opts.force === "coupon" : cfg.coupons && cfg.couponHours.includes(hour);
   const doEve = opts.force ? opts.force === "vespera" && Boolean(evEve) : Boolean(evEve) && hour === 19;
   const doRecap = opts.force ? opts.force === "resumo" && Boolean(evRecap) : Boolean(evRecap) && hour === 11;
+  const doTeaser = opts.force ? opts.force === "contagem" && evTeasers.length > 0 : evTeasers.length > 0 && hour === 19;
   if (!opts.force && !cfg.enabled) return { ...res, skipped: "desligado" };
-  if (!doProducts && !doCoupons && !doEve && !doRecap) return { ...res, skipped: "fora do horário" };
+  if (!doProducts && !doCoupons && !doEve && !doRecap && !doTeaser) return { ...res, skipped: "fora do horário" };
 
   if (!opts.force) {
     // trava da hora: só a primeira chamada passa
@@ -699,6 +728,8 @@ export async function runTick(
   if (!acc.pageToken) return { ...res, errors: ["Facebook/Instagram não conectados."] };
 
   const jobs: { label: string; make: () => Promise<number> }[] = [];
+  if (doTeaser)
+    for (const ev of evTeasers) jobs.push({ label: `${ev.name}: contagem`, make: () => queueEventPost(db, ev, "contagem", cfg) });
   if (doEve && evEve) jobs.push({ label: `${evEve.name}: véspera`, make: () => queueEventPost(db, evEve, "vespera", cfg) });
   if (doRecap && evRecap) jobs.push({ label: `${evRecap.name}: resumo`, make: () => queueEventPost(db, evRecap, "resumo", cfg) });
   if (doProducts) for (const c of await pickCandidates(db, cfg)) jobs.push({ label: c.p.slug, make: () => queuePost(db, c, cfg, evToday) });

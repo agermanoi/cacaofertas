@@ -31,7 +31,7 @@ type Post = {
 
 const when = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) : "";
-const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado", coupon: "Cupom", vespera: "Véspera de data", resumo: "Resumo de data" };
+const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado", coupon: "Cupom", contagem: "Contagem para data", vespera: "Véspera de data", resumo: "Resumo de data" };
 const STATUS: Record<string, string> = {
   queued: "Na fila",
   publishing: "Publicando…",
@@ -150,6 +150,11 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
             Nas <a href="/admin/datas">datas com posts especiais</a> também saem a véspera (19h do dia anterior) e o resumo (11h do
             dia seguinte).
           </p>
+        </div>
+        <div className="field">
+          <label htmlFor="teaserDays">Contagem regressiva: postar quantos dias antes de cada data (às 19h)</label>
+          <input id="teaserDays" name="teaserDays" defaultValue={cfg.teaserDays.join(", ")} placeholder="14, 7, 3" />
+          <p className="hint">Ex.: 14, 7, 3 = posts “Faltam 14 dias”, “Faltam 7 dias” e “Faltam 3 dias”, além da véspera. Vazio = sem contagem.</p>
         </div>
         <div className="social-checks">
           <label className="check">
@@ -320,6 +325,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                 <optgroup label="Datas do varejo">
                   {events.map((e) => (
                     <Fragment key={e.slug}>
+                      <option value={`__contagem:${e.slug}`}>{e.name}: contagem regressiva (“faltam N dias”)</option>
                       <option value={`__vespera:${e.slug}`}>
                         {e.name}: véspera (“amanhã é {e.name}”)
                       </option>
@@ -382,7 +388,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                   <img src={p.feed_url} alt="" loading="lazy" width={72} height={90} />
                 ) : null}
                 <span>
-                  <strong>{["coupon", "vespera", "resumo"].includes(p.reason || "") ? p.caption.split("\n")[0].replace(/^🎟️\s*/, "") : p.caption.split("\n")[1] || p.slug}</strong>
+                  <strong>{["coupon", "contagem", "vespera", "resumo"].includes(p.reason || "") ? p.caption.split("\n")[0].replace(/^🎟️\s*/, "") : p.caption.split("\n")[1] || p.slug}</strong>
                   <span className="social-meta">
                     {when(p.published_at)}
                     {p.ig_permalink ? (

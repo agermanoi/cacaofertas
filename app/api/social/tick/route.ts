@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "não autorizado" }, { status: 401 });
   }
   const f = req.nextUrl.searchParams.get("force");
-  const force = f === "coupon" || f === "product" || f === "vespera" || f === "resumo" ? f : undefined;
+  const force = f === "coupon" || f === "product" || f === "vespera" || f === "resumo" || f === "contagem" ? f : undefined;
   const event = req.nextUrl.searchParams.get("event") || undefined;
   const result = await runTick(db, { force, event, deadlineMs: 40_000 });
   // a página do link na bio mostra o que acabou de sair

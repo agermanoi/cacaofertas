@@ -44,6 +44,7 @@ export async function saveSocial(formData: FormData) {
     couponHours: text(formData, "couponHours"),
     couponMinPct: Number(text(formData, "couponMinPct")),
     eventHours: text(formData, "eventHours"),
+    teaserDays: text(formData, "teaserDays"),
   });
   const { error } = await adminClient()
     .from("kv")
@@ -63,13 +64,13 @@ export async function createPost(formData: FormData) {
   const now = on(formData, "now");
 
   let list;
-  const evMatch = slug.match(/^__(vespera|resumo):(.+)$/);
+  const evMatch = slug.match(/^__(contagem|vespera|resumo):(.+)$/);
   if (evMatch) {
     const ev = (await getEvents(db)).find((e) => e.slug === evMatch[2]);
     if (!ev) back({ erro: "Data não encontrada." });
     let eid: number;
     try {
-      eid = await queueEventPost(db, ev, evMatch[1] as "vespera" | "resumo", cfg);
+      eid = await queueEventPost(db, ev, evMatch[1] as "contagem" | "vespera" | "resumo", cfg);
     } catch (e) {
       back({ erro: `Não foi possível gerar a arte: ${(e as Error).message}` });
     }
