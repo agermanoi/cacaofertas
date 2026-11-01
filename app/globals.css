@@ -2052,3 +2052,41 @@ button.btn-ghost {
 .today-new { color: var(--brand); font-size: 1rem; }
 .today-when { font-size: 0.78rem; font-weight: 700; color: #5b6573; }
 .today-coupon-item { display: grid; gap: 6px; }
+
+/* ---------- Datas do varejo ---------- */
+.countdown-link { text-decoration: none; }
+.countdown-link:hover { text-decoration: underline; }
+.top-nav .top-event {
+  background: var(--brand);
+  color: var(--ink);
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+@media (max-width: 480px) {
+  .top-nav:has(.top-event) .top-how { display: none; }
+}
+.event-page { padding-top: 32px; padding-bottom: 64px; }
+.event-hero { background: var(--shelf); border-radius: var(--r); padding: 24px; margin-bottom: 28px; }
+.event-hero h1 { margin: 0 0 8px; }
+.event-when { display: inline-block; font-weight: 800; background: var(--brand); color: var(--ink); padding: 4px 12px; border-radius: 999px; margin-bottom: 12px; }
+.event-hero p { max-width: 70ch; }
+.event-section { margin: 0 0 32px; }
+.event-section h2 { margin: 0 0 6px; }
+.event-section > p.lede { margin: 0 0 14px; color: #3b4553; }
+.event-table { width: 100%; border-collapse: collapse; }
+.event-table th, .event-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.event-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: #5b6573; }
+.event-table td.num, .event-table th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.event-table .prod { display: flex; align-items: center; gap: 10px; }
+.event-table .prod img { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; }
+.event-good { color: #146c2e; font-weight: 800; }
+.event-bad { color: #a11a1a; font-weight: 800; }
+.event-coupons { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.event-faq dt { font-weight: 800; margin-top: 14px; }
+.event-faq dd { margin: 4px 0 0; }
+.event-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.event-list li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r); }
+@media (max-width: 600px) {
+  .event-table .hide-sm { display: none; }
+}

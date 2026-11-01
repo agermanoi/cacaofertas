@@ -60,6 +60,8 @@ export interface SiteSettings {
   /** Contador do topo ("Faltam 30 dias para a Black Friday"). */
   countdown: {
     enabled: boolean;
+    /** Usa o calendário de datas (/admin/datas): mostra a próxima data dentro da janela de cada uma. */
+    auto: boolean;
     /** Nome do evento, usado em {evento} */
     event: string;
     /** Data do evento (AAAA-MM-DD). Vazio = próxima Black Friday, calculada sozinha. */
@@ -104,6 +106,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   adsTxt: "",
   countdown: {
     enabled: true,
+    auto: true,
     event: "Black Friday",
     date: "",
     before: "Faltam {dias} para a {evento}",
@@ -183,6 +186,7 @@ export function mergeSettings(raw: unknown): SiteSettings {
     adsTxt: opt(r.adsTxt).slice(0, 50000),
     countdown: {
       enabled: r.countdown?.enabled === undefined ? D.countdown.enabled : Boolean(r.countdown.enabled),
+      auto: r.countdown?.auto === undefined ? D.countdown.auto : Boolean(r.countdown.auto),
       event: str(r.countdown?.event, D.countdown.event).slice(0, 60),
       date: /^\d{4}-\d{2}-\d{2}$/.test(opt(r.countdown?.date)) ? opt(r.countdown?.date) : "",
       before: str(r.countdown?.before, D.countdown.before).slice(0, 120),

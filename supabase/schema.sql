@@ -346,3 +346,28 @@ revoke all on function site_geo(int) from public, anon, authenticated;
 
 -- TikTok
 alter table social_posts add column if not exists tiktok_publish_id text;
+
+-- ---------- Datas do varejo (11.11, Black Friday, 12.12…) ----------
+create table if not exists events (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  name text not null,
+  article text not null default 'o',
+  date date not null,
+  yearly boolean not null default true,
+  intro text not null default '',
+  terms text[] not null default '{}',
+  countdown boolean not null default true,
+  countdown_days int not null default 15,
+  page boolean not null default true,
+  extra_posts boolean not null default false,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table events enable row level security;
+drop policy if exists "public read events" on events;
+create policy "public read events" on events for select using (active);
+grant select on events to anon, authenticated;
+alter table social_posts drop constraint if exists social_posts_kind_check;
+alter table social_posts add constraint social_posts_kind_check check (kind in ('product','coupon','event'));

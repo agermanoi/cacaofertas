@@ -129,6 +129,14 @@ export default async function SettingsPage({ searchParams }: Props) {
           <label className="check">
             <input type="checkbox" name="cd_enabled" defaultChecked={s.countdown.enabled} /> Mostrar o contador ao lado do logo
           </label>
+          <label className="check">
+            <input type="checkbox" name="cd_auto" defaultChecked={s.countdown.auto} /> Seguir o calendário de datas (11.11, Black
+            Friday, 12.12…) cadastrado em <a href="/admin/datas">Datas</a>
+          </label>
+          <p className="hint">
+            Com o calendário ligado, o contador mostra a próxima data dentro da janela de cada uma e leva para a página dela.
+            Fora das janelas, valem os campos abaixo.
+          </p>
           <div className="field-row">
             <div className="field">
               <label htmlFor="cd_event">Nome do evento</label>

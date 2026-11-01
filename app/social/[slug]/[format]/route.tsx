@@ -4,6 +4,7 @@ import { isInflated, verdictFor } from "@/lib/verdict";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
 import { atStore } from "@/lib/social";
+import { getPublicEvents, todayBR } from "@/lib/events";
 
 /**
  * Arte dos posts do Instagram/Facebook.
@@ -23,7 +24,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const p = await getProductBySlug(slug);
   if (!p || p.best_price == null) return new Response("Produto sem preço", { status: 404 });
 
-  const [s, fonts] = await Promise.all([getSettings(), ogFonts()]);
+  const [s, fonts, events] = await Promise.all([getSettings(), ogFonts(), getPublicEvents()]);
+  const ev = events.find((e) => e.extra_posts && e.date === todayBR()) || null;
   const [logo, photo, mascot] = await Promise.all([imageData(s.logoUrl), imageData(p.image_url), imageData("/brand/mascote.png")]);
   const size = SIZES[fmt];
   const story = fmt === "story";
@@ -38,6 +40,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
       : v.kind === "below"
         ? `${Math.round((v.vsAvg || 0) * 100)}% ABAIXO DA MÉDIA`
         : "MENOR PREÇO DE HOJE";
+  const badgeText = ev ? `${ev.name.toUpperCase()} · ${badge}` : badge;
+  const badgeSize = badgeText.length > 26 ? 24 : 30;
   const good = v.kind === "record" || v.kind === "below";
   const name = p.name.length > 80 ? `${p.name.slice(0, 78)}…` : p.name;
   const nameSize = name.length > 55 ? 50 : name.length > 32 ? 58 : 66;
@@ -72,13 +76,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
               display: "flex",
               background: good ? "#146C2E" : s.colors.ink,
               color: "#FFFFFF",
-              fontSize: 30,
+              fontSize: badgeSize,
               fontWeight: 900,
               padding: "12px 24px",
               borderRadius: 999,
             }}
           >
-            {badge}
+            {badgeText}
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import { publicClient } from "@/lib/supabase";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
 import { validity } from "@/lib/social";
+import { getPublicEvents, todayBR } from "@/lib/events";
 
 /**
  * Arte dos posts de cupom.
@@ -25,7 +26,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .maybeSingle();
   if (!c?.code) return new Response("Cupom indisponível", { status: 404 });
 
-  const [s, fonts] = await Promise.all([getSettings(), ogFonts()]);
+  const [s, fonts, events] = await Promise.all([getSettings(), ogFonts(), getPublicEvents()]);
+  const ev = events.find((e) => e.extra_posts && e.date === todayBR()) || null;
   const [logo, mascot] = await Promise.all([imageData(s.logoUrl), imageData("/brand/mascote.png")]);
   const story = fmt === "story";
   const title = String(c.title).replace(/\s+/g, " ").trim();
@@ -71,7 +73,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
               borderRadius: 999,
             }}
           >
-            CUPOM DE DESCONTO
+            {ev ? `CUPOM ${ev.name.toUpperCase()}` : "CUPOM DE DESCONTO"}
           </div>
         </div>
 

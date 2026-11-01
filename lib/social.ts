@@ -5,6 +5,7 @@ import type { ProductOverview } from "./types";
 import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
+import { addDays, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
 
 /**
  * Publicação automática no Instagram e na Página do Facebook (Meta Graph API).
@@ -47,6 +48,8 @@ export interface SocialConfig {
   couponHours: number[];
   /** desconto mínimo do cupom: % (ou R$ ≥ 3× esse número quando o desconto é em reais) */
   couponMinPct: number;
+  /** horários dos produtos no dia de uma data com posts especiais (11.11, Black Friday…) */
+  eventHours: number[];
 }
 
 export const DEFAULT_SOCIAL: SocialConfig = {
@@ -66,6 +69,7 @@ export const DEFAULT_SOCIAL: SocialConfig = {
   coupons: true,
   couponHours: [12, 15, 18],
   couponMinPct: 10,
+  eventHours: [9, 12, 15, 18, 21],
 };
 
 /** "10, 20" → [10, 20] (horas válidas, sem repetir, em ordem). */
@@ -106,6 +110,7 @@ export function parseSocial(raw: unknown): SocialConfig {
     coupons: bool(r.coupons, D.coupons),
     couponHours: r.couponHours === undefined ? D.couponHours : parseHours(r.couponHours, D.couponHours),
     couponMinPct: num(r.couponMinPct, D.couponMinPct, 1, 90),
+    eventHours: r.eventHours === undefined ? D.eventHours : parseHours(r.eventHours, D.eventHours),
   };
 }
 
@@ -166,12 +171,12 @@ export function headline(v: Verdict): string {
   return "⭐ Menor preço de hoje";
 }
 
-export function buildCaptions(p: ProductOverview, cfg: SocialConfig): { ig: string; fb: string } {
+export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventRow | null): { ig: string; fb: string } {
   const v = verdictFor(p);
   const price = Number(p.best_price);
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
   const host = siteUrl().replace(/^https?:\/\//, "");
-  const lines: string[] = [headline(v), p.name, ""];
+  const lines: string[] = [`${ev ? `🛍️ ${ev.name} | ` : ""}${headline(v)}`, p.name, ""];
   lines.push(`💰 ${brl(price)}${p.best_store ? ` ${atStore(p.best_store)}` : ""}`);
   if (list && list > price * 1.02 && !isInflated(v.kind)) {
     lines.push(`De ${brl(list)} (−${Math.round((1 - price / list) * 100)}%)`);
@@ -181,7 +186,7 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig): { ig: stri
   } else {
     lines.push("📊 Comparamos as lojas duas vezes por dia e mostramos o histórico de preço.");
   }
-  const tags = [cfg.hashtags, hashtagOf(p.category)]
+  const tags = [cfg.hashtags, hashtagOf(p.category), ev ? hashtagOf(ev.name) : ""]
     .join(" ")
     .split(/\s+/)
     .filter((t) => /^#\S+$/.test(t));
@@ -196,6 +201,12 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig): { ig: stri
   const ig = compose(`🔗 Link na bio → ${host}/hoje`);
   const fb = compose(`🔗 ${url}?utm_source=facebook&utm_medium=social`);
   return { ig: ig.slice(0, 2200), fb: fb.slice(0, 5000) };
+}
+
+/** Evento de hoje com posts especiais (ou null). */
+export async function socialEventToday(db: SupabaseClient): Promise<EventRow | null> {
+  const today = todayBR();
+  return (await getEvents(db)).find((e) => e.extra_posts && e.date === today) || null;
 }
 
 /* ---------------------------------------------------------------- seleção */
@@ -258,10 +269,12 @@ export async function pickCandidates(db: SupabaseClient, cfg: SocialConfig, limi
 /* ------------------------------------------------------------------- arte */
 
 /** Busca a arte PNG do site, converte para JPEG e guarda no Storage. Devolve a URL pública. */
-export async function renderToStorage(db: SupabaseClient, slug: string, format: "feed" | "story", couponId?: string): Promise<string> {
-  const src = couponId
-    ? `${siteUrl()}/social/cupom/${couponId}/${format}?t=${Date.now()}`
-    : `${siteUrl()}/social/${encodeURIComponent(slug)}/${format}?t=${Date.now()}`;
+export async function renderToStorage(db: SupabaseClient, slug: string, format: "feed" | "story", couponId?: string, srcPath?: string): Promise<string> {
+  const src = srcPath
+    ? `${siteUrl()}${srcPath}/${format}?t=${Date.now()}`
+    : couponId
+      ? `${siteUrl()}/social/cupom/${couponId}/${format}?t=${Date.now()}`
+      : `${siteUrl()}/social/${encodeURIComponent(slug)}/${format}?t=${Date.now()}`;
   const res = await fetch(src, { cache: "no-store" });
   const type = res.headers.get("content-type") || "";
   if (!res.ok || !type.startsWith("image/png")) throw new Error(`Arte ${format} indisponível (${res.status} ${type}) em ${src}`);
@@ -288,10 +301,10 @@ export async function renderToStorage(db: SupabaseClient, slug: string, format: 
 }
 
 /** Cria o post na fila (arte + legendas). */
-export async function queuePost(db: SupabaseClient, c: Candidate, cfg: SocialConfig): Promise<number> {
+export async function queuePost(db: SupabaseClient, c: Candidate, cfg: SocialConfig, ev?: EventRow | null): Promise<number> {
   const feed = await renderToStorage(db, c.p.slug, "feed");
   const story = cfg.story || cfg.tiktok ? await renderToStorage(db, c.p.slug, "story") : null;
-  const { ig, fb } = buildCaptions(c.p, cfg);
+  const { ig, fb } = buildCaptions(c.p, cfg, ev);
   const { data, error } = await db
     .from("social_posts")
     .insert({
@@ -489,7 +502,7 @@ export function validity(expires: string | null): string {
  * sem repetir o cupom em 14 dias nem a loja em 3 dias. Destaques do painel primeiro,
  * depois o maior desconto.
  */
-export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit = 1): Promise<CouponRow[]> {
+export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit = 1, ev?: EventRow | null): Promise<CouponRow[]> {
   const soon = new Date(Date.now() + 6 * 3600_000).toISOString();
   const { data } = await db
     .from("coupons")
@@ -511,7 +524,7 @@ export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit =
   const score = (c: CouponRow) => {
     const d = parseDiscount(c.discount);
     const value = d.pct ?? (d.brl ? d.brl / 3 : 0);
-    return (c.highlight ? 1000 : 0) + value;
+    return (c.highlight ? 1000 : 0) + (ev && mentionsEvent(ev, c.title) ? 500 : 0) + value;
   };
   const ok = ((data || []) as CouponRow[]).filter((c) => {
     if (!c.code || !realStore(c.store) || usedCoupons.has(c.id) || usedStores.has(couponSlug(c))) return false;
@@ -539,11 +552,11 @@ export function couponSlug(c: { store: string }): string {
     .replace(/^-|-$/g, "")}`;
 }
 
-export function couponCaptions(c: CouponRow, cfg: SocialConfig): { ig: string; fb: string } {
+export function couponCaptions(c: CouponRow, cfg: SocialConfig, ev?: EventRow | null): { ig: string; fb: string } {
   const host = siteUrl().replace(/^https?:\/\//, "");
   const title = c.title.replace(/\s+/g, " ").trim();
   const lines = [
-    `🎟️ Cupom ${c.store}${c.discount ? `: ${c.discount}` : ""}`,
+    `${ev ? `🛍️ ${ev.name} | ` : ""}🎟️ Cupom ${c.store}${c.discount ? `: ${c.discount}` : ""}`,
     title,
     "",
     `👉 Código: ${c.code}`,
@@ -563,14 +576,63 @@ export function couponCaptions(c: CouponRow, cfg: SocialConfig): { ig: string; f
   };
 }
 
-export async function queueCoupon(db: SupabaseClient, c: CouponRow, cfg: SocialConfig): Promise<number> {
+export async function queueCoupon(db: SupabaseClient, c: CouponRow, cfg: SocialConfig, ev?: EventRow | null): Promise<number> {
   const slug = couponSlug(c);
   const feed = await renderToStorage(db, slug, "feed", c.id);
   const story = cfg.story || cfg.tiktok ? await renderToStorage(db, slug, "story", c.id) : null;
-  const { ig, fb } = couponCaptions(c, cfg);
+  const { ig, fb } = couponCaptions(c, cfg, ev);
   const { data, error } = await db
     .from("social_posts")
     .insert({ kind: "coupon", coupon_id: c.id, slug, status: "queued", caption: ig, fb_caption: fb, feed_url: feed, story_url: story, reason: "coupon" })
+    .select("id")
+    .single();
+  if (error) throw new Error(`Fila: ${error.message}`);
+  return Number(data.id);
+}
+
+/* ------------------------------------------------------- posts de datas */
+
+const money = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+/** Legendas da véspera ("amanhã é 11.11") e do resumo ("o que foi desconto de verdade"). */
+export async function eventCaptions(
+  db: SupabaseClient,
+  ev: EventRow,
+  kind: "vespera" | "resumo",
+  cfg: SocialConfig
+): Promise<{ ig: string; fb: string }> {
+  const host = siteUrl().replace(/^https?:\/\//, "");
+  const url = `${siteUrl()}/datas/${ev.slug}`;
+  const lines: string[] = [];
+  if (kind === "vespera") {
+    lines.push(`🛍️ Amanhã é ${ev.name}!`, "", "Antes de comprar, veja o preço para bater: quanto cada produto custa hoje e o menor preço que já vimos.", "Amanhã a gente mostra quais descontos são de verdade.");
+  } else {
+    const { data } = await db.from("product_overview").select("*").eq("active", true).not("best_price", "is", null);
+    const deals = (await eventDeals(db, ev, (data || []) as ProductOverview[])).filter((d) => d.pct >= 0.05).slice(0, 5);
+    lines.push(`📊 ${ev.name}: o que foi desconto de verdade`, "");
+    if (deals.length) {
+      for (const d of deals) lines.push(`✅ ${d.p.name}: ${money(d.price)} (−${Math.round(d.pct * 100)}% vs média)`);
+    } else {
+      lines.push("Nenhum produto que acompanhamos ficou 5% ou mais abaixo da média de 30 dias. Desconto de verdade foi raro.");
+    }
+  }
+  const tags = [...new Set(`${cfg.hashtags} ${hashtagOf(ev.name)} #promocao`.split(/\s+/).filter((t) => /^#\S+$/.test(t)))].slice(0, 25).join(" ");
+  const compose = (link: string) => [lines.join("\n"), "", link, "", tags].join("\n").trim();
+  return {
+    ig: compose(`🔗 Link na bio → ${host}/hoje`).slice(0, 2200),
+    fb: compose(`🔗 ${url}?utm_source=facebook&utm_medium=social`).slice(0, 5000),
+  };
+}
+
+export async function queueEventPost(db: SupabaseClient, ev: EventRow, kind: "vespera" | "resumo", cfg: SocialConfig): Promise<number> {
+  const slug = `data-${ev.slug}-${kind}`;
+  const path = `/social/evento/${ev.slug}/${kind}`;
+  const feed = await renderToStorage(db, slug, "feed", undefined, path);
+  const story = cfg.story || cfg.tiktok ? await renderToStorage(db, slug, "story", undefined, path) : null;
+  const { ig, fb } = await eventCaptions(db, ev, kind, cfg);
+  const { data, error } = await db
+    .from("social_posts")
+    .insert({ kind: "event", slug, status: "queued", caption: ig, fb_caption: fb, feed_url: feed, story_url: story, reason: kind })
     .select("id")
     .single();
   if (error) throw new Error(`Fila: ${error.message}`);
@@ -602,17 +664,30 @@ export interface TickResult {
  * nos de cupom, um cupom. Cada hora roda uma vez só, mesmo se chamado de novo.
  * deadlineMs: para de começar posts novos depois desse tempo (limite da função na Vercel).
  */
-export async function runTick(db: SupabaseClient, opts: { force?: "product" | "coupon"; deadlineMs?: number } = {}): Promise<TickResult> {
+export async function runTick(
+  db: SupabaseClient,
+  opts: { force?: "product" | "coupon" | "vespera" | "resumo"; event?: string; deadlineMs?: number } = {}
+): Promise<TickResult> {
   const start = Date.now();
   const deadline = opts.deadlineMs ?? 40_000;
   const cfg = await getSocialConfig(db);
   const { hour, key } = brNow();
   const res: TickResult = { hour, queued: [], published: [], errors: [] };
 
-  const doProducts = opts.force ? opts.force === "product" : cfg.productHours.includes(hour);
+  // datas com posts especiais: hoje (mais horários e selo), amanhã (véspera, 19h), ontem (resumo, 11h)
+  const today = todayBR();
+  const events = (await getEvents(db)).filter((e) => e.extra_posts);
+  const evToday = events.find((e) => e.date === today) || null;
+  const evEve = opts.event ? events.find((e) => e.slug === opts.event) || null : events.find((e) => e.date === addDays(today, 1)) || null;
+  const evRecap = opts.event ? events.find((e) => e.slug === opts.event) || null : events.find((e) => e.date === addDays(today, -1)) || null;
+
+  const productHours = evToday ? cfg.eventHours : cfg.productHours;
+  const doProducts = opts.force ? opts.force === "product" : productHours.includes(hour);
   const doCoupons = opts.force ? opts.force === "coupon" : cfg.coupons && cfg.couponHours.includes(hour);
+  const doEve = opts.force ? opts.force === "vespera" && Boolean(evEve) : Boolean(evEve) && hour === 19;
+  const doRecap = opts.force ? opts.force === "resumo" && Boolean(evRecap) : Boolean(evRecap) && hour === 11;
   if (!opts.force && !cfg.enabled) return { ...res, skipped: "desligado" };
-  if (!doProducts && !doCoupons) return { ...res, skipped: "fora do horário" };
+  if (!doProducts && !doCoupons && !doEve && !doRecap) return { ...res, skipped: "fora do horário" };
 
   if (!opts.force) {
     // trava da hora: só a primeira chamada passa
@@ -624,8 +699,12 @@ export async function runTick(db: SupabaseClient, opts: { force?: "product" | "c
   if (!acc.pageToken) return { ...res, errors: ["Facebook/Instagram não conectados."] };
 
   const jobs: { label: string; make: () => Promise<number> }[] = [];
-  if (doProducts) for (const c of await pickCandidates(db, cfg)) jobs.push({ label: c.p.slug, make: () => queuePost(db, c, cfg) });
-  if (doCoupons) for (const c of await pickCoupons(db, cfg, 1)) jobs.push({ label: `${couponSlug(c)} (${c.code})`, make: () => queueCoupon(db, c, cfg) });
+  if (doEve && evEve) jobs.push({ label: `${evEve.name}: véspera`, make: () => queueEventPost(db, evEve, "vespera", cfg) });
+  if (doRecap && evRecap) jobs.push({ label: `${evRecap.name}: resumo`, make: () => queueEventPost(db, evRecap, "resumo", cfg) });
+  if (doProducts) for (const c of await pickCandidates(db, cfg)) jobs.push({ label: c.p.slug, make: () => queuePost(db, c, cfg, evToday) });
+  if (doCoupons)
+    for (const c of await pickCoupons(db, cfg, 1, evToday))
+      jobs.push({ label: `${couponSlug(c)} (${c.code})`, make: () => queueCoupon(db, c, cfg, evToday) });
 
   for (const j of jobs) {
     if (Date.now() - start > deadline) {

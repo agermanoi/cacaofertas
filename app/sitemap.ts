@@ -2,12 +2,14 @@ import { siteUrl } from "@/lib/site";
 import { categorySlug } from "@/lib/categories";
 import type { MetadataRoute } from "next";
 import { getOverview } from "@/lib/data";
+import { getPublicEvents } from "@/lib/events";
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const products = await getOverview();
+  const events = (await getPublicEvents()).filter((e) => e.page);
   return [
     { url: `${base}/`, changeFrequency: "hourly", priority: 1 },
     { url: `${base}/cupons`, changeFrequency: "daily", priority: 0.7 },
@@ -17,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/politica-de-privacidade`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/termos-de-uso`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/mapa-do-site`, changeFrequency: "weekly", priority: 0.3 },
+    { url: `${base}/datas`, changeFrequency: "weekly", priority: 0.5 },
+    ...events.map((e) => ({ url: `${base}/datas/${e.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
     ...[...new Set(products.map((p) => p.category))].map((c) => ({
       url: `${base}/categoria/${categorySlug(c)}`,
       changeFrequency: "daily" as const,

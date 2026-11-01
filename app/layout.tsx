@@ -2,6 +2,7 @@ import { siteUrl } from "@/lib/site";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { countdownText, cssVars, getSettings } from "@/lib/settings";
+import { countdownEvent, countdownLabel, getPublicEvents, navEvent } from "@/lib/events";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import { PageTracker } from "@/components/PageTracker";
 import "./globals.css";
@@ -41,7 +42,11 @@ function gptInit(g: { networkCode: string; parentAdUnit: string; childUnits: boo
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const s = await getSettings();
-  const countdown = countdownText(s.countdown);
+  const events = await getPublicEvents();
+  const ce = s.countdown.enabled && s.countdown.auto ? countdownEvent(events) : null;
+  const countdown = ce ? countdownLabel(ce) : countdownText(s.countdown);
+  const countdownHref = ce?.e.page ? `/datas/${ce.e.slug}` : null;
+  const navEv = navEvent(events);
   const year = new Date().getFullYear();
   return (
     <html lang="pt-BR">
@@ -90,12 +95,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={s.logoUrl} alt={s.siteName} className="brand-logo" width={240} height={58} />
             </Link>
-            {countdown ? <p className="countdown">{countdown}</p> : null}
+            {countdown ? (
+              countdownHref ? (
+                <Link href={countdownHref} className="countdown countdown-link">
+                  {countdown}
+                </Link>
+              ) : (
+                <p className="countdown">{countdown}</p>
+              )
+            ) : null}
             <nav className="top-nav" aria-label="Principal">
+              {navEv ? (
+                <Link href={`/datas/${navEv.slug}`} className="top-link top-event">
+                  {navEv.name}
+                </Link>
+              ) : null}
               <Link href="/cupons" className="top-link">
                 Cupons
               </Link>
-              <Link href="/como-funciona" className="top-link">
+              <Link href="/como-funciona" className="top-link top-how">
                 Como funciona
               </Link>
             </nav>
@@ -144,6 +162,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
             <nav className="foot-nav" aria-label="Institucional">
               <Link href="/cupons">Cupons de desconto</Link>
+              <Link href="/datas">Calendário de promoções</Link>
               <Link href="/como-funciona">Como funciona</Link>
               <Link href="/contato">Contato</Link>
               <Link href="/politica-de-privacidade">Política de privacidade</Link>

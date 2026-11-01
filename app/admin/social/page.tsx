@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import { adminClient } from "@/lib/supabase";
 import { tiktokPublishStatus } from "@/lib/tiktok";
+import { getEvents, type EventRow } from "@/lib/events";
 import { demo } from "@/lib/mock";
 import { Flash } from "@/components/admin/Flash";
 import { DEFAULT_SOCIAL, getMetaAccount, getSocialConfig, type MetaAccount, type SocialConfig } from "@/lib/social";
@@ -29,7 +31,7 @@ type Post = {
 
 const when = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" }) : "";
-const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado", coupon: "Cupom" };
+const REASON: Record<string, string> = { record: "Menor preço já visto", below: "Abaixo da média", popular: "Mais buscado", coupon: "Cupom", vespera: "Véspera de data", resumo: "Resumo de data" };
 const STATUS: Record<string, string> = {
   queued: "Na fila",
   publishing: "Publicando…",
@@ -40,15 +42,16 @@ const STATUS: Record<string, string> = {
 
 async function load() {
   if (demo.enabled()) {
-    return { cfg: DEFAULT_SOCIAL, acc: null as MetaAccount | null, queue: [] as Post[], history: [] as Post[], products: [], lastRun: null };
+    return { cfg: DEFAULT_SOCIAL, acc: null as MetaAccount | null, queue: [] as Post[], history: [] as Post[], products: [], lastRun: null, events: [] as EventRow[] };
   }
   const db = adminClient();
-  const [cfg, acc, posts, prods, last] = await Promise.all([
+  const [cfg, acc, posts, prods, last, events] = await Promise.all([
     getSocialConfig(db),
     getMetaAccount(db),
     db.from("social_posts").select("*").neq("status", "discarded").order("created_at", { ascending: false }).limit(60),
     db.from("product_overview").select("slug,name,best_price").eq("active", true).not("best_price", "is", null).order("name"),
     db.from("kv").select("value").eq("key", "social_last_run").maybeSingle(),
+    getEvents(db),
   ]);
   const list = (posts.data || []) as Post[];
   let lastRun: { at?: string; queued?: string[]; published?: string[]; errors?: string[] } | null = null;
@@ -64,6 +67,7 @@ async function load() {
     history: list.filter((p) => p.status === "published"),
     products: (prods.data || []) as { slug: string; name: string; best_price: number }[],
     lastRun,
+    events: events.filter((e) => e.extra_posts),
   };
 }
 
@@ -138,6 +142,14 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
             <input id="couponHours" name="couponHours" defaultValue={cfg.couponHours.join(", ")} placeholder="12, 15, 18" />
             <p className="hint">O post sai nos primeiros minutos da hora.</p>
           </div>
+        </div>
+        <div className="field">
+          <label htmlFor="eventHours">Horários dos produtos em dia de data especial (11.11, Black Friday…)</label>
+          <input id="eventHours" name="eventHours" defaultValue={cfg.eventHours.join(", ")} placeholder="9, 12, 15, 18, 21" />
+          <p className="hint">
+            Nas <a href="/admin/datas">datas com posts especiais</a> também saem a véspera (19h do dia anterior) e o resumo (11h do
+            dia seguinte).
+          </p>
         </div>
         <div className="social-checks">
           <label className="check">
@@ -263,7 +275,7 @@ function QueueItem({ p }: { p: Post }) {
 
 export default async function Social({ searchParams }: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { ok, erro } = await searchParams;
-  const { cfg, acc, queue, history, products, lastRun } = await load();
+  const { cfg, acc, queue, history, products, lastRun, events } = await load();
   // situação dos rascunhos do TikTok das últimas 48 h (o TikTok processa depois do envio)
   const ttRecent = history.filter((p) => p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 48 * 3600_000).slice(0, 6);
   const ttStatus = new Map<number, { status: string; reason?: string }>();
@@ -304,6 +316,20 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
             <select id="slug" name="slug" defaultValue="" className="social-select">
               <option value="">Próxima oferta da vez (escolha automática)</option>
               <option value="__cupom">Próximo cupom da vez (escolha automática)</option>
+              {events.length ? (
+                <optgroup label="Datas do varejo">
+                  {events.map((e) => (
+                    <Fragment key={e.slug}>
+                      <option value={`__vespera:${e.slug}`}>
+                        {e.name}: véspera (“amanhã é {e.name}”)
+                      </option>
+                      <option value={`__resumo:${e.slug}`}>
+                        {e.name}: resumo (descontos de verdade)
+                      </option>
+                    </Fragment>
+                  ))}
+                </optgroup>
+              ) : null}
               {products.map((p) => (
                 <option key={p.slug} value={p.slug}>
                   {p.name} · {Number(p.best_price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
@@ -356,7 +382,7 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                   <img src={p.feed_url} alt="" loading="lazy" width={72} height={90} />
                 ) : null}
                 <span>
-                  <strong>{p.reason === "coupon" ? p.caption.split("\n")[0].replace(/^🎟️\s*/, "") : p.caption.split("\n")[1] || p.slug}</strong>
+                  <strong>{["coupon", "vespera", "resumo"].includes(p.reason || "") ? p.caption.split("\n")[0].replace(/^🎟️\s*/, "") : p.caption.split("\n")[1] || p.slug}</strong>
                   <span className="social-meta">
                     {when(p.published_at)}
                     {p.ig_permalink ? (

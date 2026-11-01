@@ -21,8 +21,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "não autorizado" }, { status: 401 });
   }
   const f = req.nextUrl.searchParams.get("force");
-  const force = f === "coupon" || f === "product" ? f : undefined;
-  const result = await runTick(db, { force, deadlineMs: 40_000 });
+  const force = f === "coupon" || f === "product" || f === "vespera" || f === "resumo" ? f : undefined;
+  const event = req.nextUrl.searchParams.get("event") || undefined;
+  const result = await runTick(db, { force, event, deadlineMs: 40_000 });
   // a página do link na bio mostra o que acabou de sair
   if (result.published.length || result.queued.length) revalidatePath("/hoje");
   return NextResponse.json({ ok: true, ...result });

@@ -115,6 +115,7 @@ export async function saveSettings(formData: FormData) {
     adsTxt: raw(formData, "ads_txt"),
     countdown: {
       enabled: formData.get("cd_enabled") === "on",
+      auto: formData.get("cd_auto") === "on",
       event: text(formData, "cd_event"),
       date: text(formData, "cd_date"),
       before: text(formData, "cd_before"),
