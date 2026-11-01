@@ -170,7 +170,13 @@
       "skin",
       "cooler",
       "usado",
-      "headset"
+      "headset",
+      "turtle beach",
+      "hotas",
+      "h o t a s",
+      "volante",
+      "joystick",
+      "mount"
     ],
     "min_price": 2000,
     "popularity": 80
@@ -1412,9 +1418,18 @@
       "película",
       "pelicula",
       "series s",
-      "controle avulso"
+      "controle avulso",
+      "turtle beach",
+      "hotas",
+      "h o t a s",
+      "volante",
+      "joystick",
+      "mount",
+      "headset",
+      "suporte",
+      "cooler"
     ],
-    "min_price": 3500,
+    "min_price": 4500,
     "popularity": 82
   },
   {

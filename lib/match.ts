@@ -69,11 +69,23 @@ export function matchesProduct(product: Product, offer: OfferInput): boolean {
 }
 
 /** Filtra, remove duplicadas e mantém as N mais baratas por fonte/loja. */
+/**
+ * Descarta preços muito abaixo dos outros anúncios do mesmo produto (menos de 60% da mediana,
+ * com 3 ou mais anúncios): quase sempre é acessório, kit ou peça que passou pelo filtro de título
+ * ("Pacote Turtle Beach ... para Xbox Series X").
+ */
+export function dropOutliers<T extends { price: number }>(list: T[]): T[] {
+  if (list.length < 3) return list;
+  const prices = list.map((o) => o.price).sort((a, b) => a - b);
+  const mid = prices.length / 2;
+  const median = prices.length % 2 ? prices[Math.floor(mid)] : (prices[mid - 1] + prices[mid]) / 2;
+  return list.filter((o) => o.price >= median * 0.6);
+}
+
 export function selectOffers(product: Product, offers: OfferInput[], perStore = 3): OfferInput[] {
   const seen = new Set<string>();
   const byStore = new Map<string, number>();
-  return offers
-    .filter((o) => matchesProduct(product, o))
+  return dropOutliers(offers.filter((o) => matchesProduct(product, o)))
     .sort((a, b) => a.price - b.price)
     .filter((o) => {
       const key = `${o.source}:${o.externalId}`;
