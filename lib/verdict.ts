@@ -12,6 +12,7 @@ export interface Verdict {
 }
 
 const MIN_DAYS = Number(process.env.NEXT_PUBLIC_MIN_DAYS_FOR_VERDICT || 5);
+const FAKE_MIN_DAYS = 15;
 
 export function verdictFor(p: ProductOverview): Verdict {
   const best = p.best_price != null ? Number(p.best_price) : null;
@@ -34,7 +35,9 @@ export function verdictFor(p: ProductOverview): Verdict {
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
   const max = p.max_30d != null ? Number(p.max_30d) : null;
 
-  if (list && max && list > max * 1.15 && vsAvg < 0.03) {
+  // Só depois de 15 dias de histórico: antes disso o "maior preço em 30 dias" ainda é curto
+  // demais e quase todo preço "de" (o preço de tabela da loja) passaria do limite.
+  if (list && max && days >= FAKE_MIN_DAYS && list > max * 1.15 && vsAvg < 0.03) {
     return {
       kind: "fake",
       label: "Desconto menor do que parece",
