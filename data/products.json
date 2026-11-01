@@ -1396,7 +1396,15 @@
       "pelicula",
       "edge",
       "grip",
-      "gatilho"
+      "gatilho",
+      "carregador",
+      "carregamento",
+      "base",
+      "dock",
+      "estacao",
+      "estação",
+      "suporte",
+      "cabo"
     ],
     "min_price": 300,
     "popularity": 87

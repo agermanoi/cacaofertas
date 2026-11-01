@@ -61,8 +61,21 @@ export function titleMatches(product: Product, rawTitle: string): boolean {
   );
 }
 
+/**
+ * Anúncio que COMEÇA com nome de acessório ("Carregador Controle PS5…", "Capa iPhone 16…")
+ * é o acessório, não o produto, a menos que o próprio produto seja desse tipo.
+ */
+const ACCESSORY_START =
+  /^(carregador|base( de)? carregamento|estacao|dock|suporte|capa|capinha|case|pelicula|protetor|cabo|adaptador|grip|skin|adesivo|pulseira|bracelete|refil|controle remoto|tampa|bolsa|mochila|kit (de )?(limpeza|acessorios))\b/;
+
+export function isAccessoryTitle(product: Pick<Product, "name">, rawTitle: string): boolean {
+  const m = norm(rawTitle).match(ACCESSORY_START);
+  return Boolean(m) && !norm(product.name).includes(m![1].split(" ")[0]);
+}
+
 export function matchesProduct(product: Product, offer: OfferInput): boolean {
   if (!offer.price || !Number.isFinite(offer.price)) return false;
+  if (isAccessoryTitle(product, offer.title)) return false;
   if (offer.price < Number(product.min_price || 0)) return false;
   if (product.max_price && offer.price > Number(product.max_price)) return false;
   return titleMatches(product, offer.title);
