@@ -37,8 +37,8 @@ export function verdictFor(p: ProductOverview): Verdict {
   if (list && max && list > max * 1.15 && vsAvg < 0.03) {
     return {
       kind: "fake",
-      label: "Desconto maquiado",
-      detail: `O "de" de ${fmt(list)} nunca foi praticado nos últimos 30 dias. O preço está na média.`,
+      label: "Desconto menor do que parece",
+      detail: `Não vimos o preço de ${fmt(list)} nos últimos 30 dias. O preço de hoje está na média.`,
       vsAvg,
     };
   }

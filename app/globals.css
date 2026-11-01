@@ -185,8 +185,8 @@ h2 {
 .hero-alert {
   margin: 20px 0 0;
   display: inline-block;
-  background: var(--bad-bg);
-  color: var(--bad);
+  background: var(--warn-bg);
+  color: var(--warn);
   font-weight: 700;
   padding: 6px 12px;
   border-radius: var(--r);
@@ -317,8 +317,8 @@ h2 {
   color: var(--warn);
 }
 .v-fake .verdict-label {
-  background: var(--bad);
-  color: #fff;
+  background: var(--warn-bg);
+  color: var(--warn);
 }
 .v-learning .verdict-label,
 .v-empty .verdict-label {

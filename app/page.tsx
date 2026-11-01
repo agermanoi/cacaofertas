@@ -53,7 +53,7 @@ export default async function Home() {
             </p>
             {fakes > 0 ? (
               <p className="hero-alert">
-                Hoje {fakes === 1 ? "1 oferta tem" : `${fakes} ofertas têm`} preço “de” inflado.
+                Hoje {fakes === 1 ? "1 oferta anuncia" : `${fakes} ofertas anunciam`} um desconto maior do que o histórico mostra.
               </p>
             ) : null}
           </div>

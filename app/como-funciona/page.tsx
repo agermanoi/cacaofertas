@@ -37,10 +37,10 @@ export default function ComoFunciona() {
         <dd>Dentro da faixa normal dos últimos 30 dias, mesmo que a loja anuncie desconto.</dd>
         <dt className="v-above">Acima da média</dt>
         <dd>Pelo menos 5% mais caro que a média. Provavelmente vale esperar.</dd>
-        <dt className="v-fake">Desconto maquiado</dt>
+        <dt className="v-fake">Desconto menor do que parece</dt>
         <dd>
-          A loja mostra um preço “de” mais de 15% acima do maior valor que vimos em 30 dias, mas o preço “por” está na
-          média. É o famoso metade do dobro.
+          O preço “de” anunciado está mais de 15% acima do maior valor que vimos nos últimos 30 dias, e o preço de hoje
+          está dentro da média. O produto pode valer a pena, mas o desconto real é menor que o anunciado.
         </dd>
       </dl>
 
