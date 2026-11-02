@@ -166,9 +166,20 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
   try {
     seen = JSON.parse(data?.value || "{}");
   } catch {}
+  // Prioridade: produtos em que a Amazon é o menor preço exibido e a leitura tem mais de 20 h
+  // (é o preço que o visitante vê, então precisa estar fresco); depois, rodízio pelos mais antigos.
+  const { data: ov } = await db.from("product_overview").select("slug,best_store").in("slug", products.map((p) => p.slug));
+  const amazonBest = new Set((ov || []).filter((r) => r.best_store === "Amazon").map((r) => r.slug));
+  const staleCut = new Date(Date.now() - 20 * 3600_000).toISOString();
+  const urgent = (p: Product) => amazonBest.has(p.slug) && (seen[p.slug] || "") < staleCut;
   const pick = products
     .slice()
-    .sort((a, b) => (seen[a.slug] || "").localeCompare(seen[b.slug] || "") || b.popularity - a.popularity)
+    .sort(
+      (a, b) =>
+        Number(urgent(b)) - Number(urgent(a)) ||
+        (seen[a.slug] || "").localeCompare(seen[b.slug] || "") ||
+        b.popularity - a.popularity
+    )
     .slice(0, Math.min(budget, products.length));
   for (const p of pick) seen[p.slug] = now.toISOString();
   if (pick.length) await db.from("kv").upsert({ key: "serpapi_seen", value: JSON.stringify(seen), updated_at: now.toISOString() });

@@ -22,6 +22,20 @@ export const revalidate = 3600;
 
 type Params = { params: Promise<{ slug: string }> };
 
+/** "visto hoje, 03:18", "visto ontem, 21:40", "visto há 2 dias" (horário de Brasília). */
+function seenLabel(iso: string): string {
+  const tz = "America/Sao_Paulo";
+  const d = new Date(iso);
+  const day = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: tz });
+  const hm = d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+  const today = day(new Date());
+  const yesterday = day(new Date(Date.now() - 86_400_000));
+  if (day(d) === today) return `visto hoje, ${hm}`;
+  if (day(d) === yesterday) return `visto ontem, ${hm}`;
+  const n = Math.round((Date.parse(today) - Date.parse(day(d))) / 86_400_000);
+  return `visto há ${n} dias`;
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProductBySlug(slug);
@@ -163,6 +177,7 @@ export default async function ProductPage({ params }: Params) {
                       <s>{money(o.last_list_price)}</s>
                     ) : null}
                     <strong>{money(o.last_price)}</strong>
+                    <span className="seen">{seenLabel(o.last_seen_at)}</span>
                   </td>
                   <td>
                     <StoreLink href={`/go/${o.id}`} className="btn">
@@ -174,10 +189,11 @@ export default async function ProductPage({ params }: Params) {
             </tbody>
           </table>
         ) : (
-          <p className="empty">Nenhuma loja com este produto em estoque nos últimos 3 dias.</p>
+          <p className="empty">Nenhuma loja com este produto em estoque nos últimos dias.</p>
         )}
         <p className="note">
-          Preço à vista visto na última coleta. Frete, cupons e parcelamento podem mudar o valor final.
+          Preço à vista visto na última leitura de cada loja (horário ao lado do preço). As lojas mudam preços ao longo do dia;
+          confira o valor final, o frete e o parcelamento na loja.
         </p>
       </section>
 

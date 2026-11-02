@@ -2090,3 +2090,10 @@ button.btn-ghost {
 @media (max-width: 600px) {
   .event-table .hide-sm { display: none; }
 }
+.offers .num .seen {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5b6573;
+  margin-top: 2px;
+}

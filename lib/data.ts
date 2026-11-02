@@ -115,5 +115,7 @@ export async function getOffers(productId: string): Promise<OfferRow[]> {
     .order("last_price", { ascending: true })
     .limit(30);
   if (error) console.error("[data] offers:", error.message);
-  return (data || []) as OfferRow[];
+  // Amazon (consultada em rodízio) vale por 3 dias; as outras lojas, lidas em toda coleta, por 2
+  const cut2 = Date.now() - 2 * 86_400_000;
+  return ((data || []) as OfferRow[]).filter((o) => o.source === "amazon" || new Date(o.last_seen_at).getTime() >= cut2);
 }

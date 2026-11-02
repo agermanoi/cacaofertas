@@ -79,13 +79,13 @@ create table if not exists clicks (
 -- Menor preço do dia por produto --------------------------------------
 create or replace view product_daily with (security_invoker = on) as
 -- Menor preço do dia por produto. O preço de uma oferta vale até a próxima leitura
--- (no máximo 3 dias; 5 na Amazon, que é consultada em rodízio pela SerpAPI), igual ao
+-- (no máximo 2 dias; 3 na Amazon, que é consultada em rodízio pela SerpAPI), igual ao
 -- que o site mostra como "preço de hoje". Sem isso o gráfico serrilha nos dias em que
 -- a fonte mais barata não foi consultada.
 with h as (
   select ph.product_id, ph.price, ph.captured_on,
          lead(ph.captured_on) over (partition by ph.offer_id order by ph.captured_on) as next_on,
-         case when o.source = 'amazon' then 5 else 3 end as win
+         case when o.source = 'amazon' then 3 else 2 end as win
   from price_history ph
   join offers o on o.id = ph.offer_id
 ),
@@ -122,7 +122,7 @@ left join lateral (
   where o.product_id = p.id
     and o.active
     and o.last_price is not null
-    and o.last_seen_at > now() - case when o.source = 'amazon' then interval '5 days' else interval '3 days' end
+    and o.last_seen_at > now() - case when o.source = 'amazon' then interval '3 days' else interval '2 days' end
 ) cur on true
 left join lateral (
   select
