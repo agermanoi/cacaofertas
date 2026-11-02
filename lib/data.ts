@@ -119,3 +119,22 @@ export async function getOffers(productId: string): Promise<OfferRow[]> {
   const cut2 = Date.now() - 2 * 86_400_000;
   return ((data || []) as OfferRow[]).filter((o) => o.source === "amazon" || new Date(o.last_seen_at).getTime() >= cut2);
 }
+
+/** Horário da última leitura de preço (a coleta mais recente), em texto: "hoje às 09:47". */
+export async function lastPriceUpdate(): Promise<string | null> {
+  if (demo.enabled() || !configured()) return null;
+  const { data } = await publicClient()
+    .from("offers")
+    .select("last_seen_at")
+    .order("last_seen_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data?.last_seen_at) return null;
+  const tz = "America/Sao_Paulo";
+  const d = new Date(data.last_seen_at);
+  const day = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: tz });
+  const hm = d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+  if (day(d) === day(new Date())) return `hoje às ${hm}`;
+  if (day(d) === day(new Date(Date.now() - 86_400_000))) return `ontem às ${hm}`;
+  return d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" }) + ` às ${hm}`;
+}

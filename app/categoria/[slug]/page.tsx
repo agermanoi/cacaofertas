@@ -3,7 +3,7 @@ import { siteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDailySeries, getOverview } from "@/lib/data";
+import { getDailySeries, getOverview, lastPriceUpdate } from "@/lib/data";
 import { verdictFor } from "@/lib/verdict";
 import { categoryInfo, categorySlug } from "@/lib/categories";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
@@ -119,7 +119,7 @@ export default async function CategoryPage({ params }: Params) {
 
       <AdSlot id="categoria-topo" format="leaderboard" />
 
-      <Catalog items={items} title={`${name}: todos os produtos`} showCategories={false} adPrefix="categoria" />
+      <Catalog items={items} title={`${name}: todos os produtos`} showCategories={false} adPrefix="categoria" updatedAt={await lastPriceUpdate()} />
 
       {info.tips.length ? (
         <section aria-labelledby="dicas" className="page-text category-tips">

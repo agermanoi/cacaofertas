@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDailySeries, getOverview } from "@/lib/data";
+import { getDailySeries, getOverview, lastPriceUpdate } from "@/lib/data";
 import { isInflated, verdictFor } from "@/lib/verdict";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
 import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
@@ -10,7 +10,7 @@ import { categorySlug } from "@/lib/categories";
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [products, settings] = await Promise.all([getOverview(), getSettings()]);
+  const [products, settings, updatedAt] = await Promise.all([getOverview(), getSettings(), lastPriceUpdate()]);
   const series = await getDailySeries(products.map((p) => p.id), 30);
 
   const items: CatalogItem[] = products.map((p) => ({
@@ -81,7 +81,7 @@ export default async function Home() {
         ) : null}
         <AdSlot id="home-topo" format="leaderboard" />
         {items.length ? (
-          <Catalog items={items} />
+          <Catalog items={items} updatedAt={updatedAt} />
         ) : (
           <p className="empty">Nenhum produto cadastrado. Rode “npm run seed” para cadastrar a lista inicial.</p>
         )}

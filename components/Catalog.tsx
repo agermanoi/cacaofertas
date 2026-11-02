@@ -27,8 +27,11 @@ export function Catalog({
   title = "Os mais buscados",
   showCategories = true,
   adPrefix = "home",
+  updatedAt = null,
 }: {
   items: CatalogItem[];
+  /** "hoje às 09:47": última leitura de preços */
+  updatedAt?: string | null;
   title?: string;
   showCategories?: boolean;
   /** Prefixo das posições de anúncio na lista (home-lista-1, categoria-lista-1…) */
@@ -54,7 +57,15 @@ export function Catalog({
   return (
     <section className="catalog" aria-labelledby="catalog-title">
       <div className="catalog-head">
-        <h2 id="catalog-title">{title}</h2>
+        <div>
+          <h2 id="catalog-title">{title}</h2>
+          {updatedAt ? (
+            <p className="catalog-updated">
+              Preços atualizados {updatedAt}. As lojas mudam preços ao longo do dia: o horário de cada loja está na página do
+              produto.
+            </p>
+          ) : null}
+        </div>
         <div className="controls">
           <label className="search">
             <span className="sr-only">Buscar produto</span>
