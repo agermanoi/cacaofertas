@@ -9,8 +9,8 @@ import { siteUrl } from "./site";
  *
  * Chaves na tabela kv (gravadas pelo painel em /admin/tiktok):
  *   tiktok_client_key, tiktok_client_secret       app em developers.tiktok.com
- *   tiktok_access_token, tiktok_access_expires     token de 24 h (renovado sozinho)
- *   tiktok_refresh_token                           válido por 365 dias, pode mudar a cada renovação
+ *   tiktok_access_token, tiktok_access_expires     token de 2 h (renovado sozinho)
+ *   tiktok_refresh_token                           válido por 180 dias; muda a cada renovação (sempre gravado)
  *   tiktok_open_id, tiktok_user                    conta conectada
  *   tiktok_verify                                  {"arquivo.txt": "conteúdo"} da verificação de URL
  *
@@ -116,7 +116,8 @@ async function saveTokens(db: SupabaseClient, t: TokenResponse) {
   const now = Date.now();
   const values: Record<string, string> = {
     tiktok_access_token: t.access_token!,
-    tiktok_access_expires: new Date(now + (t.expires_in || 86400) * 1000).toISOString(),
+    // validade informada pelo TikTok (2 h a partir de 01/12/2026); sem ela, assume 2 h
+    tiktok_access_expires: new Date(now + (t.expires_in || 7200) * 1000).toISOString(),
   };
   if (t.refresh_token) values.tiktok_refresh_token = t.refresh_token;
   if (t.refresh_expires_in) values.tiktok_refresh_expires = new Date(now + t.refresh_expires_in * 1000).toISOString();
@@ -162,18 +163,43 @@ export async function tiktokDisconnect(db: SupabaseClient) {
 }
 
 /** Token válido (renova quando falta menos de 10 minutos). */
+/**
+ * Token válido. Regras do TikTok a partir de 01/12/2026: o access token dura 2 h e o refresh token
+ * 180 dias, e cada renovação devolve um refresh token NOVO e invalida o anterior. Por isso:
+ * renova quando faltam menos de 10 min (pela validade que o próprio TikTok informa), grava sempre o
+ * refresh token novo e, se duas renovações acontecerem ao mesmo tempo, a que perder relê o banco e
+ * usa o token que a outra gravou.
+ */
 async function accessToken(db: SupabaseClient): Promise<string> {
-  const kv = await kvGet(db, ["tiktok_client_key", "tiktok_client_secret", "tiktok_access_token", "tiktok_access_expires", "tiktok_refresh_token"]);
+  const keys = ["tiktok_client_key", "tiktok_client_secret", "tiktok_access_token", "tiktok_access_expires", "tiktok_refresh_token"];
+  const kv = await kvGet(db, keys);
   if (!kv.tiktok_refresh_token) throw new Error("TikTok não conectado.");
   if (kv.tiktok_access_token && new Date(kv.tiktok_access_expires).getTime() - Date.now() > 10 * 60_000) return kv.tiktok_access_token;
-  const t = await tokenRequest({
-    client_key: kv.tiktok_client_key,
-    client_secret: kv.tiktok_client_secret,
-    grant_type: "refresh_token",
-    refresh_token: kv.tiktok_refresh_token,
-  });
-  await saveTokens(db, t);
-  return t.access_token!;
+  try {
+    const t = await tokenRequest({
+      client_key: kv.tiktok_client_key,
+      client_secret: kv.tiktok_client_secret,
+      grant_type: "refresh_token",
+      refresh_token: kv.tiktok_refresh_token,
+    });
+    await saveTokens(db, t);
+    return t.access_token!;
+  } catch (e) {
+    // outra execução pode ter renovado primeiro (o refresh token antigo deixa de valer)
+    const again = await kvGet(db, keys);
+    if (
+      again.tiktok_refresh_token !== kv.tiktok_refresh_token &&
+      again.tiktok_access_token &&
+      new Date(again.tiktok_access_expires).getTime() > Date.now()
+    ) {
+      return again.tiktok_access_token;
+    }
+    const msg = (e as Error).message;
+    if (/invalid_grant|refresh_token|expired|invalid/i.test(msg)) {
+      throw new Error("a conexão do TikTok expirou: reconecte em Admin → Redes sociais → TikTok");
+    }
+    throw e;
+  }
 }
 
 /** URL pública da arte pelo domínio verificado (o TikTok não aceita o domínio do Supabase). */

@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { adminClient } from "@/lib/supabase";
-import { tiktokPublishStatus } from "@/lib/tiktok";
+import { tiktokPublishStatus, tiktokStatus } from "@/lib/tiktok";
 import { getEvents, type EventRow } from "@/lib/events";
 import { demo } from "@/lib/mock";
 import { Flash } from "@/components/admin/Flash";
@@ -281,6 +281,9 @@ function QueueItem({ p }: { p: Post }) {
 export default async function Social({ searchParams }: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { ok, erro } = await searchParams;
   const { cfg, acc, queue, history, products, lastRun, events } = await load();
+  // aviso de reconexão do TikTok (o refresh token vale 180 dias)
+  const tt = cfg.tiktok && !demo.enabled() ? await tiktokStatus(adminClient()) : null;
+  const ttDays = tt?.refreshExpires ? Math.floor((new Date(tt.refreshExpires).getTime() - Date.now()) / 86_400_000) : null;
   // situação dos rascunhos do TikTok das últimas 48 h (o TikTok processa depois do envio)
   const ttRecent = history.filter((p) => p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 48 * 3600_000).slice(0, 6);
   const ttStatus = new Map<number, { status: string; reason?: string }>();
@@ -311,6 +314,17 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
       <Flash ok={ok} erro={erro} />
       {lastRun?.errors?.length ? <p className="flash flash-erro">Última execução: {lastRun.errors.join(" | ")}</p> : null}
 
+      {tt && tt.connected && ttDays != null && ttDays <= 15 ? (
+        <p className="flash flash-erro">
+          A conexão do TikTok vence em {Math.max(ttDays, 0)} {ttDays === 1 ? "dia" : "dias"}.{" "}
+          <a href="/admin/tiktok">Reconecte o TikTok</a> para os rascunhos continuarem chegando.
+        </p>
+      ) : null}
+      {tt && !tt.connected ? (
+        <p className="flash flash-erro">
+          O TikTok está marcado nas configurações, mas não está conectado. <a href="/admin/tiktok">Conectar</a>
+        </p>
+      ) : null}
       <Connection acc={acc} />
 
       <section className="admin-section">
