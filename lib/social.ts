@@ -351,6 +351,34 @@ async function graphGet(path: string, params: Record<string, string>) {
   return json;
 }
 
+/**
+ * Atualiza um post da fila antes de publicar: produto com preço diferente (mais de 1%) ou
+ * criado há mais de 6 h ganha arte e legenda novas; cupom vencido ou pausado não sai.
+ */
+async function refreshQueued(
+  db: SupabaseClient,
+  post: Record<string, any>,
+  cfg: SocialConfig
+): Promise<{ post?: Record<string, unknown>; error?: string }> {
+  const ageH = (Date.now() - new Date(post.created_at).getTime()) / 3600_000;
+  if (post.kind === "coupon" && post.coupon_id) {
+    const { data: c } = await db.from("coupons").select("active,expires_at").eq("id", post.coupon_id).maybeSingle();
+    if (!c || !c.active || (c.expires_at && new Date(c.expires_at) < new Date())) return { error: "Cupom vencido ou pausado: post não publicado." };
+    return {};
+  }
+  if (post.kind !== "product" || !post.product_id) return {};
+  const { data: p } = await db.from("product_overview").select("*").eq("id", post.product_id).maybeSingle();
+  if (!p || p.best_price == null) return { error: "Produto sem preço agora: post não publicado." };
+  const changed = Math.abs(Number(p.best_price) - Number(post.price)) / Number(p.best_price) > 0.01;
+  if (!changed && ageH < 6) return {};
+  const feed = await renderToStorage(db, p.slug, "feed");
+  const story = post.story_url || cfg.story || cfg.tiktok ? await renderToStorage(db, p.slug, "story") : null;
+  const { ig, fb } = buildCaptions(p as ProductOverview, cfg);
+  const fresh = { feed_url: feed, story_url: story, caption: ig, fb_caption: fb, price: p.best_price };
+  await db.from("social_posts").update(fresh).eq("id", post.id);
+  return { post: fresh };
+}
+
 /** Instagram: cria o contêiner, espera processar e publica. */
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const notReady = (e: unknown) => /pronta|not ready|aguarde|wait a moment|try again/i.test(String((e as Error)?.message || e));
@@ -393,6 +421,16 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
     .select("*")
     .maybeSingle();
   if (!post) return { ok: false, error: "Post não está na fila (já publicando ou descartado)." };
+
+  // Post parado na fila: antes de publicar, confere se o preço/cupom ainda vale e refaz a arte se mudou
+  if (!post.ig_media_id && !post.fb_post_id && !post.ig_story_id) {
+    const stale = await refreshQueued(db, post, cfg);
+    if (stale.error) {
+      await db.from("social_posts").update({ status: "failed", error: stale.error }).eq("id", id);
+      return { ok: false, error: stale.error };
+    }
+    if (stale.post) Object.assign(post, stale.post);
+  }
 
   const upd: Record<string, unknown> = {};
   const errors: string[] = [];
