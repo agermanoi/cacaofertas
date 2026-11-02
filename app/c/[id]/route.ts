@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminClient } from "@/lib/supabase";
 import { clickMeta } from "@/lib/analytics";
+import { applyAffiliateTags } from "@/lib/click-tags";
 
 export const dynamic = "force-dynamic";
 
@@ -73,23 +74,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       await db.from("coupons").update({ affiliate_url: aff }).eq("id", c.id);
     }
   }
-  // Código de afiliado da Amazon também nos cupons
-  try {
-    const u = new URL(target);
-    if (/(^|\.)amazon\.com\.br$/.test(u.hostname) && !u.searchParams.get("tag")) {
-      let tag = process.env.AMAZON_ASSOCIATE_TAG || "";
-      if (!tag) {
-        const { data } = await db.from("kv").select("value").eq("key", "amazon_associate_tag").maybeSingle();
-        tag = String(data?.value || "");
-      }
-      if (tag) {
-        u.searchParams.set("tag", tag);
-        target = u.toString();
-      }
-    }
-  } catch {
-    /* URL inválida: segue como está */
-  }
+  // Códigos de afiliado (Amazon e Mercado Livre) também nos cupons
+  target = await applyAffiliateTags(db, target);
 
   const res = NextResponse.redirect(target, 302);
   res.headers.set("X-Robots-Tag", "noindex, nofollow");

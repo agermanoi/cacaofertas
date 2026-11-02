@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Flash } from "@/components/admin/Flash";
 import { ML_STATE_COOKIE, mlConfigured, mlExchangeCode, mlRedirectUri, mlStatus } from "@/lib/mercadolivre-auth";
-import { disconnectMl, startMlConnect } from "./actions";
+import { clearMlAffiliate, disconnectMl, saveMlAffiliate, startMlConnect } from "./actions";
+import { adminClient } from "@/lib/supabase";
 
 type Props = {
   searchParams: Promise<{ code?: string; state?: string; error?: string; ok?: string; erro?: string; conta?: string }>;
@@ -31,8 +32,14 @@ export default async function MercadoLivrePage({ searchParams }: Props) {
 
   const configured = mlConfigured();
   const status = configured ? await mlStatus() : { connected: false as const };
+  const { data: affRow } = await adminClient().from("kv").select("value").eq("key", "ml_affiliate_params").maybeSingle();
+  const aff = String(affRow?.value || "");
   const ok =
-    sp.ok === "conectado"
+    sp.ok === "afiliado"
+      ? "Link de afiliado do Mercado Livre salvo. Todos os cliques para o ML já saem com o seu código."
+      : sp.ok === "afiliado-removido"
+        ? "Código de afiliado do Mercado Livre removido."
+        : sp.ok === "conectado"
       ? `Mercado Livre conectado${sp.conta ? ` (${sp.conta})` : ""}. A próxima coleta já usa essa conta.`
       : sp.ok === "desconectado"
         ? "Mercado Livre desconectado. A coleta deixa de consultar o ML até você conectar de novo."
@@ -103,6 +110,38 @@ export default async function MercadoLivrePage({ searchParams }: Props) {
           </p>
         </section>
       )}
+
+      <section className="admin-section">
+        <h2>Link de afiliado (comissão)</h2>
+        {aff ? (
+          <p className="flash flash-ok">
+            Ativo: os cliques para o Mercado Livre saem com <code>{aff}</code>.
+          </p>
+        ) : (
+          <p className="flash flash-erro">
+            Sem código de afiliado: os cliques para o Mercado Livre não estão gerando comissão.
+          </p>
+        )}
+        <form action={saveMlAffiliate} className="admin-form">
+          <div className="field">
+            <label htmlFor="ml_link">Link de afiliado gerado no portal</label>
+            <input id="ml_link" name="link" placeholder="https://mercadolivre.com/sec/... ou o link longo com matt_word e matt_tool" />
+            <p className="hint">
+              No <a href="https://www.mercadolivre.com.br/afiliados" target="_blank" rel="noopener">portal de afiliados</a>, vá
+              em Ferramentas → Gerador de link, gere um link de qualquer produto e cole aqui. O painel tira dele o seu código
+              (matt_word e matt_tool) e aplica em todos os links do Mercado Livre do site.
+            </p>
+          </div>
+          <div className="form-actions">
+            <button className="btn">Salvar</button>
+          </div>
+        </form>
+        {aff ? (
+          <form action={clearMlAffiliate}>
+            <button className="btn btn-ghost btn-small btn-danger">Remover código</button>
+          </form>
+        ) : null}
+      </section>
     </div>
   );
 }
