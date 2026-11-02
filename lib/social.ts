@@ -183,7 +183,7 @@ export function headline(v: Verdict): string {
   return "⭐ Menor preço de hoje";
 }
 
-export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventRow | null): { ig: string; fb: string } {
+export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventRow | null, seenAt?: string | null): { ig: string; fb: string } {
   const v = verdictFor(p);
   const price = Number(p.best_price);
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
@@ -198,6 +198,7 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventR
   } else {
     lines.push("📊 Comparamos as lojas duas vezes por dia e mostramos o histórico de preço.");
   }
+  if (seenAt) lines.push(`📅 Preço visto em ${seenAt}`);
   const tags = [cfg.hashtags, hashtagOf(p.category), ev ? hashtagOf(ev.name) : ""]
     .join(" ")
     .split(/\s+/)
@@ -213,6 +214,16 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventR
   const ig = compose(`🔗 Link na bio → ${host}/hoje`);
   const fb = compose(`🔗 ${url}?utm_source=facebook&utm_medium=social`);
   return { ig: ig.slice(0, 2200), fb: fb.slice(0, 5000) };
+}
+
+/** "02/11 às 10:05": última leitura da oferta mais barata. */
+async function seenFor(db: SupabaseClient, offerId: string | null | undefined): Promise<string | null> {
+  if (!offerId) return null;
+  const { data } = await db.from("offers").select("last_seen_at").eq("id", offerId).maybeSingle();
+  if (!data?.last_seen_at) return null;
+  const tz = "America/Sao_Paulo";
+  const d = new Date(data.last_seen_at);
+  return `${d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" })} às ${d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" })}`;
 }
 
 /** Evento de hoje com posts especiais (ou null). */
@@ -316,7 +327,7 @@ export async function renderToStorage(db: SupabaseClient, slug: string, format: 
 export async function queuePost(db: SupabaseClient, c: Candidate, cfg: SocialConfig, ev?: EventRow | null): Promise<number> {
   const feed = await renderToStorage(db, c.p.slug, "feed");
   const story = cfg.story || cfg.tiktok ? await renderToStorage(db, c.p.slug, "story") : null;
-  const { ig, fb } = buildCaptions(c.p, cfg, ev);
+  const { ig, fb } = buildCaptions(c.p, cfg, ev, await seenFor(db, c.p.best_offer_id));
   const { data, error } = await db
     .from("social_posts")
     .insert({
@@ -373,7 +384,7 @@ async function refreshQueued(
   if (!changed && ageH < 6) return {};
   const feed = await renderToStorage(db, p.slug, "feed");
   const story = post.story_url || cfg.story || cfg.tiktok ? await renderToStorage(db, p.slug, "story") : null;
-  const { ig, fb } = buildCaptions(p as ProductOverview, cfg);
+  const { ig, fb } = buildCaptions(p as ProductOverview, cfg, null, await seenFor(db, p.best_offer_id));
   const fresh = { feed_url: feed, story_url: story, caption: ig, fb_caption: fb, price: p.best_price };
   await db.from("social_posts").update(fresh).eq("id", post.id);
   return { post: fresh };

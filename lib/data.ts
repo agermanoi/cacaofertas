@@ -138,3 +138,18 @@ export async function lastPriceUpdate(): Promise<string | null> {
   if (day(d) === day(new Date(Date.now() - 86_400_000))) return `ontem às ${hm}`;
   return d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" }) + ` às ${hm}`;
 }
+
+/** "02/11 às 10:05": quando o preço exibido (melhor oferta) foi lido pela última vez. */
+export async function bestOfferSeenAt(bestOfferId: string | null | undefined): Promise<string | null> {
+  if (!bestOfferId || demo.enabled() || !configured()) return null;
+  const { data } = await publicClient().from("offers").select("last_seen_at").eq("id", bestOfferId).maybeSingle();
+  return data?.last_seen_at ? formatSeen(data.last_seen_at) : null;
+}
+
+export function formatSeen(iso: string): string {
+  const tz = "America/Sao_Paulo";
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" });
+  const hm = d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+  return `${date} às ${hm}`;
+}

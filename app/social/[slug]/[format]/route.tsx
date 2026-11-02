@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getProductBySlug } from "@/lib/data";
+import { bestOfferSeenAt, getProductBySlug } from "@/lib/data";
 import { isInflated, verdictFor } from "@/lib/verdict";
 import { getSettings } from "@/lib/settings";
 import { imageData, ogFonts, siteHost } from "@/lib/og";
@@ -24,7 +24,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const p = await getProductBySlug(slug);
   if (!p || p.best_price == null) return new Response("Produto sem preço", { status: 404 });
 
-  const [s, fonts, events] = await Promise.all([getSettings(), ogFonts(), getPublicEvents()]);
+  const [s, fonts, events, seen] = await Promise.all([getSettings(), ogFonts(), getPublicEvents(), bestOfferSeenAt(p.best_offer_id)]);
   const ev = events.find((e) => e.extra_posts && e.date === todayBR()) || null;
   const [logo, photo, mascot] = await Promise.all([imageData(s.logoUrl), imageData(p.image_url), imageData("/brand/mascote.png")]);
   const size = SIZES[fmt];
@@ -45,7 +45,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const good = v.kind === "record" || v.kind === "below";
   const name = p.name.length > 80 ? `${p.name.slice(0, 78)}…` : p.name;
   const nameSize = name.length > 55 ? 50 : name.length > 32 ? 58 : 66;
-  const photoH = story ? 820 : 600;
+  const photoH = story ? 800 : 560;
 
   return new ImageResponse(
     (
@@ -140,6 +140,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
             {p.best_store ? atStore(p.best_store) : "menor preço entre as lojas"}
             {good && v.detail ? ` · ${v.detail.replace(/\.$/, "")}` : ""}
           </div>
+          {seen ? (
+            <div style={{ display: "flex", fontSize: 24, fontWeight: 700, color: "#5B6573", marginTop: 8 }}>
+              {`Preço visto em ${seen}. Pode mudar a qualquer momento.`}
+            </div>
+          ) : null}
         </div>
 
         {/* rodapé */}
