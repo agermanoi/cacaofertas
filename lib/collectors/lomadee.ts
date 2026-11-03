@@ -84,6 +84,20 @@ export function lomadee(): Collector {
   };
 }
 
+/**
+ * A Lomadee devolve um link por canal da conta. Prefere o canal de comparador de preços
+ * ("Cupons e comparador Caça Ofertas"); o antigo (Blog) só se for o único que a loja aceita.
+ */
+type ShortEntry = { shortUrls?: string[]; message?: string; availableChannel?: { name?: string } };
+export function pickLomadeeShort(json: unknown): { url: string } | { error: string } {
+  const list = (Array.isArray(json) ? json : [json]).filter(Boolean) as ShortEntry[];
+  const ok = list.filter((e) => e.shortUrls?.[0]);
+  const best = ok.find((e) => /price|compar|cupo|coupon/i.test(e.availableChannel?.name || "")) || ok.find((e) => !/blog/i.test(e.availableChannel?.name || "")) || ok[0];
+  if (best) return { url: best.shortUrls![0] };
+  const msg = list.map((e) => e.message).find(Boolean) || "sem link";
+  return { error: String(msg).slice(0, 200) };
+}
+
 /** Gera o link curto de afiliado (lmdee.link). Chamado só para ofertas novas. */
 export async function lomadeeAffiliateLink(organizationId: string, url: string): Promise<string | null> {
   try {
@@ -92,9 +106,10 @@ export async function lomadeeAffiliateLink(organizationId: string, url: string):
       headers: headers(),
       body: JSON.stringify({ organizationId, type: "Custom", url, mdasc: process.env.LOMADEE_MDASC || undefined }),
     });
-    const json = (await res.json()) as { shortUrls?: string[] }[];
+    const json = await res.json();
     await sleep(1100);
-    return json?.[0]?.shortUrls?.[0] ?? null;
+    const r = pickLomadeeShort(json);
+    return "url" in r ? r.url : null;
   } catch (e) {
     console.warn(`[lomadee] não gerou link de afiliado: ${(e as Error).message}`);
     return null;
@@ -112,15 +127,10 @@ export async function lomadeeShortLink(organizationId: string, url: string): Pro
       headers: headers(),
       body: JSON.stringify({ organizationId, type: "Custom", url, mdasc: process.env.LOMADEE_MDASC || undefined }),
     });
-    const json = (await res.json().catch(() => null)) as
-      | { shortUrls?: string[]; message?: string }[]
-      | { message?: string; success?: boolean }
-      | null;
+    const json = await res.json().catch(() => null);
     await sleep(1100);
-    const first = Array.isArray(json) ? json[0] : null;
-    if (first?.shortUrls?.[0]) return { url: first.shortUrls[0] };
-    const msg = (first?.message || (json && !Array.isArray(json) ? json.message : "") || `HTTP ${res.status}`).toString();
-    return { error: msg.slice(0, 200) };
+    if (Array.isArray(json)) return pickLomadeeShort(json);
+    return { error: String((json as { message?: string } | null)?.message || `HTTP ${res.status}`).slice(0, 200) };
   } catch (e) {
     return { error: (e as Error).message.slice(0, 200) };
   }

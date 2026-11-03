@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { adminClient } from "@/lib/supabase";
 import { clickMeta } from "@/lib/analytics";
 import { applyAffiliateTags } from "@/lib/click-tags";
+import { pickLomadeeShort } from "@/lib/collectors/lomadee";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +24,8 @@ async function lomadeeShort(db: ReturnType<typeof adminClient>, organizationId: 
     });
     clearTimeout(t);
     if (!res.ok) return null;
-    const json = (await res.json()) as { shortUrls?: string[] }[] | { shortUrls?: string[] };
-    const first = Array.isArray(json) ? json[0] : json;
-    return first?.shortUrls?.[0] || null;
+    const r = pickLomadeeShort(await res.json());
+    return "url" in r ? r.url : null;
   } catch {
     return null;
   }
