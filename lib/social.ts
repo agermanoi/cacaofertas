@@ -396,9 +396,24 @@ async function refreshQueued(
 
 /** Instagram: cria o contêiner, espera processar e publica. */
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const notReady = (e: unknown) => /pronta|not ready|aguarde|wait a moment|try again/i.test(String((e as Error)?.message || e));
+const notReady = (e: unknown) =>
+  /pronta|not ready|aguarde|wait a moment|try again|encontrar a m[ií]dia|not (be )?found|not available|does not exist/i.test(String((e as Error)?.message || e));
 
+/**
+ * Publica no Instagram. Se o Instagram "perder" o contêiner (acontece às vezes nos Stories:
+ * "Não foi possível encontrar a mídia com …"), cria um novo e tenta mais uma vez.
+ */
 async function igPublish(acc: MetaAccount, params: Record<string, string>): Promise<string> {
+  try {
+    return await igPublishOnce(acc, params);
+  } catch (e) {
+    if (!notReady(e)) throw e;
+    await sleep(5000);
+    return igPublishOnce(acc, params);
+  }
+}
+
+async function igPublishOnce(acc: MetaAccount, params: Record<string, string>): Promise<string> {
   const { id } = await graphPost(`/${acc.igId}/media`, { ...params, access_token: acc.pageToken });
   for (let i = 0; i < 15; i++) {
     const st = await graphGet(`/${id}`, { fields: "status_code", access_token: acc.pageToken }).catch(() => ({}) as any);
@@ -412,7 +427,7 @@ async function igPublish(acc: MetaAccount, params: Record<string, string>): Prom
       const out = await graphPost(`/${acc.igId}/media_publish`, { creation_id: id, access_token: acc.pageToken });
       return String(out.id);
     } catch (e) {
-      if (i >= 5 || !notReady(e)) throw e;
+      if (i >= 4 || !notReady(e)) throw e;
       await sleep(3000);
     }
   }
