@@ -12,7 +12,8 @@
     "seed": "tsx scripts/seed.ts",
     "ml:auth": "tsx scripts/ml-auth.ts",
     "meta:setup": "tsx scripts/meta-setup.ts",
-    "social": "tsx scripts/social.ts"
+    "social": "tsx scripts/social.ts",
+    "video": "tsx scripts/video.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -31,7 +32,8 @@
     "dotenv": "^16.4.5",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
-    "@types/pngjs": "^6.0.5"
+    "@types/pngjs": "^6.0.5",
+    "playwright": "1.48.2"
   },
   "engines": {
     "node": ">=20"

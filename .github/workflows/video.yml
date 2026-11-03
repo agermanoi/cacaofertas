@@ -1,0 +1,46 @@
+name: Vídeo para o TikTok
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Produto (slug). Vazio = melhor oferta do momento"
+        required: false
+        default: ""
+      send:
+        description: "Mandar como rascunho para o TikTok"
+        type: boolean
+        default: true
+
+concurrency:
+  group: video
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Instalar Chromium e ffmpeg
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y ffmpeg >/dev/null || true
+          ffmpeg -version | head -1
+      - name: Gerar vídeo
+        run: npm run video -- ${{ github.event.inputs.slug }} ${{ github.event.inputs.send == 'false' && '--no-send' || '' }}
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://cacaofertas.com.br
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video
+          path: out/*.mp4
+          if-no-files-found: ignore

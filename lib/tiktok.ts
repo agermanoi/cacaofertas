@@ -238,6 +238,31 @@ export async function tiktokSendDraft(db: SupabaseClient, opts: { imageUrl: stri
   return json.data.publish_id;
 }
 
+/**
+ * Manda um vídeo (MP4) como rascunho para a caixa de entrada do TikTok.
+ * Você abre o app, escolhe o som e publica. Mesmo limite: 5 rascunhos pendentes por 24 h.
+ */
+export async function tiktokSendVideoDraft(db: SupabaseClient, videoUrl: string): Promise<string> {
+  const token = await accessToken(db);
+  const res = await fetch(`${API}/v2/post/publish/inbox/video/init/`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json; charset=UTF-8" },
+    body: JSON.stringify({ source_info: { source: "PULL_FROM_URL", video_url: tiktokMediaUrl(videoUrl) } }),
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: { publish_id?: string }; error?: { code?: string; message?: string } };
+  if (!res.ok || (json.error?.code && json.error.code !== "ok") || !json.data?.publish_id) {
+    const code = json.error?.code || `HTTP ${res.status}`;
+    const hint: Record<string, string> = {
+      url_ownership_unverified: "o endereço dos vídeos ainda não foi verificado no app do TikTok",
+      spam_risk_too_many_pending_share: "já há 5 rascunhos pendentes na caixa de entrada (publique ou apague alguns)",
+      scope_not_authorized: "a conta foi conectada sem a permissão video.upload",
+      access_token_invalid: "conexão expirada: conecte o TikTok de novo",
+    };
+    throw new Error(hint[code] || json.error?.message || code);
+  }
+  return json.data.publish_id;
+}
+
 /** Arquivo de verificação de URL do TikTok (servido em /tiktok/<arquivo>). */
 export async function tiktokVerifyFile(db: SupabaseClient, name: string): Promise<string | null> {
   const kv = await kvGet(db, ["tiktok_verify"]);

@@ -179,8 +179,10 @@ create index if not exists contact_messages_created_idx on contact_messages (cre
 
 -- ---------- Bucket público para logo e ícone ----------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('brand', 'brand', true, 2097152, array['image/png','image/jpeg','image/webp','image/svg+xml'])
+values ('brand', 'brand', true, 20971520, array['image/png','image/jpeg','image/webp','image/svg+xml','video/mp4'])
 on conflict (id) do nothing;
+-- vídeos do TikTok (até 20 MB)
+update storage.buckets set file_size_limit = 20971520, allowed_mime_types = array['image/png','image/jpeg','image/webp','image/svg+xml','video/mp4'] where id = 'brand';
 
 -- ---------- Cupons ----------
 create table if not exists coupons (
