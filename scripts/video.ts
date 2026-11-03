@@ -1,18 +1,24 @@
 /**
- * Vídeo vertical (10 s, 1080 × 1920) de uma oferta, enviado como rascunho para o TikTok.
+ * Vídeos verticais (1080 × 1920) para o TikTok, enviados como rascunho para a caixa de entrada.
  *
- *   npm run video                        escolhe a melhor oferta do momento (mesma lógica dos posts)
- *   npm run video -- fire-tv-stick-4k    força um produto
+ *   npm run video -- --pending           automático: faz o vídeo dos posts publicados nas últimas
+ *                                        3 h que ainda não foram para o TikTok (GitHub Actions, de hora em hora)
+ *   npm run video -- --pending --check   só conta quantos estão pendentes (para pular a instalação do Chromium)
+ *   npm run video -- fire-tv-stick-4k    vídeo avulso de um produto
  *   npm run video -- fire-tv-stick-4k --no-send   só gera (não manda para o TikTok)
  *
- * Roda no GitHub Actions (precisa de Chromium + ffmpeg). O MP4 fica em out/ e no Storage
- * (brand/social/video/...). No TikTok ele cai na caixa de entrada: você escolhe o som e publica.
+ * Produto → vídeo animado de 10 s (gráfico do histórico + preço).
+ * Cupom / data especial → a arte vertical do post com um zoom lento (8 s).
+ *
+ * A API do TikTok não aceita legenda em rascunho de vídeo: a legenda fica pronta para copiar
+ * em Admin → Redes sociais (botão "Copiar legenda do TikTok").
  */
 import "dotenv/config";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { chromium } from "playwright";
+import { chromium, type Browser } from "playwright";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { adminClient } from "../lib/supabase";
 import type { ProductOverview } from "../lib/types";
 import { isInflated, verdictFor } from "../lib/verdict";
@@ -21,8 +27,9 @@ import { getSocialConfig, pickCandidates } from "../lib/social";
 import { tiktokPublishStatus, tiktokSendVideoDraft, tiktokStatus } from "../lib/tiktok";
 import { VIDEO_FPS, VIDEO_SECONDS, videoHtml } from "../lib/video";
 
-const db = adminClient();
+const db: SupabaseClient = adminClient();
 const OUT = join(process.cwd(), "out");
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 
 const fileData = (path: string, type: string) => {
   try {
@@ -32,17 +39,22 @@ const fileData = (path: string, type: string) => {
   }
 };
 
+async function download(url: string): Promise<{ buf: Buffer; type: string } | null> {
+  try {
+    const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (compatible; CacaOfertasBot/1.0)" } });
+    const type = r.headers.get("content-type") || "";
+    if (r.ok && type.startsWith("image/")) return { buf: Buffer.from(await r.arrayBuffer()), type };
+  } catch {
+    /* sem imagem */
+  }
+  return null;
+}
+
 async function urlData(url: string | null | undefined): Promise<string | null> {
   if (!url) return null;
-  const tries = [url.replace(/\._AC_[A-Z]{2}\d+_\./, "._AC_SL1000_."), url];
-  for (const u of tries) {
-    try {
-      const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0 (compatible; CacaOfertasBot/1.0)" } });
-      const type = r.headers.get("content-type") || "";
-      if (r.ok && type.startsWith("image/")) return `data:${type};base64,${Buffer.from(await r.arrayBuffer()).toString("base64")}`;
-    } catch {
-      /* tenta a próxima */
-    }
+  for (const u of [url.replace(/\._AC_[A-Z]{2}\d+_\./, "._AC_SL1000_."), url]) {
+    const d = await download(u);
+    if (d) return `data:${d.type};base64,${d.buf.toString("base64")}`;
   }
   return null;
 }
@@ -53,28 +65,25 @@ function formatSeen(iso: string): string {
   return `${d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" })} às ${d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" })}`;
 }
 
-async function pickProduct(slug: string | undefined): Promise<ProductOverview> {
-  if (slug) {
-    const { data } = await db.from("product_overview").select("*").eq("slug", slug).not("best_price", "is", null).maybeSingle();
-    if (!data) throw new Error(`Produto "${slug}" não encontrado ou sem preço.`);
-    return data as ProductOverview;
-  }
-  const cfg = await getSocialConfig(db);
-  const [c] = await pickCandidates(db, cfg, 1);
-  if (!c) throw new Error("Nenhuma oferta boa para o vídeo agora.");
-  return c.p;
+function encode(input: string[], mp4: string, seconds: number, filter?: string) {
+  execFileSync("ffmpeg", [
+    "-loglevel", "error", "-y",
+    ...input,
+    "-f", "lavfi", "-t", String(seconds), "-i", "anullsrc=r=44100:cl=stereo",
+    ...(filter ? ["-filter_complex", filter, "-map", "[v]", "-map", "1:a"] : []),
+    "-t", String(seconds),
+    "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+    "-c:a", "aac", "-shortest", "-movflags", "+faststart", mp4,
+  ]);
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const send = !args.includes("--no-send");
-  const slug = args.find((a) => !a.startsWith("--"))?.trim() || undefined;
+/* ------------------------------------------------------------ produto (animado) */
 
-  const p = await pickProduct(slug);
+let browser: Browser | null = null;
+
+async function productVideo(p: ProductOverview): Promise<string> {
   const v = verdictFor(p);
   if (isInflated(v.kind)) console.warn(`Atenção: ${p.slug} está com desconto inflado (${v.kind}).`);
-  console.log(`Produto: ${p.name} (${p.slug}) — ${v.kind}`);
-
   const since = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
   const [{ data: daily }, { data: settingsRow }, { data: offer }] = await Promise.all([
     db.from("product_daily").select("day,min_price").eq("product_id", p.id).gte("day", since).order("day"),
@@ -84,8 +93,7 @@ async function main() {
   const s = mergeSettings(settingsRow?.data);
   const price = Number(p.best_price);
   const history = (daily || []).map((d) => ({ day: String(d.day), price: Number(d.min_price) })).filter((h) => h.price > 0);
-  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
-  if (!history.length || history[history.length - 1].day !== today) history.push({ day: today, price });
+  if (!history.length || history[history.length - 1].day !== today()) history.push({ day: today(), price });
   else history[history.length - 1].price = price;
 
   const good = v.kind === "record" || v.kind === "below";
@@ -110,61 +118,169 @@ async function main() {
     host: (process.env.NEXT_PUBLIC_SITE_URL || "https://cacaofertas.com.br").replace(/^https?:\/\//, "").replace(/\/$/, ""),
   });
 
-  // quadros
   const frames = join(OUT, "frames");
   rmSync(frames, { recursive: true, force: true });
   mkdirSync(frames, { recursive: true });
-  writeFileSync(join(OUT, "video.html"), html);
-  const browser = await chromium.launch();
+  browser ||= await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   await page.setContent(html, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
-  const total = VIDEO_SECONDS * VIDEO_FPS;
-  for (let i = 0; i < total; i++) {
+  for (let i = 0; i < VIDEO_SECONDS * VIDEO_FPS; i++) {
     await page.evaluate((t) => (window as unknown as { render: (t: number) => void }).render(t), i / VIDEO_FPS);
     await page.screenshot({ path: join(frames, `${String(i).padStart(4, "0")}.png`) });
   }
-  await browser.close();
-
-  const mp4 = join(OUT, `${p.slug}.mp4`);
-  execFileSync("ffmpeg", [
-    "-loglevel", "error", "-y",
-    "-framerate", String(VIDEO_FPS), "-i", join(frames, "%04d.png"),
-    "-f", "lavfi", "-t", String(VIDEO_SECONDS), "-i", "anullsrc=r=44100:cl=stereo",
-    "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
-    "-c:a", "aac", "-shortest", "-movflags", "+faststart", mp4,
-  ]);
+  await page.close();
+  const mp4 = join(OUT, `${p.slug}-${Date.now().toString(36)}.mp4`);
+  encode(["-framerate", String(VIDEO_FPS), "-i", join(frames, "%04d.png")], mp4, VIDEO_SECONDS);
   rmSync(frames, { recursive: true, force: true });
+  return mp4;
+}
+
+/* ------------------------------------------------- cupom / data (arte + zoom) */
+
+async function artVideo(slug: string, storyUrl: string): Promise<string> {
+  const img = await download(storyUrl);
+  if (!img) throw new Error("arte vertical do post indisponível");
+  const src = join(OUT, `${slug}-story.jpg`);
+  writeFileSync(src, img.buf);
+  const mp4 = join(OUT, `${slug}-${Date.now().toString(36)}.mp4`);
+  const secs = 8;
+  const frames = secs * VIDEO_FPS;
+  encode(
+    ["-loop", "1", "-framerate", String(VIDEO_FPS), "-i", src],
+    mp4,
+    secs,
+    `[0:v]scale=2160:3840,zoompan=z='1+0.07*on/${frames}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${frames}:s=1080x1920:fps=${VIDEO_FPS},fade=t=in:st=0:d=0.4[v]`,
+  );
+  rmSync(src, { force: true });
+  return mp4;
+}
+
+/* ------------------------------------------------------------ envio */
+
+async function upload(mp4: string, slug: string): Promise<string> {
   const buf = readFileSync(mp4);
-  console.log(`Vídeo: ${mp4} (${(buf.length / 1024 / 1024).toFixed(1)} MB)`);
-
-  const path = `social/video/${today}/${p.slug}-${Date.now().toString(36)}.mp4`;
+  console.log(`  vídeo ${(buf.length / 1024 / 1024).toFixed(1)} MB`);
+  const path = `social/video/${today()}/${slug}-${Date.now().toString(36)}.mp4`;
   const { error } = await db.storage.from("brand").upload(path, buf, { contentType: "video/mp4", upsert: false, cacheControl: "31536000" });
-  if (error) throw new Error(`Upload do vídeo: ${error.message}`);
-  const url = db.storage.from("brand").getPublicUrl(path).data.publicUrl;
-  console.log(`Storage: ${url}`);
+  if (error) throw new Error(`upload do vídeo: ${error.message}`);
+  return db.storage.from("brand").getPublicUrl(path).data.publicUrl;
+}
 
-  if (!send) return;
-  const tk = await tiktokStatus(db);
-  if (!tk.connected) {
-    console.log("TikTok não conectado: o vídeo ficou só no Storage e nos arquivos da execução.");
-    return;
-  }
+async function sendAndWait(url: string): Promise<string> {
   const id = await tiktokSendVideoDraft(db, url);
-  console.log(`TikTok: enviado (publish_id ${id}). Acompanhando…`);
+  console.log(`  TikTok: enviado (${id})`);
   for (let i = 0; i < 12; i++) {
     await new Promise((r) => setTimeout(r, 5000));
     const st = await tiktokPublishStatus(db, id);
-    console.log(`  ${st.status}${st.reason ? ` — ${st.reason}` : ""}`);
-    if (st.status === "SEND_TO_USER_INBOX" || st.status === "PUBLISH_COMPLETE") {
-      console.log("Pronto: abra o TikTok → caixa de entrada/notificações para escolher o som e publicar.");
-      return;
+    console.log(`    ${st.status}${st.reason ? ` — ${st.reason}` : ""}`);
+    if (st.status === "SEND_TO_USER_INBOX" || st.status === "PUBLISH_COMPLETE") break;
+    if (st.status === "FAILED") throw new Error(`TikTok recusou o vídeo: ${st.reason || st.status}`);
+  }
+  return id;
+}
+
+/* ------------------------------------------------------------ modos */
+
+interface PendingPost {
+  id: number;
+  kind: string;
+  slug: string;
+  story_url: string | null;
+}
+
+async function pendingPosts(): Promise<PendingPost[]> {
+  const cfg = await getSocialConfig(db);
+  if (!cfg.tiktok || !cfg.tiktokVideo) return [];
+  const { data } = await db
+    .from("social_posts")
+    .select("id,kind,slug,story_url")
+    .eq("status", "published")
+    .is("tiktok_publish_id", null)
+    .is("tiktok_error", null)
+    .gte("published_at", new Date(Date.now() - 3 * 3600_000).toISOString())
+    .order("published_at", { ascending: true })
+    .limit(4);
+  return (data || []) as PendingPost[];
+}
+
+async function runPending(checkOnly: boolean) {
+  const list = await pendingPosts();
+  if (checkOnly) {
+    console.log(`Pendentes: ${list.length}`);
+    if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `pending=${list.length}\n`);
+    return;
+  }
+  if (!list.length) return console.log("Nada pendente.");
+  if (!(await tiktokStatus(db)).connected) return console.log("TikTok não conectado.");
+
+  let fails = 0;
+  for (const post of list) {
+    console.log(`Post ${post.id} (${post.kind}: ${post.slug})`);
+    // trava: marca como em andamento para outra execução não pegar o mesmo
+    const { data: lock } = await db
+      .from("social_posts")
+      .update({ tiktok_error: "gerando vídeo…" })
+      .eq("id", post.id)
+      .is("tiktok_publish_id", null)
+      .is("tiktok_error", null)
+      .select("id")
+      .maybeSingle();
+    if (!lock) continue;
+    try {
+      let mp4: string;
+      if (post.kind === "product") {
+        const { data } = await db.from("product_overview").select("*").eq("slug", post.slug).maybeSingle();
+        if (!data || (data as ProductOverview).best_price == null) throw new Error("produto sem preço agora");
+        mp4 = await productVideo(data as ProductOverview);
+      } else {
+        if (!post.story_url) throw new Error("post sem arte vertical");
+        mp4 = await artVideo(post.slug.replace(/[^\w-]+/g, "-"), post.story_url);
+      }
+      const url = await upload(mp4, post.slug.replace(/[^\w-]+/g, "-"));
+      const id = await sendAndWait(url);
+      await db.from("social_posts").update({ tiktok_publish_id: id, tiktok_video_url: url, tiktok_error: null }).eq("id", post.id);
+    } catch (e) {
+      fails++;
+      const msg = (e as Error).message.slice(0, 300);
+      console.error(`  erro: ${msg}`);
+      await db.from("social_posts").update({ tiktok_error: msg }).eq("id", post.id);
     }
-    if (st.status === "FAILED" || st.status === "ERRO") throw new Error(`TikTok recusou o vídeo: ${st.reason || st.status}`);
+  }
+  if (fails === list.length) process.exitCode = 1;
+}
+
+async function runOne(slug: string | undefined, send: boolean) {
+  let p: ProductOverview;
+  if (slug) {
+    const { data } = await db.from("product_overview").select("*").eq("slug", slug).not("best_price", "is", null).maybeSingle();
+    if (!data) throw new Error(`Produto "${slug}" não encontrado ou sem preço.`);
+    p = data as ProductOverview;
+  } else {
+    const [c] = await pickCandidates(db, await getSocialConfig(db), 1);
+    if (!c) throw new Error("Nenhuma oferta boa para o vídeo agora.");
+    p = c.p;
+  }
+  console.log(`Produto: ${p.name} (${p.slug})`);
+  const mp4 = await productVideo(p);
+  const url = await upload(mp4, p.slug);
+  console.log(`  ${url}`);
+  if (send) {
+    if (!(await tiktokStatus(db)).connected) return console.log("TikTok não conectado: o vídeo ficou só no Storage.");
+    await sendAndWait(url);
   }
 }
 
-main().catch((e) => {
-  console.error(e instanceof Error ? e.message : e);
-  process.exit(1);
-});
+async function main() {
+  mkdirSync(OUT, { recursive: true });
+  const args = process.argv.slice(2);
+  if (args.includes("--pending")) await runPending(args.includes("--check"));
+  else await runOne(args.find((a) => !a.startsWith("--"))?.trim() || undefined, !args.includes("--no-send"));
+}
+
+main()
+  .catch((e) => {
+    console.error(e instanceof Error ? e.message : e);
+    process.exitCode = 1;
+  })
+  .finally(() => browser?.close());

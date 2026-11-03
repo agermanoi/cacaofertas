@@ -1,10 +1,11 @@
 import { Fragment } from "react";
 import { adminClient } from "@/lib/supabase";
 import { tiktokPublishStatus, tiktokStatus } from "@/lib/tiktok";
+import CopyButton from "@/components/admin/CopyButton";
 import { getEvents, type EventRow } from "@/lib/events";
 import { demo } from "@/lib/mock";
 import { Flash } from "@/components/admin/Flash";
-import { DEFAULT_SOCIAL, getMetaAccount, getSocialConfig, type MetaAccount, type SocialConfig } from "@/lib/social";
+import { DEFAULT_SOCIAL, getMetaAccount, getSocialConfig, tiktokCaption, type MetaAccount, type SocialConfig } from "@/lib/social";
 import { createPost, discardPost, publishQueued, retryPost, saveCaption, saveSocial } from "./actions";
 
 // publicar no Instagram espera o processamento da imagem (até ~50 s)
@@ -24,6 +25,8 @@ type Post = {
   ig_media_id: string | null;
   fb_post_id: string | null;
   tiktok_publish_id: string | null;
+  tiktok_video_url: string | null;
+  tiktok_error: string | null;
   error: string | null;
   created_at: string;
   published_at: string | null;
@@ -174,6 +177,10 @@ function Settings({ cfg }: { cfg: SocialConfig }) {
             <span>
               TikTok (rascunho na caixa de entrada, <a href="/admin/tiktok">conectar</a>)
             </span>
+          </label>
+          <label className="check">
+            <input type="checkbox" name="tiktokVideo" defaultChecked={cfg.tiktokVideo} />
+            <span>TikTok em vídeo (10 s animado; chega uns 10 a 40 min depois do post). Desmarcado = foto.</span>
           </label>
         </div>
       </fieldset>
@@ -423,6 +430,10 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                         </a>
                       </>
                     ) : null}
+                    {p.tiktok_error ? <span className="muted"> · TikTok: {p.tiktok_error}</span> : null}
+                    {cfg.tiktok && cfg.tiktokVideo && !p.tiktok_publish_id && !p.tiktok_error && p.published_at && Date.now() - new Date(p.published_at).getTime() < 3 * 3600_000
+                      ? " · TikTok: vídeo sendo gerado"
+                      : null}
                     {p.tiktok_publish_id ? (
                       <>
                         {" · TikTok: "}
@@ -432,6 +443,11 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                       </>
                     ) : null}
                     {p.error ? <span className="muted"> · {p.error}</span> : null}
+                    {p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 72 * 3600_000 ? (
+                      <span className="social-retry">
+                        <CopyButton text={tiktokCaption(p.caption)} />
+                      </span>
+                    ) : null}
                     {p.error ? (
                       <form action={retryPost} className="social-retry">
                         <input type="hidden" name="id" value={p.id} />

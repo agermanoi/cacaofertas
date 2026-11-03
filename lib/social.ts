@@ -32,6 +32,8 @@ export interface SocialConfig {
   story: boolean;
   /** manda rascunho para a caixa de entrada do TikTok (arte vertical + legenda) */
   tiktok: boolean;
+  /** TikTok em vídeo (gerado pelo GitHub Actions minutos depois do post); desligado = foto */
+  tiktokVideo: boolean;
   /** dias até o mesmo produto poder voltar (antes disso, só se o preço cair mais 3%) */
   repeatDays: number;
   /** queda mínima vs média de 30 dias, em %, para contar como oferta real */
@@ -62,6 +64,7 @@ export const DEFAULT_SOCIAL: SocialConfig = {
   facebook: true,
   story: false,
   tiktok: false,
+  tiktokVideo: true,
   repeatDays: 7,
   minDrop: 7,
   fallback: true,
@@ -104,6 +107,7 @@ export function parseSocial(raw: unknown): SocialConfig {
     facebook: bool(r.facebook, D.facebook),
     story: bool(r.story, D.story),
     tiktok: bool(r.tiktok, D.tiktok),
+    tiktokVideo: bool(r.tiktokVideo, D.tiktokVideo),
     repeatDays: num(r.repeatDays, D.repeatDays, 1, 60),
     minDrop: num(r.minDrop, D.minDrop, 1, 80),
     fallback: bool(r.fallback, D.fallback),
@@ -484,14 +488,15 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
     }
   };
   const tiktok = async () => {
-    if (!cfg.tiktok || !post.story_url || post.tiktok_publish_id) return;
+    // em modo vídeo quem manda é o GitHub Actions (scripts/video.ts --pending), minutos depois
+    if (!cfg.tiktok || cfg.tiktokVideo || !post.story_url || post.tiktok_publish_id) return;
     try {
       const lines = String(post.caption).split("\n");
       const title = (post.kind === "coupon" ? lines[0] : lines[1] || lines[0]).replace(/^[^\p{L}\p{N}]+/u, "").trim();
       upd.tiktok_publish_id = await tiktokSendDraft(db, {
         imageUrl: post.story_url,
         title,
-        description: String(post.caption).replace("Link na bio →", "Link na bio:"),
+        description: tiktokCaption(post.caption),
       });
     } catch (e) {
       errors.push(`TikTok: ${(e as Error).message}`);
@@ -512,6 +517,26 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
     })
     .eq("id", id);
   return { ok: any, error: errors.join(" | ") || undefined };
+}
+
+/** Legenda para o TikTok: o link não é clicável lá e o TikTok aceita no máximo 5 hashtags (a da marca fica sempre). */
+export function tiktokCaption(caption: string): string {
+  const TAG = /#[\p{L}\p{N}_]+(?:\.[\p{L}\p{N}_]+)*/gu;
+  const text = String(caption).replace("Link na bio →", "Link na bio:");
+  const all = [...new Set((text.match(TAG) || []).map((x) => x.toLowerCase()))];
+  const brand = all.find((x) => x === "#cacaofertas");
+  const keep = new Set(brand ? [...all.filter((x) => x !== brand).slice(0, 4), brand] : all.slice(0, 5));
+  const used = new Set<string>();
+  return text
+    .replace(TAG, (tag) => {
+      const k = tag.toLowerCase();
+      if (!keep.has(k) || used.has(k)) return "";
+      used.add(k);
+      return tag;
+    })
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+$/gm, "")
+    .slice(0, 2200);
 }
 
 /** "na Amazon", "no Mercado Livre", "nas Casas Bahia". */

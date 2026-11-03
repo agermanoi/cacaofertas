@@ -348,6 +348,9 @@ revoke all on function site_geo(int) from public, anon, authenticated;
 
 -- TikTok
 alter table social_posts add column if not exists tiktok_publish_id text;
+-- TikTok em vídeo (gerado pelo GitHub Actions): endereço do MP4 e erro da última tentativa
+alter table social_posts add column if not exists tiktok_video_url text;
+alter table social_posts add column if not exists tiktok_error text;
 
 -- ---------- Datas do varejo (11.11, Black Friday, 12.12…) ----------
 create table if not exists events (
