@@ -8,7 +8,7 @@ import { HOUSE_SIZES, houseProducts, type HouseSize } from "@/lib/house-ads";
  * Mostra os produtos do momento (preço de hoje); o clique passa pelo contador do GAM.
  * A URL de clique do GAM vai no "#" (não chega ao servidor), então a página fica em cache
  * e um script a coloca na frente de cada link.
- * Tamanhos: 970x250, 728x90, 300x250, 320x100.
+ * Tamanhos: 970x250, 728x90, 300x250, 320x100, 320x50.
  */
 export const revalidate = 600;
 
@@ -57,13 +57,17 @@ export async function GET(_req: Request, { params }: { params: Promise<{ size: s
       <a class="cta" href="${href("/hoje")}" target="_blank" rel="noopener">Ver histórico de preço ›</a>
     </div>`;
   } else {
-    const i = items[0];
+    const it = (i: (typeof items)[number], k: number) => `
+      <a class="item${k === 0 ? " on" : ""}" href="${href(`/produto/${i.p.slug}`)}" target="_blank" rel="noopener">
+        <span class="img"><img src="${esc(i.p.image_url!)}" alt=""></span>
+        <span class="info"><span class="name">${esc(i.p.name)}</span><span class="row"><span class="price">${brl(Number(i.p.best_price))}</span><span class="badge ${i.v.kind === "record" || i.v.kind === "below" ? "good" : ""}">${esc(i.badge)}</span></span></span>
+      </a>`;
     body = `
-    <a class="ad strip s${conf.w}" href="${href(i ? `/produto/${i.p.slug}` : "/hoje")}" target="_blank" rel="noopener">
-      <img class="logo" src="${esc(logo)}" alt="${esc(s.siteName)}">
-      ${i ? `<span class="img"><img src="${esc(i.p.image_url!)}" alt=""></span><span class="info"><span class="name">${esc(i.p.name)}</span><span class="price">${brl(Number(i.p.best_price))}</span></span>` : ""}
-      <span class="cta">Ver ›</span>
-    </a>`;
+    <div class="ad strip s${size}">
+      <a class="lg" href="${href("/hoje")}" target="_blank" rel="noopener"><img class="logo" src="${esc(logo)}" alt="${esc(s.siteName)}"></a>
+      <div class="rot">${items.map(it).join("")}</div>
+      <a class="cta" href="${href("/hoje")}" target="_blank" rel="noopener">${conf.w <= 320 ? "Ver ›" : "Ver ofertas ›"}</a>
+    </div>`;
   }
 
   const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=${conf.w}">
@@ -106,17 +110,26 @@ a{color:inherit;text-decoration:none}
 .b300 .badge{white-space:nowrap;font-size:9.5px;padding:2px 7px}
 .b300 .cta{text-align:center;padding:8px;font-size:13px}
 .strip{align-items:center;gap:10px;padding:0 10px}
-.strip .logo{height:${conf.h > 90 ? 34 : 30}px}
-.strip .img{width:${conf.h - 16}px;height:${conf.h - 16}px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
-.strip .img img{max-width:90%;max-height:90%;object-fit:contain}
-.strip .info{flex:1;display:flex;flex-direction:column;min-width:0}
-.strip .name{font-size:13px;-webkit-line-clamp:${conf.h > 90 ? 2 : 1}}
-.strip .price{font-size:20px}
-.strip .cta{padding:7px 12px;font-size:13px;flex:none}
-.s320 .logo{display:none}
+.strip .lg{flex:none;display:flex}
+.strip .logo{height:${conf.h >= 90 ? 34 : 30}px}
+.strip .rot{position:relative;flex:1;height:${conf.h - (conf.h <= 50 ? 8 : 14)}px;min-width:0}
+.strip .item{position:absolute;inset:0;display:flex;align-items:center;gap:8px;background:#fff;border-radius:${conf.h <= 50 ? 8 : 12}px;padding:0 ${conf.h <= 50 ? 6 : 10}px 0 4px;opacity:0;transition:opacity .5s;pointer-events:none;overflow:hidden}
+.strip .item.on{opacity:1;pointer-events:auto}
+.strip .img{width:${Math.min(conf.h - (conf.h <= 50 ? 12 : 22), conf.w <= 320 ? 64 : 999)}px;height:${conf.h - (conf.h <= 50 ? 12 : 22)}px;display:flex;align-items:center;justify-content:center;flex:none}
+.strip .img img{max-width:100%;max-height:100%;object-fit:contain}
+.strip .info{flex:1;display:flex;flex-direction:column;min-width:0;gap:${conf.h <= 50 ? 0 : 3}px}
+.strip .name{font-size:${conf.h <= 50 ? 11 : 13}px;line-height:1.15;-webkit-line-clamp:${conf.h >= 90 ? 2 : 1}}
+.strip .row{display:flex;align-items:center;gap:6px;min-width:0}
+.strip .price{font-size:${conf.h <= 50 ? 15 : 19}px;white-space:nowrap}
+.strip .badge{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;padding:2px 7px}
+.strip .cta{padding:${conf.h <= 50 ? "6px 10px" : "8px 14px"};font-size:${conf.h <= 50 ? 12 : 13}px;flex:none;white-space:nowrap}
+.s320x100 .lg,.s320x50 .lg{display:none}
+.s320x100{gap:8px;padding:0 8px}
+.s320x50{gap:6px;padding:0 4px}
+.s320x50 .badge,.s320x100 .badge{display:none}
 </style></head><body>${body}
 <script>(function(){try{var c=decodeURIComponent(location.hash.slice(1));if(c.indexOf('http')!==0)return;var a=document.querySelectorAll('a');for(var k=0;k<a.length;k++)a[k].href=c+a[k].getAttribute('href').replace(/&amp;/g,'&')}catch(e){}})();</script>
-${size === "300x250" && items.length > 1 ? `<script>(function(){var c=document.querySelectorAll('.rot .card'),i=0;setInterval(function(){c[i].classList.remove('on');i=(i+1)%c.length;c[i].classList.add('on')},4000)})();</script>` : ""}
+${size !== "970x250" && items.length > 1 ? `<script>(function(){var c=document.querySelectorAll('.rot > a'),i=0;setInterval(function(){c[i].classList.remove('on');i=(i+1)%c.length;c[i].classList.add('on')},4000)})();</script>` : ""}
 </body></html>`;
   return new Response(html, {
     headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, s-maxage=600, stale-while-revalidate=600", "x-robots-tag": "noindex" },

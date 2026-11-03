@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ size: st
   const conf = HOUSE_SIZES[size as HouseSize];
   if (!conf) return new Response("Tamanho inválido", { status: 404 });
   const x = new URL(req.url).searchParams.get("x") === "2" ? 2 : 1;
-  const [s, fonts, items] = await Promise.all([getSettings(), ogFonts(), houseProducts(size === "300x250" ? 1 : conf.n)]);
+  const [s, fonts, items] = await Promise.all([getSettings(), ogFonts(), houseProducts(size === "970x250" ? conf.n : 1)]);
   const [logo, ...imgs] = await Promise.all([imageData(s.logoUrl), ...items.map((i) => imageData(i.p.image_url))]);
   const P = s.colors.primary;
   const INK = s.colors.ink;
@@ -111,11 +111,36 @@ export async function GET(req: Request, { params }: { params: Promise<{ size: st
       </div>
     );
   } else {
+    const tiny = conf.h <= 50;
+    const i = items[0];
+    const good = i && (i.v.kind === "record" || i.v.kind === "below");
+    const boxH = conf.h - (tiny ? 8 : 14);
+    const imgS = Math.min(conf.h - (tiny ? 12 : 22), conf.w <= 320 ? 64 : 999);
     node = (
-      <div style={{ display: "flex", alignItems: "center", width: "100%", height: "100%", background: P, padding: `0 ${u(10)}px`, fontFamily: "Nunito", color: INK }}>
-        {conf.w > 320 ? <Logo h={26} /> : null}
-        <div style={{ display: "flex", flex: 1, height: u(conf.h - 16), marginLeft: u(10), marginRight: u(10) }}>{items.length ? <Card k={0} wide /> : null}</div>
-        <Cta t="Ver ›" fs={13} />
+      <div style={{ display: "flex", alignItems: "center", width: "100%", height: "100%", background: P, padding: `0 ${u(conf.w > 320 ? 10 : tiny ? 4 : 8)}px`, fontFamily: "Nunito", color: INK }}>
+        {conf.w > 320 ? <div style={{ display: "flex", marginRight: u(10) }}><Logo h={26} /></div> : null}
+        <div style={{ display: "flex", flex: 1, alignItems: "center", height: u(boxH), background: "#FFFFFF", borderRadius: u(tiny ? 8 : 12), padding: `0 ${u(tiny ? 6 : 10)}px 0 ${u(4)}px`, marginRight: u(tiny ? 6 : 10) }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: u(imgS), height: u(imgS), marginRight: u(8) }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {imgs[0] ? <img src={imgs[0]!} alt="" style={{ maxWidth: u(imgS), maxHeight: u(imgS), objectFit: "contain" }} /> : null}
+          </div>
+          {i ? (
+            <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+              <div style={{ display: "flex", fontSize: u(tiny ? 11 : 13), fontWeight: 700, lineHeight: 1.15 }}>{short(i.p.name, tiny ? 30 : conf.w > 320 ? 70 : 44)}</div>
+              <div style={{ display: "flex", alignItems: "center", marginTop: u(tiny ? 0 : 3) }}>
+                <div style={{ display: "flex", fontSize: u(tiny ? 15 : 19), fontWeight: 900 }}>{brl(Number(i.p.best_price))}</div>
+                {conf.w > 320 ? (
+                  <div style={{ display: "flex", marginLeft: u(6), fontSize: u(9.5), fontWeight: 900, padding: `${u(2)}px ${u(7)}px`, borderRadius: 999, background: good ? "#E3F6E9" : "#EEF0F3", color: good ? "#146C2E" : "#3B4553" }}>
+                    {short(i.badge.toUpperCase(), conf.w > 320 ? 30 : 18)}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div style={{ display: "flex", background: INK, color: "#FFFFFF", fontWeight: 900, fontSize: u(tiny ? 12 : 13), padding: tiny ? `${u(6)}px ${u(10)}px` : `${u(8)}px ${u(14)}px`, borderRadius: 999 }}>
+          {conf.w <= 320 ? "Ver ›" : "Ver ofertas ›"}
+        </div>
       </div>
     );
   }

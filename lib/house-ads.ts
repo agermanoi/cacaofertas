@@ -5,9 +5,10 @@ import type { ProductOverview } from "./types";
 /** Tamanhos dos anúncios da casa (Google Ad Manager). */
 export const HOUSE_SIZES = {
   "970x250": { w: 970, h: 250, n: 3 },
-  "728x90": { w: 728, h: 90, n: 1 },
+  "728x90": { w: 728, h: 90, n: 3 },
   "300x250": { w: 300, h: 250, n: 3 },
-  "320x100": { w: 320, h: 100, n: 1 },
+  "320x100": { w: 320, h: 100, n: 3 },
+  "320x50": { w: 320, h: 50, n: 3 },
 } as const;
 export type HouseSize = keyof typeof HOUSE_SIZES;
 
