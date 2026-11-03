@@ -102,7 +102,7 @@ async function lomadeeTrackLinks(db: SupabaseClient, current: Set<string>): Prom
     .eq("source", "lomadee")
     .is("affiliate_url", null)
     .or("active.eq.true,meta->>trackError.not.is.null")
-    .limit(80);
+    .limit(250);
   let ok = 0;
   let failed = 0;
   for (const c of data || []) {
