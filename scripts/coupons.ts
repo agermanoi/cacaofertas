@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import * as cheerio from "cheerio";
-import { lomadeeBrands, lomadeeCampaigns } from "../lib/collectors/lomadee";
+import { lomadeeBrands, lomadeeCampaigns, lomadeeShortLink } from "../lib/collectors/lomadee";
 import { http } from "../lib/http";
 import { normalizeStore } from "../lib/affiliate";
 
@@ -85,6 +85,45 @@ async function upsert(db: SupabaseClient, source: string, rows: Row[]): Promise<
   return rows.length;
 }
 
+/** Planilha, imagem ou PDF do material de divulgação não é página de loja. */
+function isLandingUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url) && !/cdn\.lomadee\.com\.br/i.test(url) && !/\.(csv|xlsx?|pdf|zip|png|jpe?g|gif|webp)(\?|#|$)/i.test(url);
+}
+
+/**
+ * Gera antes (aqui, sem pressa) o link rastreado de cada cupom da Lomadee. Quando a loja recusa
+ * (canal não permitido, domínio fora da loja…), o cupom fica escondido: sem link rastreado o clique
+ * não vira comissão. Na próxima coleta tenta de novo — se a loja liberar, ele volta sozinho.
+ */
+async function lomadeeTrackLinks(db: SupabaseClient, current: Set<string>): Promise<{ ok: number; failed: number }> {
+  const { data } = await db
+    .from("coupons")
+    .select("id, external_id, url, active, meta")
+    .eq("source", "lomadee")
+    .is("affiliate_url", null)
+    .or("active.eq.true,meta->>trackError.not.is.null")
+    .limit(80);
+  let ok = 0;
+  let failed = 0;
+  for (const c of data || []) {
+    const meta = (c.meta || {}) as { organizationId?: string; trackError?: string };
+    if (!meta.organizationId || !current.has(c.external_id)) continue; // só os que ainda valem
+    const r = await lomadeeShortLink(meta.organizationId, c.url);
+    if ("url" in r) {
+      ok++;
+      const { trackError, ...rest } = meta;
+      await db
+        .from("coupons")
+        .update({ affiliate_url: r.url, meta: rest, ...(trackError ? { active: true } : {}) })
+        .eq("id", c.id);
+    } else {
+      failed++;
+      await db.from("coupons").update({ active: false, meta: { ...meta, trackError: r.error } }).eq("id", c.id);
+    }
+  }
+  return { ok, failed };
+}
+
 export async function importLomadee(db: SupabaseClient): Promise<{ count: number; error?: string }> {
   try {
     const [campaigns, brands] = await Promise.all([lomadeeCampaigns(), lomadeeBrands()]);
@@ -96,7 +135,7 @@ export async function importLomadee(db: SupabaseClient): Promise<{ count: number
     const rows: Row[] = [];
     const seenTitles = new Set<string>();
     for (const c of campaigns) {
-      if (!c.url) continue;
+      if (!c.url || !isLandingUrl(c.url)) continue;
       const code = c.type.includes("Coupon") && c.code ? c.code : null;
       if (!isRealCoupon(c.name, c.description, code)) continue;
       const dupKey = `${c.organizationId}|${c.name.trim().toLowerCase()}|${code || ""}`;
@@ -125,7 +164,10 @@ export async function importLomadee(db: SupabaseClient): Promise<{ count: number
         meta: c.organizationId ? { organizationId: c.organizationId } : null,
       });
     }
-    return { count: await upsert(db, "lomadee", rows) };
+    const count = await upsert(db, "lomadee", rows);
+    const links = await lomadeeTrackLinks(db, new Set(rows.map((r) => r.external_id)));
+    if (links.ok || links.failed) console.log(`[lomadee] links de afiliado: ${links.ok} gerados, ${links.failed} recusados pela loja (cupom escondido)`);
+    return { count };
   } catch (e) {
     return { count: 0, error: (e as Error).message.slice(0, 300) };
   }

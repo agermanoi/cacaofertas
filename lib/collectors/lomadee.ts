@@ -101,6 +101,31 @@ export async function lomadeeAffiliateLink(organizationId: string, url: string):
   }
 }
 
+/**
+ * Igual ao lomadeeAffiliateLink, mas devolve o motivo quando a Lomadee recusa
+ * (ex.: "This channel is not allowed by the organization", "domain_not_allowed").
+ */
+export async function lomadeeShortLink(organizationId: string, url: string): Promise<{ url: string } | { error: string }> {
+  try {
+    const res = await fetch(`${base()}/affiliate/shortener/url`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ organizationId, type: "Custom", url, mdasc: process.env.LOMADEE_MDASC || undefined }),
+    });
+    const json = (await res.json().catch(() => null)) as
+      | { shortUrls?: string[]; message?: string }[]
+      | { message?: string; success?: boolean }
+      | null;
+    await sleep(1100);
+    const first = Array.isArray(json) ? json[0] : null;
+    if (first?.shortUrls?.[0]) return { url: first.shortUrls[0] };
+    const msg = (first?.message || (json && !Array.isArray(json) ? json.message : "") || `HTTP ${res.status}`).toString();
+    return { error: msg.slice(0, 200) };
+  } catch (e) {
+    return { error: (e as Error).message.slice(0, 200) };
+  }
+}
+
 /** Lista as lojas (marcas) que a conta enxerga na Lomadee. Usado só para diagnóstico no painel. */
 export async function lomadeeBrands(): Promise<{ brands: { id?: string; name: string; site?: string; active?: boolean; note?: string }[]; error?: string }> {
   const brands: { id?: string; name: string; site?: string; active?: boolean; note?: string }[] = [];
