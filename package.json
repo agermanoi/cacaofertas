@@ -13,7 +13,8 @@
     "ml:auth": "tsx scripts/ml-auth.ts",
     "meta:setup": "tsx scripts/meta-setup.ts",
     "social": "tsx scripts/social.ts",
-    "video": "tsx scripts/video.ts"
+    "video": "tsx scripts/video.ts",
+    "indexnow": "tsx scripts/indexnow.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

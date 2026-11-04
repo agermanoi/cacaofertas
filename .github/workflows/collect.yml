@@ -51,3 +51,10 @@ jobs:
           else
             echo "REVALIDATE_URL não configurado; o site atualiza sozinho em até 1h."
           fi
+      - name: Avisar o Bing (IndexNow)
+        continue-on-error: true
+        run: npm run indexnow
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://cacaofertas.com.br
