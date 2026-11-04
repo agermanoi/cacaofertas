@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { breadcrumbLd } from "@/lib/seo";
+import { breadcrumbLd, faqLd, productFaq } from "@/lib/seo";
 import { categorySlug as catSlugForCrumb } from "@/lib/categories";
 import { siteUrl } from "@/lib/site";
-import { getDailySeries, getOffers, getProductBySlug, getStoreSeries } from "@/lib/data";
-import { verdictFor } from "@/lib/verdict";
+import { formatSeen, getDailySeries, getOffers, getProductBySlug, getStoreSeries } from "@/lib/data";
+import { periodLabel, verdictFor } from "@/lib/verdict";
 import { money } from "@/lib/format";
 import { PriceTag } from "@/components/PriceTag";
 import { VerdictBadge } from "@/components/VerdictBadge";
@@ -67,6 +67,7 @@ export default async function ProductPage({ params }: Params) {
   const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))]);
   const verdict = verdictFor(p);
   const specs = getSpecs(p.slug, p.specs);
+  const faq = productFaq(p, verdict, { stores: offers.length, seen: offers[0]?.last_seen_at ? formatSeen(offers[0].last_seen_at) : null });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -107,6 +108,8 @@ export default async function ProductPage({ params }: Params) {
         }}
       />
 
+      {faq.length ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd(faq)) }} /> : null}
+
       <nav className="crumbs" aria-label="Você está em">
         <Link href="/">Todos os produtos</Link> <span aria-hidden="true">/</span>{" "}
         <Link href={`/categoria/${categorySlug(p.category)}`}>{p.category}</Link>
@@ -131,11 +134,11 @@ export default async function ProductPage({ params }: Params) {
           <dd>{money(p.min_all)}</dd>
         </div>
         <div>
-          <dt>Média dos últimos 30 dias</dt>
+          <dt>Média dos últimos {periodLabel(p.days_tracked)}</dt>
           <dd>{money(p.avg_30d)}</dd>
         </div>
         <div>
-          <dt>Maior preço em 30 dias</dt>
+          <dt>Maior preço em {periodLabel(p.days_tracked)}</dt>
           <dd>{money(p.max_30d)}</dd>
         </div>
         <div>
@@ -209,6 +212,20 @@ export default async function ProductPage({ params }: Params) {
             Confira as regras: muitos cupons valem só para algumas categorias ou acima de um valor mínimo.{" "}
             <Link href="/cupons">Ver todos os cupons</Link>
           </p>
+        </section>
+      ) : null}
+
+      {faq.length ? (
+        <section aria-labelledby="perguntas" className="faq">
+          <h2 id="perguntas">Perguntas frequentes</h2>
+          <dl>
+            {faq.map((f) => (
+              <div key={f.q}>
+                <dt>{f.q}</dt>
+                <dd>{f.a}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
       ) : null}
 

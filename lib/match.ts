@@ -78,6 +78,9 @@ export function matchesProduct(product: Product, offer: OfferInput): boolean {
   if (isAccessoryTitle(product, offer.title)) return false;
   if (offer.price < Number(product.min_price || 0)) return false;
   if (product.max_price && offer.price > Number(product.max_price)) return false;
+  // sem teto definido: preço absurdo (vendedor "pausando" anúncio com R$ 2.000.399) não entra
+  if (!product.max_price && Number(product.min_price) > 0 && offer.price > Number(product.min_price) * 10) return false;
+  if (offer.price > 200_000) return false;
   return titleMatches(product, offer.title);
 }
 
@@ -88,11 +91,15 @@ export function matchesProduct(product: Product, offer: OfferInput): boolean {
  * ("Pacote Turtle Beach ... para Xbox Series X").
  */
 export function dropOutliers<T extends { price: number }>(list: T[]): T[] {
+  if (list.length === 2) {
+    const [a, b] = [...list].sort((x, y) => x.price - y.price);
+    return b.price > a.price * 4 ? [a] : list; // dois preços muito distantes: o alto é erro de anúncio
+  }
   if (list.length < 3) return list;
   const prices = list.map((o) => o.price).sort((a, b) => a - b);
   const mid = prices.length / 2;
   const median = prices.length % 2 ? prices[Math.floor(mid)] : (prices[mid - 1] + prices[mid]) / 2;
-  return list.filter((o) => o.price >= median * 0.6);
+  return list.filter((o) => o.price >= median * 0.6 && o.price <= median * 3);
 }
 
 export function selectOffers(product: Product, offers: OfferInput[], perStore = 3): OfferInput[] {

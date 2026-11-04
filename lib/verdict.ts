@@ -17,6 +17,12 @@ export interface Verdict {
 const MIN_DAYS = Number(process.env.NEXT_PUBLIC_MIN_DAYS_FOR_VERDICT || 5);
 const FAKE_MIN_DAYS = 15;
 
+/** "30 dias" quando já há um mês de histórico; antes disso, "7 dias acompanhados" (honesto com o período real). */
+export function periodLabel(daysTracked: number | null | undefined): string {
+  const d = Number(daysTracked || 0);
+  return d >= 30 ? "30 dias" : `${d} ${d === 1 ? "dia acompanhado" : "dias acompanhados"}`;
+}
+
 export function verdictFor(p: ProductOverview): Verdict {
   const best = p.best_price != null ? Number(p.best_price) : null;
   const avg = p.avg_30d != null ? Number(p.avg_30d) : null;
@@ -35,6 +41,7 @@ export function verdictFor(p: ProductOverview): Verdict {
   }
 
   const vsAvg = (avg - best) / avg;
+  const per = periodLabel(days);
   const list = p.best_list_price != null ? Number(p.best_list_price) : null;
   const max = p.max_30d != null ? Number(p.max_30d) : null;
 
@@ -47,27 +54,27 @@ export function verdictFor(p: ProductOverview): Verdict {
       return {
         kind: "half",
         label: "Metade do dobro",
-        detail: `Anunciado com ${Math.round(announced * 100)}% de desconto, mas o preço de hoje está na média dos últimos 30 dias.`,
+        detail: `Anunciado com ${Math.round(announced * 100)}% de desconto, mas o preço de hoje está na média dos últimos ${per}.`,
         vsAvg,
       };
     }
     return {
       kind: "fake",
       label: "Desconto menor do que parece",
-      detail: `Não vimos o preço de ${fmt(list)} nos últimos 30 dias. O preço de hoje está na média.`,
+      detail: `Não vimos o preço de ${fmt(list)} nos últimos ${per}. O preço de hoje está na média.`,
       vsAvg,
     };
   }
   if (p.min_all != null && best <= Number(p.min_all) * 1.005 && vsAvg > 0.02) {
-    return { kind: "record", label: "Menor preço já visto", detail: `${Math.round(vsAvg * 100)}% abaixo da média de 30 dias.`, vsAvg };
+    return { kind: "record", label: "Menor preço já visto", detail: `${Math.round(vsAvg * 100)}% abaixo da média dos últimos ${per}.`, vsAvg };
   }
   if (vsAvg >= 0.07) {
-    return { kind: "below", label: "Abaixo da média", detail: `${Math.round(vsAvg * 100)}% mais barato que a média de 30 dias.`, vsAvg };
+    return { kind: "below", label: "Abaixo da média", detail: `${Math.round(vsAvg * 100)}% mais barato que a média dos últimos ${per}.`, vsAvg };
   }
   if (vsAvg <= -0.05) {
-    return { kind: "above", label: "Acima da média", detail: `${Math.round(-vsAvg * 100)}% mais caro que a média de 30 dias. Vale esperar.`, vsAvg };
+    return { kind: "above", label: "Acima da média", detail: `${Math.round(-vsAvg * 100)}% mais caro que a média dos últimos ${per}. Vale esperar.`, vsAvg };
   }
-  return { kind: "normal", label: "Preço de sempre", detail: "Dentro da faixa dos últimos 30 dias.", vsAvg };
+  return { kind: "normal", label: "Preço de sempre", detail: `Dentro da faixa dos últimos ${per}.`, vsAvg };
 }
 
 function fmt(v: number) {

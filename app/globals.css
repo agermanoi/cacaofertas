@@ -2098,3 +2098,25 @@ button.btn-ghost {
   margin-top: 2px;
 }
 .catalog-updated { margin: 4px 0 0; font-size: 0.82rem; color: #5b6573; max-width: 60ch; }
+
+/* perguntas frequentes do produto */
+.faq dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.faq dl > div {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fff;
+}
+.faq dt {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.faq dd {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
