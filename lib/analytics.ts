@@ -17,6 +17,8 @@ export function deviceOf(ua: string): "mobile" | "tablet" | "desktop" {
   return "desktop";
 }
 
+const TIKTOK_UA = /musical_ly|BytedanceWebview|TikTok|trill_|ByteLocale/i;
+
 /** De onde veio: utm_source, navegador interno dos apps ou o site que mandou. */
 export function sourceOf(opts: { utm?: string | null; ref?: string | null; ua: string; host: string }): { source: string; refHost: string | null } {
   let refHost: string | null = null;
@@ -31,6 +33,8 @@ export function sourceOf(opts: { utm?: string | null; ref?: string | null; ua: s
   if (utm) return { source: (ALIAS[utm] || utm).slice(0, 40), refHost };
   if (/instagram/i.test(opts.ua)) return { source: "instagram", refHost };
   if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(opts.ua)) return { source: "facebook", refHost };
+  // navegador interno do TikTok (não manda o site de origem)
+  if (TIKTOK_UA.test(opts.ua)) return { source: "tiktok", refHost };
   if (!refHost) return { source: "direto", refHost };
   const self = opts.host.replace(/^www\./, "");
   if (refHost === self || refHost.endsWith(`.${self}`)) return { source: "interno", refHost };
@@ -66,6 +70,6 @@ export function clientIp(h: Headers): string {
 export async function clickMeta(h: Headers): Promise<{ visitor: string; source: string } | null> {
   const ua = h.get("user-agent") || "";
   if (isBot(ua)) return null;
-  const source = /instagram/i.test(ua) ? "instagram" : /FBAN|FBAV|FB_IAB|FBIOS/i.test(ua) ? "facebook" : "site";
+  const source = /instagram/i.test(ua) ? "instagram" : /FBAN|FBAV|FB_IAB|FBIOS/i.test(ua) ? "facebook" : TIKTOK_UA.test(ua) ? "tiktok" : "site";
   return { visitor: await visitorHash(clientIp(h), ua), source };
 }
