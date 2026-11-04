@@ -47,6 +47,7 @@ const SOURCE_LABEL: Record<string, string> = {
   google: "Google",
   tiktok: "TikTok",
   gam: "Anúncios (GAM)",
+  googleads: "Google Ads",
   "chatgpt.com": "ChatGPT",
   site: "Site",
 };
