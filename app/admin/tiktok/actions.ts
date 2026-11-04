@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
 import { ADMIN_COOKIE, verifySession } from "@/lib/admin-auth";
+import { checkDispatchToken } from "@/lib/github";
 import { TIKTOK_STATE_COOKIE, tiktokAuthorizeUrl, tiktokDisconnect, tiktokSaveKeys, tiktokSaveVerifyFile } from "@/lib/tiktok";
 
 function back(msg: { ok?: string; erro?: string }): never {
@@ -59,4 +60,16 @@ export async function disconnectTiktok() {
   await tiktokDisconnect(adminClient());
   revalidatePath("/admin/tiktok");
   back({ ok: "TikTok desconectado." });
+}
+
+/** Token do GitHub para disparar o gerador de vídeo logo depois de cada post. */
+export async function saveGithubToken(formData: FormData) {
+  await requireAdmin();
+  const token = String(formData.get("github_token") || "").trim();
+  if (!/^(github_pat_|ghp_)[\w]{20,}$/.test(token)) back({ erro: "Cole o token do GitHub (começa com github_pat_)." });
+  const err = await checkDispatchToken(token);
+  if (err) back({ erro: `Token não funcionou: ${err}.` });
+  await adminClient().from("kv").upsert({ key: "github_dispatch_token", value: token, updated_at: new Date().toISOString() });
+  revalidatePath("/admin/tiktok");
+  back({ ok: "Token salvo: os vídeos agora são gerados logo depois de cada post." });
 }

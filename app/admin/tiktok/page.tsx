@@ -5,7 +5,7 @@ import { adminClient } from "@/lib/supabase";
 import { Flash } from "@/components/admin/Flash";
 import { TIKTOK_SCOPES, TIKTOK_STATE_COOKIE, tiktokExchangeCode, tiktokRedirectUri, tiktokStatus } from "@/lib/tiktok";
 import { siteUrl } from "@/lib/site";
-import { disconnectTiktok, saveTiktokKeys, saveVerifyFile, startTiktokConnect } from "./actions";
+import { disconnectTiktok, saveGithubToken, saveTiktokKeys, saveVerifyFile, startTiktokConnect } from "./actions";
 
 type Props = {
   searchParams: Promise<{ code?: string; state?: string; error?: string; error_description?: string; ok?: string; erro?: string }>;
@@ -31,6 +31,7 @@ export default async function TiktokPage({ searchParams }: Props) {
 
   const st = await tiktokStatus(db);
   const site = siteUrl();
+  const { data: gh } = await db.from("kv").select("updated_at").eq("key", "github_dispatch_token").maybeSingle();
 
   return (
     <div className="wrap admin-page">
@@ -160,6 +161,29 @@ export default async function TiktokPage({ searchParams }: Props) {
             </button>
           </form>
         )}
+      </section>
+
+      <section className="admin-section">
+        <h2>5. Vídeos na hora</h2>
+        <p className="hint">
+          O vídeo de cada post é gerado no GitHub Actions. Com este token, o site avisa o GitHub logo depois do post e o vídeo chega ao TikTok em uns 5 minutos;
+          sem ele, depende do agendamento do GitHub, que atrasa e pula horários.
+        </p>
+        <p className="hint">
+          Crie em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com › Fine-grained token</a>: em
+          Repository access escolha <strong>Only select repositories › agermanoi/cacaofertas</strong>, em Permissions › Repository permissions coloque{" "}
+          <strong>Actions: Read and write</strong> e validade de 1 ano.
+        </p>
+        <form action={saveGithubToken} className="admin-form">
+          <div className="field">
+            <label htmlFor="github_token">Token do GitHub</label>
+            <input id="github_token" name="github_token" type="password" autoComplete="off" placeholder={gh ? "já salvo (cole outro para trocar)" : "github_pat_..."} />
+          </div>
+          <p className="hint">{gh ? `Salvo em ${when(gh.updated_at)}. ` : ""}Fica guardado no banco, fora do código e do navegador.</p>
+          <div className="form-actions">
+            <button className="btn">Salvar token</button>
+          </div>
+        </form>
       </section>
     </div>
   );

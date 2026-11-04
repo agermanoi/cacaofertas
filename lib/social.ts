@@ -5,6 +5,7 @@ import type { ProductOverview } from "./types";
 import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
+import { dispatchVideoJob } from "./github";
 import { addDays, daysBetween, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
 
 /**
@@ -531,6 +532,11 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
       published_at: any ? post.published_at || new Date().toISOString() : null,
     })
     .eq("id", id);
+  // TikTok em vídeo: avisa o gerador (GitHub Actions) na hora, sem esperar o agendamento
+  if (any && cfg.tiktok && cfg.tiktokVideo && !post.tiktok_publish_id) {
+    const d = await dispatchVideoJob(db);
+    if (!d.ok && d.error !== "sem token do GitHub") console.warn(`[social] vídeo do TikTok não disparado: ${d.error}`);
+  }
   return { ok: any, error: errors.join(" | ") || undefined };
 }
 
