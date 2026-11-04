@@ -26,7 +26,9 @@ export function sourceOf(opts: { utm?: string | null; ref?: string | null; ua: s
     refHost = null;
   }
   const utm = (opts.utm || "").toLowerCase().trim();
-  if (utm) return { source: utm.slice(0, 40), refHost };
+  // o Instagram e o Facebook põem utm_source=ig / fb sozinhos nos links (bio, posts): mesma origem
+  const ALIAS: Record<string, string> = { ig: "instagram", fb: "facebook", "facebook.com": "facebook", "instagram.com": "instagram", tt: "tiktok" };
+  if (utm) return { source: (ALIAS[utm] || utm).slice(0, 40), refHost };
   if (/instagram/i.test(opts.ua)) return { source: "instagram", refHost };
   if (/FBAN|FBAV|FB_IAB|FBIOS/i.test(opts.ua)) return { source: "facebook", refHost };
   if (!refHost) return { source: "direto", refHost };
