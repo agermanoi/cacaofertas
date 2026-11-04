@@ -3,6 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   // Arquivo de verificação do TikTok na raiz (https://SITE/tiktokXXXX.txt) → servido pela rota /tiktok/
+  // links curtos para bios (o TikTok aceita só 80 caracteres): /tt → ofertas de hoje marcadas como TikTok
+  async redirects() {
+    return [
+      { source: "/tt", destination: "/hoje?utm_source=tiktok", permanent: false },
+      { source: "/ig", destination: "/hoje?utm_source=instagram", permanent: false },
+      { source: "/zap", destination: "/hoje?utm_source=whatsapp", permanent: false },
+    ];
+  },
   async rewrites() {
     return [{ source: "/:file(tiktok[A-Za-z0-9_-]+\\.txt)", destination: "/tiktok/:file" }];
   },
