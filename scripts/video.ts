@@ -2,7 +2,7 @@
  * Vídeos verticais (1080 × 1920) para o TikTok, enviados como rascunho para a caixa de entrada.
  *
  *   npm run video -- --pending           automático: faz o vídeo dos posts publicados nas últimas
- *                                        3 h que ainda não foram para o TikTok (GitHub Actions, de hora em hora)
+ *                                        24 h que ainda não foram para o TikTok (GitHub Actions, de hora em hora)
  *   npm run video -- --pending --check   só conta quantos estão pendentes (para pular a instalação do Chromium)
  *   npm run video -- fire-tv-stick-4k    vídeo avulso de um produto
  *   npm run video -- fire-tv-stick-4k --no-send   só gera (não manda para o TikTok)
@@ -198,7 +198,7 @@ async function pendingPosts(): Promise<PendingPost[]> {
     .eq("status", "published")
     .is("tiktok_publish_id", null)
     .is("tiktok_error", null)
-    .gte("published_at", new Date(Date.now() - 3 * 3600_000).toISOString())
+    .gte("published_at", new Date(Date.now() - 24 * 3600_000).toISOString())
     .order("published_at", { ascending: true })
     .limit(4);
   return (data || []) as PendingPost[];

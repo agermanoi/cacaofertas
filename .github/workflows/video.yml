@@ -1,8 +1,12 @@
 name: Vídeo para o TikTok
 
 on:
+  # logo depois de cada rodada de posts (não depende do agendamento do GitHub, que atrasa e pula horários)
+  workflow_run:
+    workflows: ["Posts nas redes sociais"]
+    types: [completed]
   schedule:
-    # de hora em hora, das 09:40 às 23:40 (Brasília): pega os posts publicados nas últimas 3 h
+    # rede de segurança: de hora em hora, das 09:40 às 23:40 (Brasília), pega o que ficou pendente nas últimas 24 h
     - cron: "40 12-23,0-2 * * *"
   workflow_dispatch:
     inputs:
@@ -21,6 +25,7 @@ concurrency:
 
 jobs:
   video:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
