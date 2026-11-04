@@ -21,7 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
     // Ícone enviado pelo painel substitui o padrão (app/icon.png e app/apple-icon.png)
     ...(customIcon ? { icons: { icon: s.iconUrl, apple: s.iconUrl } } : {}),
     // Validação de sites parceiros (gera <meta name="lomadee" content="...">)
-    verification: { other: { lomadee: process.env.NEXT_PUBLIC_LOMADEE_VERIFICATION || "2324685" } },
+    verification: {
+      other: {
+        lomadee: process.env.NEXT_PUBLIC_LOMADEE_VERIFICATION || "2324685",
+        // Mitgo (Admitad): verificação do site como afiliado
+        "mitgo-verification": "77817292-6780-4ad7-b409-214233829503",
+      },
+    },
   };
 }
 
