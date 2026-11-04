@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { breadcrumbLd, faqLd, productFaq } from "@/lib/seo";
+import { GUIDES, MIN_ITEMS, guideItems } from "@/lib/guides";
 import { categorySlug as catSlugForCrumb } from "@/lib/categories";
 import { siteUrl } from "@/lib/site";
-import { formatSeen, getDailySeries, getOffers, getProductBySlug, getStoreSeries } from "@/lib/data";
+import { formatSeen, getDailySeries, getOffers, getOverview, getProductBySlug, getStoreSeries } from "@/lib/data";
 import { periodLabel, verdictFor } from "@/lib/verdict";
 import { money } from "@/lib/format";
 import { PriceTag } from "@/components/PriceTag";
@@ -67,6 +68,8 @@ export default async function ProductPage({ params }: Params) {
   const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))]);
   const verdict = verdictFor(p);
   const specs = getSpecs(p.slug, p.specs);
+  const overview = await getOverview();
+  const guides = GUIDES.filter((g) => g.match(p) && guideItems(g, overview).length >= MIN_ITEMS);
   const faq = productFaq(p, verdict, { stores: offers.length, seen: offers[0]?.last_seen_at ? formatSeen(offers[0].last_seen_at) : null });
 
   const jsonLd = {
@@ -213,6 +216,19 @@ export default async function ProductPage({ params }: Params) {
             <Link href="/cupons">Ver todos os cupons</Link>
           </p>
         </section>
+      ) : null}
+
+      {guides.length ? (
+        <nav className="category-others" aria-label="Compare com outros">
+          <h2>Compare com outros</h2>
+          <div className="chips">
+            {guides.map((g) => (
+              <Link key={g.slug} href={`/precos/${g.slug}`}>
+                {g.title} hoje
+              </Link>
+            ))}
+          </div>
+        </nav>
       ) : null}
 
       {faq.length ? (

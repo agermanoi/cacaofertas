@@ -3,6 +3,7 @@ import { categorySlug } from "@/lib/categories";
 import type { MetadataRoute } from "next";
 import { getOverview } from "@/lib/data";
 import { getPublicEvents } from "@/lib/events";
+import { liveGuides } from "@/lib/guides";
 
 export const revalidate = 3600;
 
@@ -20,9 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/termos-de-uso`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/mapa-do-site`, changeFrequency: "weekly", priority: 0.3 },
     { url: `${base}/datas`, changeFrequency: "weekly", priority: 0.5 },
+    { url: `${base}/precos`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
+    ...liveGuides(products).map((g) => ({ url: `${base}/precos/${g.guide.slug}`, lastModified: new Date(), changeFrequency: "daily" as const, priority: 0.9 })),
     ...events.map((e) => ({ url: `${base}/datas/${e.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
     ...[...new Set(products.map((p) => p.category))].map((c) => ({
       url: `${base}/categoria/${categorySlug(c)}`,
+      lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),

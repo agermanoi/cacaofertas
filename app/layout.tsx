@@ -177,6 +177,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <nav className="foot-nav" aria-label="Institucional">
               <Link href="/cupons">Cupons de desconto</Link>
               <Link href="/datas">Calendário de promoções</Link>
+              <Link href="/precos">Guias de preço</Link>
               <Link href="/como-funciona">Como funciona</Link>
               <Link href="/contato">Contato</Link>
               <Link href="/politica-de-privacidade">Política de privacidade</Link>

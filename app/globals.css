@@ -2120,3 +2120,52 @@ button.btn-ghost {
   color: var(--ink-2);
   line-height: 1.5;
 }
+
+/* guias de preço */
+.guide-rank .table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+.guide-rank table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.guide-rank th,
+.guide-rank td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+.guide-rank td:nth-child(2) {
+  white-space: normal;
+  min-width: 180px;
+}
+.guide-rank th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.guide-rank tr:last-child td {
+  border-bottom: 0;
+}
+.guide-rank .num {
+  font-variant-numeric: tabular-nums;
+}
+.guide-rank .v-record,
+.guide-rank .v-below {
+  color: #146c2e;
+  font-weight: 700;
+}
+.guide-rank .v-above {
+  color: #9a3412;
+}
+.guide-list {
+  display: grid;
+  gap: 8px;
+  padding-left: 18px;
+}

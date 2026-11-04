@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDailySeries, getOverview, lastPriceUpdate } from "@/lib/data";
-import { verdictFor } from "@/lib/verdict";
+import { periodLabel, verdictFor } from "@/lib/verdict";
+import { guideItems, liveGuides } from "@/lib/guides";
 import { categoryInfo, categorySlug } from "@/lib/categories";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
 import { AdSlot } from "@/components/AdSlot";
@@ -55,6 +56,7 @@ export default async function CategoryPage({ params }: Params) {
   const priced = products.filter((p) => p.best_price != null);
   const cheapest = priced.slice().sort((a, b) => Number(a.best_price) - Number(b.best_price))[0];
   const otherCats = [...new Set(all.map((p) => p.category))].filter((c) => c !== name);
+  const guides = liveGuides(all).filter((g) => guideItems(g.guide, products).length > 0);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -109,7 +111,7 @@ export default async function CategoryPage({ params }: Params) {
                 <Link href={`/produto/${d.product.slug}`}>{d.product.name}</Link>
                 <span>
                   {money(Number(d.product.best_price))}
-                  {d.verdict.vsAvg ? ` · ${Math.round(d.verdict.vsAvg * 100)}% abaixo da média de 30 dias` : ""}
+                  {d.verdict.vsAvg ? ` · ${Math.round(d.verdict.vsAvg * 100)}% abaixo da média dos últimos ${periodLabel(d.product.days_tracked)}` : ""}
                 </span>
               </li>
             ))}
@@ -130,6 +132,19 @@ export default async function CategoryPage({ params }: Params) {
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {guides.length ? (
+        <nav className="category-others" aria-label="Guias de preço">
+          <h2>Guias de preço</h2>
+          <div className="chips">
+            {guides.map(({ guide }) => (
+              <Link key={guide.slug} href={`/precos/${guide.slug}`}>
+                {guide.title}
+              </Link>
+            ))}
+          </div>
+        </nav>
       ) : null}
 
       {otherCats.length ? (

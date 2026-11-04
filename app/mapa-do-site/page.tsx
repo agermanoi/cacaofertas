@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { liveGuides } from "@/lib/guides";
 import { getOverview } from "@/lib/data";
 import { categorySlug } from "@/lib/categories";
 
@@ -25,6 +26,19 @@ export default async function MapaDoSite() {
     <article className="wrap page-text sitemap-page">
       <h1>Mapa do site</h1>
       <p>Todos os produtos que acompanhamos, por categoria, e as páginas institucionais.</p>
+
+      <section>
+        <h2>
+          <Link href="/precos">Guias de preço</Link>
+        </h2>
+        <ul>
+          {liveGuides(products).map(({ guide }) => (
+            <li key={guide.slug}>
+              <Link href={`/precos/${guide.slug}`}>{guide.title} hoje</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {categories.map(([cat, list]) => (
         <section key={cat}>
