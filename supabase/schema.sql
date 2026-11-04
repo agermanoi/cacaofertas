@@ -287,6 +287,14 @@ language sql stable set search_path = public as $$
 with b as (select (date_trunc('day', now() at time zone 'America/Sao_Paulo') - make_interval(days => greatest(p_days, 1) - 1)) at time zone 'America/Sao_Paulo' as since),
 pv as (select *, (created_at at time zone 'America/Sao_Paulo')::date as day from page_views where created_at >= (select since from b)),
 ck as (select *, (created_at at time zone 'America/Sao_Paulo')::date as day from clicks where created_at >= (select since from b)),
+-- origem de cada clique: a primeira visita de fora do site do mesmo visitante no dia (até 24 h antes);
+-- sem visita registrada, o app de onde veio o clique (Instagram/Facebook) ou "direto"
+ca as (select ck.id, coalesce(
+    (select v.source from page_views v where v.visitor = ck.visitor and v.source <> 'interno'
+       and v.created_at between ck.created_at - interval '24 hours' and ck.created_at
+     order by v.created_at asc limit 1),
+    case when ck.source in ('instagram', 'facebook') then ck.source else 'direto' end) as source
+  from ck),
 days as (select generate_series(((select since from b) at time zone 'America/Sao_Paulo')::date, (now() at time zone 'America/Sao_Paulo')::date, interval '1 day')::date as day)
 select jsonb_build_object(
   'views', (select count(*) from pv),
@@ -299,7 +307,11 @@ select jsonb_build_object(
         'visitors', (select count(distinct visitor) from pv where pv.day = d.day),
         'clicks', (select count(*) from ck where ck.day = d.day)) order by d.day), '[]'::jsonb) from days d),
   'pages', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select path, count(*) n from pv group by path order by n desc limit 15) x),
-  'sources', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select source, count(*) n, count(distinct (day, visitor)) v from pv group by source order by n desc) x),
+  'sources', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select coalesce(s.source, c.source) source, coalesce(s.n, 0) n, coalesce(s.v, 0) v, coalesce(c.c, 0) c
+      from (select source, count(*) n, count(distinct (day, visitor)) v from pv group by source) s
+      full join (select source, count(*) c from ca group by source) c on c.source = s.source
+      order by n desc, c desc) x),
   'devices', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select device, count(*) n from pv group by device order by n desc) x),
   'products', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
       select p.name, p.slug, count(*) n from ck join products p on p.id = ck.product_id

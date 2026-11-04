@@ -10,7 +10,7 @@ interface Stats {
   coupon_clicks: number;
   daily: { day: string; views: number; visitors: number; clicks: number }[];
   pages: { path: string; n: number }[];
-  sources: { source: string; n: number; v: number }[];
+  sources: { source: string; n: number; v: number; c?: number }[];
   devices: { device: string; n: number }[];
   products: { name: string; slug: string; n: number }[];
   stores: { store: string; n: number }[];
@@ -211,8 +211,8 @@ export default async function Metricas({ searchParams }: { searchParams: Promise
       <div className="metric-grid">
         <Table
           title="De onde vêm as visitas"
-          head={["Origem", "Visitas", "Visitantes"]}
-          rows={external.map((x) => [SOURCE_LABEL[x.source] || x.source, int(x.n), int(x.v)])}
+          head={["Origem", "Visitas", "Visitantes", "Cliques", "Taxa"]}
+          rows={external.map((x) => [SOURCE_LABEL[x.source] || x.source, int(x.n), int(x.v), int(x.c ?? 0), x.v ? pct(x.c ?? 0, x.v) : "–"])}
           empty="Sem visitas no período."
         />
         <Table
