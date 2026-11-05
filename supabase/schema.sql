@@ -293,7 +293,7 @@ ca as (select ck.id, coalesce(
     (select v.source from page_views v where v.visitor = ck.visitor and v.source <> 'interno'
        and v.created_at between ck.created_at - interval '24 hours' and ck.created_at
      order by v.created_at asc limit 1),
-    case when ck.source in ('instagram', 'facebook', 'tiktok') then ck.source else 'direto' end) as source
+    case when ck.source in ('instagram', 'facebook', 'tiktok') then ck.source when ck.referer is null then 'sem-visita' else 'direto' end) as source
   from ck),
 days as (select generate_series(((select since from b) at time zone 'America/Sao_Paulo')::date, (now() at time zone 'America/Sao_Paulo')::date, interval '1 day')::date as day)
 select jsonb_build_object(
