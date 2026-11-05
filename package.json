@@ -15,7 +15,8 @@
     "social": "tsx scripts/social.ts",
     "video": "tsx scripts/video.ts",
     "indexnow": "tsx scripts/indexnow.ts",
-    "review-video": "tsx scripts/review-video.ts"
+    "review-video": "tsx scripts/review-video.ts",
+    "cleanup-media": "tsx scripts/cleanup-media.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
