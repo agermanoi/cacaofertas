@@ -3,9 +3,14 @@ export const BROWSER_UA =
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Tira chaves e tokens da URL antes de ela aparecer em log ou mensagem de erro (os logs do GitHub são públicos). */
+export function redactUrl(url: string): string {
+  return url.replace(/([?&;](?:token|api_key|apikey|key|access_token|client_secret|secret|affid|app_id|appid|sign|signature)=)[^&;#]*/gi, "$1***");
+}
+
 export class HttpError extends Error {
   constructor(public status: number, public body: string, url: string) {
-    super(`HTTP ${status} em ${url}: ${body.slice(0, 200)}`);
+    super(`HTTP ${status} em ${redactUrl(url)}: ${body.slice(0, 200)}`);
   }
 }
 
@@ -27,7 +32,7 @@ export async function http(url: string, init: RequestInit = {}, timeoutMs = 2000
       clearTimeout(timer);
     }
   }
-  throw new Error(`Falha após novas tentativas: ${url}`);
+  throw new Error(`Falha após novas tentativas: ${redactUrl(url)}`);
 }
 
 export async function httpJson<T = any>(url: string, init: RequestInit = {}): Promise<T> {

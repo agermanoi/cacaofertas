@@ -7,6 +7,7 @@ import { MIN_ITEMS, guideBySlug, guideItems, liveGuides } from "@/lib/guides";
 import { breadcrumbLd, faqLd } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 import { money } from "@/lib/format";
+import { getSpecs } from "@/lib/specs";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
 import { AdSlot } from "@/components/AdSlot";
 
@@ -58,6 +59,15 @@ export default async function GuidePage({ params }: Params) {
   const deals = rows.filter((r) => r.v.kind === "record" || r.v.kind === "below").sort((a, b) => (b.v.vsAvg ?? 0) - (a.v.vsAvg ?? 0));
   const inflated = rows.filter((r) => r.v.kind === "fake" || r.v.kind === "half");
   const at = (r: (typeof rows)[number]) => (r.p.best_store ? ` (${r.p.best_store})` : "");
+  const specOf = (p: (typeof items)[number]) => {
+    if (!guide.specCol) return "";
+    const s = getSpecs(p.slug, p.specs);
+    return s?.specs.find(([k]) => k.toLowerCase() === guide.specCol!.toLowerCase())?.[1] || "";
+  };
+  const hl = guide.highlight ? rows.find((r) => guide.highlight!.test(specOf(r.p), r.p)) : undefined;
+  const companions = (guide.companions || [])
+    .map((s) => all.find((p) => p.slug === s))
+    .filter((p): p is (typeof all)[number] => Boolean(p && p.best_price != null));
 
   const faq = [
     {
@@ -70,10 +80,21 @@ export default async function GuidePage({ params }: Params) {
         ? `${deals[0].p.name}: ${money(Number(deals[0].p.best_price))}${at(deals[0])}, ${Math.round((deals[0].v.vsAvg || 0) * 100)}% abaixo da média dos últimos ${periodLabel(deals[0].p.days_tracked)}.${deals.length > 1 ? ` Também estão abaixo da média: ${deals.slice(1, 3).map((d) => d.p.name).join(" e ")}.` : ""}`
         : "Hoje nenhum está abaixo da média recente: os preços estão na faixa de sempre.",
     },
+    ...(guide.highlight
+      ? [
+          {
+            q: `Qual ${guide.art} ${guide.noun} ${barato} ${guide.highlight.label} hoje?`,
+            a: hl
+              ? `${hl.p.name}, por ${money(Number(hl.p.best_price))}${at(hl)} (${specOf(hl.p)}).`
+              : `Hoje nenhuma das opções que acompanhamos ${guide.highlight.label} está com preço disponível.`,
+          },
+        ]
+      : []),
     {
       q: `Vale esperar a Black Friday para comprar ${guide.art === "a" ? "uma" : "um"} ${guide.noun}?`,
       a: `${deals.length ? `${deals.length} ${deals.length === 1 ? "opção já está" : "opções já estão"} abaixo da média hoje. ` : ""}${inflated.length ? `${inflated.length} ${inflated.length === 1 ? "anúncio mostra" : "anúncios mostram"} desconto maior do que o real. ` : ""}Se não tiver pressa, acompanhe o histórico de cada produto: uma queda real aparece aqui no mesmo dia.`,
     },
+    ...(guide.extraFaq || []),
   ];
 
   const base = siteUrl();
@@ -126,6 +147,8 @@ export default async function GuidePage({ params }: Params) {
                 <th>Menor preço hoje</th>
                 <th>Loja</th>
                 <th>Vs. média recente</th>
+                {guide.specCol ? <th>{guide.specCol}</th> : null}
+                {guide.notes ? <th>Observação</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -146,6 +169,8 @@ export default async function GuidePage({ params }: Params) {
                           ? `${Math.round(-v.vsAvg * 100)}% acima`
                           : "na média"}
                   </td>
+                  {guide.specCol ? <td>{specOf(p) || "não informado"}</td> : null}
+                  {guide.notes ? <td>{guide.notes[p.slug] || ""}</td> : null}
                 </tr>
               ))}
             </tbody>
@@ -153,6 +178,20 @@ export default async function GuidePage({ params }: Params) {
         </div>
         <p className="hint">Média dos dias que acompanhamos cada produto (até 30). Preços podem mudar a qualquer momento: confira na loja antes de comprar.</p>
       </section>
+
+      {companions.length ? (
+        <section aria-labelledby="junto" className="guide-companions">
+          <h2 id="junto">Também acompanhamos</h2>
+          <ul>
+            {companions.map((c) => (
+              <li key={c.slug}>
+                <Link href={`/produto/${c.slug}`}>{c.name}</Link>: {money(Number(c.best_price))}
+                {c.best_store ? ` (${c.best_store})` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <AdSlot id="guia-topo" format="leaderboard" />
 
