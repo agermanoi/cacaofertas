@@ -62,7 +62,11 @@ export default async function GuidePage({ params }: Params) {
   const specOf = (p: (typeof items)[number]) => {
     if (!guide.specCol) return "";
     const s = getSpecs(p.slug, p.specs);
-    return s?.specs.find(([k]) => k.toLowerCase() === guide.specCol!.toLowerCase())?.[1] || "";
+    const direct = s?.specs.find(([k]) => k.toLowerCase() === guide.specCol!.toLowerCase())?.[1];
+    if (direct) return direct;
+    // ex.: taxa de atualização escrita dentro da linha "Tela" ("50\" LED 4K, 60 Hz")
+    const hz = s?.specs.map(([, v]) => v.match(/\b\d{2,3}\s?Hz\b/i)?.[0]).find(Boolean);
+    return guide.specCol.toLowerCase().includes("atualiza") && hz ? hz : "";
   };
   const hl = guide.highlight ? rows.find((r) => guide.highlight!.test(specOf(r.p), r.p)) : undefined;
   const companions = (guide.companions || [])
