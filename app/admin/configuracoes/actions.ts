@@ -98,6 +98,8 @@ export async function saveSettings(formData: FormData) {
     analytics: {
       gaId: text(formData, "ga_id"),
       gtmId: text(formData, "gtm_id"),
+      adsId: text(formData, "ads_id"),
+      adsClickLabel: text(formData, "ads_label"),
     },
     scripts: {
       head: raw(formData, "scripts_head"),

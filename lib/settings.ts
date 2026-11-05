@@ -35,6 +35,10 @@ export interface SiteSettings {
   analytics: {
     gaId: string;
     gtmId: string;
+    /** Google Ads (AW-123456789): tag de conversão/remarketing. Vazio = desligado. */
+    adsId: string;
+    /** Rótulo da conversão "clique para a loja" (a parte depois da barra em AW-123/AbCd…). */
+    adsClickLabel: string;
   };
   /** HTML livre inserido nas páginas públicas (pixels, verificações, chat etc.). */
   scripts: {
@@ -100,7 +104,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     "Acompanhamos os produtos mais buscados da Black Friday duas vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”, também.",
   announcement: "",
   contact: { email: "", whatsapp: "", instagram: "", facebook: "", tiktok: "" },
-  analytics: { gaId: "", gtmId: "" },
+  analytics: { gaId: "", gtmId: "", adsId: "", adsClickLabel: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
   adsTxt: "",
@@ -120,6 +124,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 export const SCRIPT_MAX = 20000;
 const GA = /^G-[A-Z0-9]{4,20}$/;
 const GTM = /^GTM-[A-Z0-9]{4,12}$/;
+const AW = /^AW-\d{6,14}$/;
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
@@ -163,6 +168,8 @@ export function mergeSettings(raw: unknown): SiteSettings {
     analytics: {
       gaId: GA.test(opt(r.analytics?.gaId).toUpperCase()) ? opt(r.analytics?.gaId).toUpperCase() : "",
       gtmId: GTM.test(opt(r.analytics?.gtmId).toUpperCase()) ? opt(r.analytics?.gtmId).toUpperCase() : "",
+      adsId: AW.test(opt(r.analytics?.adsId).toUpperCase()) ? opt(r.analytics?.adsId).toUpperCase() : "",
+      adsClickLabel: opt(r.analytics?.adsClickLabel).replace(/^AW-\d+\//i, "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40),
     },
     scripts: {
       head: opt(r.scripts?.head).slice(0, SCRIPT_MAX),

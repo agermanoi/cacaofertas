@@ -54,19 +54,29 @@ function adminGuard(gaId: string) {
   return `if(location.pathname.indexOf('/admin')===0){window['ga-disable-${gaId}']=true;window.__noTrack=true;}`;
 }
 
+/**
+ * Conversão do Google Ads: cada clique em oferta (/go/…) ou cupom (/c/…) conta como "clique para a loja".
+ * Usa beacon para não perder o evento quando a página troca para a loja.
+ */
+function adsClickScript(adsId: string, label: string) {
+  return `document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!/^(https?:\\/\\/[^/]*cacaofertas\\.com\\.br)?\\/(go|c)\\//.test(h))return;if(window.gtag)gtag('event','conversion',{send_to:'${adsId}/${label}',transport_type:'beacon'});},true);`;
+}
+
 export function HeadInjections({ s }: { s: SiteSettings }) {
-  const { gaId, gtmId } = s.analytics;
+  const { gaId, gtmId, adsId, adsClickLabel } = s.analytics;
+  const tagId = gaId || adsId;
+  const configs = [gaId, adsId].filter(Boolean).map((id) => `gtag('config','${id}');`).join("");
   return (
     <>
-      {gaId ? (
+      {tagId ? (
         <>
-          <script dangerouslySetInnerHTML={{ __html: adminGuard(gaId) }} />
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+          {gaId ? <script dangerouslySetInnerHTML={{ __html: adminGuard(gaId) }} /> : null}
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}if(location.pathname.indexOf('/admin')!==0){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${tagId}';document.head.appendChild(s);gtag('js',new Date());${configs}}`,
             }}
           />
+          {adsId && adsClickLabel ? <script dangerouslySetInnerHTML={{ __html: adsClickScript(adsId, adsClickLabel) }} /> : null}
         </>
       ) : null}
       {gtmId ? (

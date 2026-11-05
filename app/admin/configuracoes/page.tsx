@@ -214,6 +214,18 @@ export default async function SettingsPage({ searchParams }: Props) {
               <p className="hint">Se o GA já estiver configurado dentro do GTM, deixe o campo do GA vazio para não contar em dobro.</p>
             </div>
           </div>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="ads_id">Google Ads (tag do Google)</label>
+              <input id="ads_id" name="ads_id" defaultValue={s.analytics.adsId} placeholder="AW-123456789" autoComplete="off" />
+              <p className="hint">Só o ID. Fica fora das páginas do painel.</p>
+            </div>
+            <div className="field">
+              <label htmlFor="ads_label">Conversão “clique para a loja” (rótulo)</label>
+              <input id="ads_label" name="ads_label" defaultValue={s.analytics.adsClickLabel} placeholder="AbCdEfGh123" autoComplete="off" />
+              <p className="hint">A parte depois da barra em send_to: &apos;AW-123456789/<strong>AbCdEfGh123</strong>&apos;. Conta cada clique em uma oferta ou cupom.</p>
+            </div>
+          </div>
           <div className="field">
             <label htmlFor="scripts_head">Códigos no &lt;head&gt;</label>
             <textarea

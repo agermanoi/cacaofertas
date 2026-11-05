@@ -58,7 +58,8 @@ export default async function Privacidade() {
 
       <h2>Cookies</h2>
       <p>
-        O site em si não usa cookies de rastreamento para visitantes. Ao clicar em um link de oferta, a loja ou a rede de
+        O site usa a tag do Google Ads para medir quantas visitas vindas de anúncios clicam em uma oferta; ela pode gravar
+        cookies do Google no seu navegador. Ao clicar em um link de oferta, a loja ou a rede de
         afiliados (como Mercado Livre, Amazon e Lomadee) pode gravar cookies no seu navegador para atribuir a venda. Se
         exibirmos anúncios, parceiros como o Google podem usar cookies para mostrar anúncios relevantes; você pode
         desativar anúncios personalizados em{" "}
