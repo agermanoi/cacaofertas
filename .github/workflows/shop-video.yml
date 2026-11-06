@@ -22,11 +22,14 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Instalar Chromium, ffmpeg e voz
+        timeout-minutes: 10
         run: |
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
+          timeout 300 npx playwright install-deps chromium || echo "deps: seguindo com as do runner"
           command -v ffmpeg || sudo apt-get install -y ffmpeg
           pip install --quiet edge-tts
       - run: node shop-video/render.mjs
+        timeout-minutes: 10
       - name: Salvar o MP4 no branch
         run: |
           git config user.name "github-actions"
