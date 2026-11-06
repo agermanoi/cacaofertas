@@ -5,8 +5,9 @@ import { Flash } from "@/components/admin/Flash";
 import { adminCategories, adminGetProduct, adminRecentOffers } from "@/lib/admin-data";
 import { deleteProduct } from "../../actions";
 import { money } from "@/lib/format";
+import { PRODUCT_PERIODS, ProductMetrics } from "@/components/admin/ProductMetrics";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; erro?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; erro?: string; dias?: string }> };
 
 const SOURCE: Record<string, string> = {
   mercadolivre: "Mercado Livre API",
@@ -19,7 +20,8 @@ const SOURCE: Record<string, string> = {
 
 export default async function EditProductPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { ok, erro } = await searchParams;
+  const { ok, erro, dias } = await searchParams;
+  const days = PRODUCT_PERIODS.includes(Number(dias)) ? Number(dias) : 7;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const [product, categories, offers] = await Promise.all([adminGetProduct(id), adminCategories(), adminRecentOffers(id)]);
@@ -39,6 +41,8 @@ export default async function EditProductPage({ params, searchParams }: Props) {
         ) : null}
       </div>
       <Flash ok={ok} erro={erro} />
+
+      <ProductMetrics id={product.id} slug={product.slug} days={days} />
 
       <ProductForm product={product} categories={categories} />
 

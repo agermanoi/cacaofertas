@@ -328,6 +328,54 @@ select jsonb_build_object(
 $$;
 revoke all on function site_stats(int) from public, anon, authenticated;
 
+-- métricas de um produto: visitas na página dele e cliques para as lojas, com a origem do visitante
+-- (a primeira visita de fora do site do mesmo visitante nas 24 h anteriores, como em site_stats)
+create or replace function product_stats(p_product uuid, p_days int) returns jsonb
+language sql stable set search_path = public as $$
+with b as (select (date_trunc('day', now() at time zone 'America/Sao_Paulo') - make_interval(days => greatest(p_days, 1) - 1)) at time zone 'America/Sao_Paulo' as since),
+pr as (select '/produto/' || slug as path from products where id = p_product),
+pv as (select v.*, (v.created_at at time zone 'America/Sao_Paulo')::date as day from page_views v
+       where v.path = (select path from pr) and v.created_at >= (select since from b)),
+va as (select pv.id, coalesce(
+    (select o.source from page_views o where o.visitor = pv.visitor and o.source <> 'interno'
+       and o.created_at between pv.created_at - interval '24 hours' and pv.created_at
+     order by o.created_at asc limit 1),
+    pv.source) as source, pv.visitor, pv.day
+  from pv),
+ck as (select c.*, (c.created_at at time zone 'America/Sao_Paulo')::date as day from clicks c
+       where c.product_id = p_product and c.coupon_id is null and c.created_at >= (select since from b)),
+ca as (select ck.id, coalesce(
+    (select v.source from page_views v where v.visitor = ck.visitor and v.source <> 'interno'
+       and v.created_at between ck.created_at - interval '24 hours' and ck.created_at
+     order by v.created_at asc limit 1),
+    case when ck.source in ('instagram', 'facebook', 'tiktok') then ck.source when ck.referer is null then 'sem-visita' else 'direto' end) as source
+  from ck),
+days as (select generate_series(((select since from b) at time zone 'America/Sao_Paulo')::date, (now() at time zone 'America/Sao_Paulo')::date, interval '1 day')::date as day)
+select jsonb_build_object(
+  'views', (select count(*) from pv),
+  'visitors', (select count(distinct (day, visitor)) from pv where visitor is not null),
+  'clicks', (select count(*) from ck),
+  'daily', (select coalesce(jsonb_agg(jsonb_build_object(
+        'day', d.day,
+        'views', (select count(*) from pv where pv.day = d.day),
+        'visitors', (select count(distinct visitor) from pv where pv.day = d.day),
+        'clicks', (select count(*) from ck where ck.day = d.day)) order by d.day), '[]'::jsonb) from days d),
+  'sources', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select coalesce(s.source, c.source) source, coalesce(s.n, 0) n, coalesce(s.v, 0) v, coalesce(c.c, 0) c
+      from (select source, count(*) n, count(distinct (day, visitor)) v from va group by source) s
+      full join (select source, count(*) c from ca group by source) c on c.source = s.source
+      order by n desc, c desc) x),
+  'stores', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select coalesce(o.store, '—') store, count(*) n from ck left join offers o on o.id = ck.offer_id
+      group by 1 order by n desc) x),
+  'pages', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+      select coalesce(nullif(split_part(split_part(regexp_replace(ck.referer, '^https?://[^/]+', ''), '?', 1), '#', 1), ''), '(sem página)') path, count(*) n
+      from ck group by 1 order by n desc limit 8) x),
+  'devices', (select coalesce(jsonb_agg(x), '[]'::jsonb) from (select coalesce(device, '—') device, count(*) n from pv group by 1 order by n desc) x)
+);
+$$;
+revoke all on function product_stats(uuid, int) from public, anon, authenticated;
+
 -- ---------- Agendador dos posts (pg_cron + pg_net) ----------
 -- Troque o domínio abaixo pelo do site. Roda no minuto 3 de cada hora;
 -- os horários de produto e de cupom são escolhidos no painel (Admin → Redes sociais).
