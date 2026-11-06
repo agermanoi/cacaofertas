@@ -1,0 +1,35 @@
+name: Vídeo TikTok Shop (teste)
+
+# Gera o vídeo de teste de afiliado do TikTok Shop e salva o MP4 de volta neste branch.
+# Não posta em lugar nenhum.
+on:
+  push:
+    branches: [tiktok-shop-teste]
+    paths: ["shop-video/config.json", "shop-video/render.mjs", "shop-video/img/**", ".github/workflows/shop-video.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Instalar Chromium, ffmpeg e voz
+        run: |
+          npx playwright install --with-deps chromium
+          command -v ffmpeg || sudo apt-get install -y ffmpeg
+          pip install --quiet edge-tts
+      - run: node shop-video/render.mjs
+      - name: Salvar o MP4 no branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -f shop-video/out/*.mp4
+          git commit -m "Vídeo TikTok Shop gerado" && git push

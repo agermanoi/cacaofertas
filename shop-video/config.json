@@ -1,0 +1,53 @@
+{
+  "out": "x55-plus",
+  "voice": "pt-BR-AntonioNeural",
+  "price": "23,50",
+  "scenes": [
+    {
+      "id": "hook",
+      "img": "case-preto.jpg",
+      "title": "FONE BLUETOOTH POR R$ 23?",
+      "text": "Fone bluetooth por vinte e três e cinquenta? Olha só."
+    },
+    {
+      "id": "about",
+      "img": "fones.jpg",
+      "title": "X55 Plus",
+      "sub": "Sem fio, pequeno, feito pra usar até deitado",
+      "text": "É o X55 Plus, um fone sem fio bem pequeno, pensado pra usar até deitado."
+    },
+    {
+      "id": "specs",
+      "img": "case-azul.jpg",
+      "title": "Segundo o anúncio",
+      "chips": [
+        "Bluetooth 5.3",
+        "Visor de bateria no estojo",
+        "iPhone e Android"
+      ],
+      "text": "Pelo anúncio: bluetooth cinco ponto três, visor de bateria no estojo, e funciona com iPhone e Android."
+    },
+    {
+      "id": "proof",
+      "img": "case-preto.jpg",
+      "title": "★ 4,4",
+      "sub": "mais de 16 mil vendidos",
+      "text": "Nota quatro vírgula quatro, e mais de dezesseis mil vendidos."
+    },
+    {
+      "id": "price",
+      "img": "fones.jpg",
+      "title": "R$ 23,50",
+      "sub": "Ignore o “de R$ 128” riscado: compare o valor final",
+      "note": "Oferta relâmpago · o preço pode mudar",
+      "text": "Na oferta relâmpago, vinte e três e cinquenta. Esquece o preço riscado de cento e vinte e oito: compare o valor final."
+    },
+    {
+      "id": "cta",
+      "img": "case-azul.jpg",
+      "title": "Link no carrinho",
+      "sub": "aqui embaixo",
+      "text": "O link tá no carrinho aqui embaixo."
+    }
+  ]
+}
