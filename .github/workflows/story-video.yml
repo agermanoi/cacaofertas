@@ -1,0 +1,43 @@
+name: Vídeo motivacional (teste)
+
+# Gera um vídeo de história narrada a partir de data/stories/<slug>.json e deixa como arquivo da execução.
+# Não posta em lugar nenhum.
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "História (arquivo em data/stories, sem .json)"
+        required: true
+        default: "coronel-sanders"
+      voice:
+        description: "Voz (pt-BR-AntonioNeural, pt-BR-FranciscaNeural, pt-BR-ThalitaMultilingualNeural)"
+        required: false
+        default: "pt-BR-AntonioNeural"
+
+jobs:
+  story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Instalar Chromium, ffmpeg e voz
+        run: |
+          npx playwright install --with-deps chromium
+          command -v ffmpeg || sudo apt-get install -y ffmpeg
+          pip install --quiet edge-tts
+      - name: Gerar vídeo
+        run: npm run story-video -- "${{ github.event.inputs.slug }}"
+        env:
+          TTS_VOICE: ${{ github.event.inputs.voice }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: story-video
+          path: out/story-*.mp4
+          if-no-files-found: ignore
+          retention-days: 14

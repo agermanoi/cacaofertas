@@ -1,0 +1,68 @@
+{
+  "slug": "coronel-sanders",
+  "title": "Ele começou aos 65",
+  "voice": "pt-BR-AntonioNeural",
+  "rate": "+4%",
+  "accent": "#F5B83D",
+  "sources": [
+    "https://en.wikipedia.org/wiki/Colonel_Sanders",
+    "https://en.wikipedia.org/wiki/KFC"
+  ],
+  "scenes": [
+    {
+      "type": "number",
+      "value": 65,
+      "label": "anos. E falido.",
+      "text": "Aos sessenta e cinco anos, ele estava praticamente falido. O primeiro cheque da aposentadoria dele foi de cento e cinco dólares."
+    },
+    {
+      "type": "title",
+      "big": "Uma vida de recomeços",
+      "text": "Ele tinha passado a vida trocando de emprego. Foi foguista de trem, vendedor de seguros e dono de posto de gasolina."
+    },
+    {
+      "type": "title",
+      "kicker": "Corbin, Kentucky",
+      "big": "O frango da beira da estrada",
+      "text": "Em uma cidadezinha do Kentucky, ele montou um restaurante na beira da estrada. O frango frito dele ficou famoso na região."
+    },
+    {
+      "type": "road",
+      "big": "A estrada mudou de lugar",
+      "text": "Até que, nos anos cinquenta, uma rodovia nova passou longe da cidade. Os clientes sumiram. Ele vendeu o restaurante em leilão, e o dinheiro mal deu para pagar as dívidas."
+    },
+    {
+      "type": "title",
+      "big": "A receita no porta-malas",
+      "text": "Então ele colocou uma panela de pressão no carro e saiu de cidade em cidade, oferecendo a receita para outros restaurantes. Ganhava alguns centavos por frango vendido."
+    },
+    {
+      "type": "nos",
+      "big": "Não.",
+      "text": "Ouviu muito não. Muitas vezes, dormia no próprio carro para economizar."
+    },
+    {
+      "type": "number",
+      "value": 600,
+      "prefix": "+",
+      "label": "restaurantes em 1964",
+      "text": "Em mil novecentos e sessenta e quatro, já eram mais de seiscentos restaurantes. Ele vendeu o negócio por dois milhões de dólares."
+    },
+    {
+      "type": "title",
+      "kicker": "Harland Sanders",
+      "big": "O homem do KFC",
+      "text": "O nome dele era Harland Sanders. O frango virou o KFC, e o rosto dele está até hoje em cada balde."
+    },
+    {
+      "type": "quote",
+      "big": "Não é tarde.",
+      "text": "Ele não começou cedo. Começou quando todo mundo achava que já tinha acabado. Se você acha que está atrasado, talvez só esteja no começo."
+    },
+    {
+      "type": "end",
+      "big": "Histórias reais de quem recomeçou",
+      "text": "Siga para a próxima história."
+    }
+  ]
+}
