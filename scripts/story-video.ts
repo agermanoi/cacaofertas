@@ -11,6 +11,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
+import { adminClient } from "../lib/supabase";
 import { storyHtml, type StoryScene, type StorySceneInput, type Word } from "../lib/story-video";
 
 const FPS = 30;
@@ -122,6 +123,13 @@ async function main() {
     "-c:a", "copy", "-shortest", "-movflags", "+faststart", mp4,
   ]);
   rmSync(tmp, { recursive: true, force: true });
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const db = adminClient();
+    const path = `social/story/${slug}-${Date.now().toString(36)}.mp4`;
+    const { error } = await db.storage.from("brand").upload(path, readFileSync(mp4), { contentType: "video/mp4", cacheControl: "31536000" });
+    if (error) console.warn(`upload: ${error.message}`);
+    else console.log(`Link: ${db.storage.from("brand").getPublicUrl(path).data.publicUrl}`);
+  }
   console.log(`Pronto: ${mp4} (${(readFileSync(mp4).length / 1024 / 1024).toFixed(1)} MB, ${total}s)`);
 }
 
