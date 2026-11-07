@@ -175,7 +175,7 @@ window.render=function(t){
   if(gi>=0){
     const G=GR[gi]; const pin=out(seg(t,G.s-.05,G.s+.12));
     g.style.opacity=pin; g.style.transform='scale('+(.92+.08*back(pin))+')';
-    g.querySelectorAll('.w').forEach((el,k)=>{const on=t>=G.w[k][1]-.03&&(k===G.w.length-1||t<G.w[k+1][1]-.03);el.style.color=on?ACC:'#fff';el.style.transform=on?'scale(1.08)':'none'});
+    g.querySelectorAll('.w').forEach((el,k)=>{const on=t>=G.w[k][1]-.03&&(k===G.w.length-1||t<G.w[k+1][1]-.03);el.style.color=on?ACC:'#fff';el.style.transform='none'});
   }
   $('prog').style.width=(t/TOTAL*1080)+'px';
 };
