@@ -110,8 +110,8 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#08080B;color:#f
 .line{height:12px;width:0;background:${A};border-radius:6px}
 .follow{font-weight:900;font-size:52px;background:${A};color:#111;padding:22px 52px;border-radius:999px}
 #cap{left:60px;right:60px;top:1170px;height:300px;display:flex;align-items:center;justify-content:center;text-align:center}
-#cap .g{font-weight:900;font-size:74px;line-height:1.12;text-transform:uppercase;text-shadow:0 6px 0 #000,0 0 30px rgba(0,0,0,.9)}
-#cap .w{display:inline-block;margin:0 10px;transition:none}
+#cap .g{font-weight:900;font-size:74px;line-height:1.12;word-spacing:14px;text-transform:uppercase;text-shadow:0 6px 0 #000,0 0 30px rgba(0,0,0,.9)}
+#cap .w{display:inline-block;transform-origin:50% 60%}
 #prog{left:0;top:0;height:8px;background:${A}}
 </style></head><body>
 <div id="bg" class="l"><div id="b1" class="blob"></div><div id="b2" class="blob"></div></div>
@@ -171,7 +171,7 @@ window.render=function(t){
   // legenda
   let gi=-1; for(let k=0;k<GR.length;k++){if(t>=GR[k].s-.05&&t<GR[k].e){gi=k;break}}
   const g=$('cap').firstElementChild;
-  if(gi!==lastG){g.innerHTML=gi<0?'':GR[gi].w.map(w=>'<span class="w">'+w[0].replace(/[&<>]/g,'')+'</span>').join('');lastG=gi}
+  if(gi!==lastG){g.innerHTML=gi<0?'':GR[gi].w.map(w=>'<span class="w">'+w[0].replace(/[&<>]/g,'')+'</span>').join(' ');lastG=gi}
   if(gi>=0){
     const G=GR[gi]; const pin=out(seg(t,G.s-.05,G.s+.12));
     g.style.opacity=pin; g.style.transform='scale('+(.92+.08*back(pin))+')';
