@@ -12,6 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: `Cupons de desconto válidos hoje (${when})`,
     description: `Cupons de desconto válidos em ${when} nas lojas parceiras, com código, validade e regras. Atualizado várias vezes por dia.`,
     alternates: { canonical: "/cupons" },
+    // cupons vêm dos feeds das redes de afiliado (iguais aos de outros sites): fica no site, fora do Google
+    robots: { index: false, follow: true },
   };
 }
 

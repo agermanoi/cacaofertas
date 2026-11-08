@@ -71,6 +71,9 @@ export default async function MapaDoSite() {
             <Link href="/como-funciona">Como medimos os preços</Link>
           </li>
           <li>
+            <Link href="/quem-somos">Quem somos</Link>
+          </li>
+          <li>
             <Link href="/contato">Contato</Link>
           </li>
           <li>

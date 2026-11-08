@@ -185,6 +185,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/datas">Calendário de promoções</Link>
               <Link href="/precos">Guias de preço</Link>
               <Link href="/como-funciona">Como funciona</Link>
+              <Link href="/quem-somos">Quem somos</Link>
               <Link href="/contato">Contato</Link>
               <Link href="/politica-de-privacidade">Política de privacidade</Link>
               <Link href="/termos-de-uso">Termos de uso</Link>

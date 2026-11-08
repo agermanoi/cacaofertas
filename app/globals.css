@@ -2169,3 +2169,7 @@ button.btn-ghost {
   gap: 8px;
   padding-left: 18px;
 }
+
+/* análise em texto do histórico do produto */
+.analysis p { max-width: 70ch; line-height: 1.6; margin: 0 0 10px; }
+.analysis p.note { margin-top: 4px; }

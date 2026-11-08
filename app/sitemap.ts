@@ -13,9 +13,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const events = (await getPublicEvents()).filter((e) => e.page);
   return [
     { url: `${base}/`, changeFrequency: "hourly", priority: 1 },
-    { url: `${base}/cupons`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/hoje`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/como-funciona`, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${base}/como-funciona`, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/quem-somos`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/contato`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/politica-de-privacidade`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/termos-de-uso`, changeFrequency: "yearly", priority: 0.1 },
@@ -30,7 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),
-    ...products.map((p) => ({
+    // só os produtos que o Google pode indexar (com preço e pelo menos 5 dias de histórico)
+    ...products.filter((p) => p.best_price != null && Number(p.days_tracked || 0) >= 5).map((p) => ({
       url: `${base}/produto/${p.slug}`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,

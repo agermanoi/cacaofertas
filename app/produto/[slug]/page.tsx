@@ -17,6 +17,7 @@ import { StoreLink } from "@/components/StoreLink";
 import { CouponCard } from "@/components/CouponCard";
 import { expiresLabel, getCouponsForStores } from "@/lib/coupons";
 import { getSpecs } from "@/lib/specs";
+import { productAnalysis } from "@/lib/analysis";
 import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
@@ -42,7 +43,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const p = await getProductBySlug(slug);
   if (!p || !p.active) return { title: "Produto não encontrado" };
   // Sem oferta no momento: a página continua acessível, mas fora do Google até voltar
-  const noIndex = p.best_price == null ? { robots: { index: false, follow: true } } : {};
+  // ou com histórico curto demais para ter análise (entra no Google quando tiver dados)
+  const noIndex = p.best_price == null || Number(p.days_tracked || 0) < 5 ? { robots: { index: false, follow: true } } : {};
   const price = p.best_price != null ? ` por ${money(Number(p.best_price))}` : "";
   const sp = getSpecs(p.slug, p.specs);
   return {
@@ -70,6 +72,7 @@ export default async function ProductPage({ params }: Params) {
   const specs = getSpecs(p.slug, p.specs);
   const overview = await getOverview();
   const guides = GUIDES.filter((g) => g.match(p) && guideItems(g, overview).length >= MIN_ITEMS);
+  const analysis = productAnalysis(p, verdict, best, stores, offers);
   const faq = productFaq(p, verdict, { stores: offers.length, seen: offers[0]?.last_seen_at ? formatSeen(offers[0].last_seen_at) : null });
 
   const jsonLd = {
@@ -156,6 +159,18 @@ export default async function ProductPage({ params }: Params) {
         <h2 id="hist">Histórico de preço</h2>
         <PriceChart best={best} stores={stores} />
       </section>
+
+      {analysis.length ? (
+        <section aria-labelledby="analise" className="analysis">
+          <h2 id="analise">O que o histórico mostra</h2>
+          {analysis.map((t, i) => (
+            <p key={i}>{t}</p>
+          ))}
+          <p className="note">
+            Texto gerado a partir das leituras de preço do Caça Ofertas. <Link href="/como-funciona">Veja como medimos</Link>.
+          </p>
+        </section>
+      ) : null}
 
       <section aria-labelledby="ofertas">
         <h2 id="ofertas">Onde comprar agora</h2>

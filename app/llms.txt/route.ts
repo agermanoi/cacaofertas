@@ -23,6 +23,7 @@ export async function GET() {
     '- Vereditos: "Menor preço já visto", "X% abaixo da média", "Preço normal", "Acima da média", "Desconto menor do que parece" (preço "de" que não foi praticado) e "Metade do dobro" (cerca de 50% de desconto sobre um preço inflado).',
     "- Os links para as lojas são de afiliado; isso não muda o preço para quem compra.",
     `- Metodologia: ${base}/como-funciona`,
+    `- Quem somos (mantido por Alexandre Germano): ${base}/quem-somos`,
     "",
     "## Guias de preço (o mais barato de hoje)",
     ...liveGuides(all).map((g) => `- [${g.guide.title}](${base}/precos/${g.guide.slug})`),
