@@ -7,6 +7,7 @@ interface ProductStats {
   views: number;
   visitors: number;
   clicks: number;
+  noise_clicks?: number;
   daily: DailyPoint[];
   sources: SourceRow[];
   stores: { store: string; n: number }[];
@@ -54,7 +55,7 @@ export async function ProductMetrics({ id, slug, days }: { id: string; slug: str
           <div className="metric-cards">
             <Card label="Visitas na página" value={int(s.views)} hint={s.views ? `${pct(mobile, s.views)} no celular` : undefined} />
             <Card label="Visitantes" value={int(s.visitors)} hint="únicos por dia, somados" />
-            <Card label="Cliques para lojas" value={int(s.clicks)} hint="de qualquer página do site" />
+            <Card label="Cliques para lojas" value={int(s.clicks)} hint={s.noise_clicks ? `sem contar ${int(s.noise_clicks)} de robôs e prévias` : "de qualquer página do site"} />
             <Card label="Taxa de clique" value={pct(s.clicks, s.visitors)} hint="cliques ÷ visitantes" />
           </div>
           {s.views || s.clicks ? <DailyChart data={s.daily} /> : null}

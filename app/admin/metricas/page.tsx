@@ -9,6 +9,7 @@ interface Stats {
   visitors: number;
   offer_clicks: number;
   coupon_clicks: number;
+  noise_clicks?: number;
   daily: DailyPoint[];
   pages: { path: string; n: number }[];
   sources: SourceRow[];
@@ -87,7 +88,7 @@ export default async function Metricas({ searchParams }: { searchParams: Promise
       <div className="metric-cards">
         <Card label="Visitas" value={int(s.views)} hint="páginas vistas" />
         <Card label="Visitantes" value={int(s.visitors)} hint="únicos por dia, somados" />
-        <Card label="Cliques para lojas" value={int(clicks)} hint={`${int(s.offer_clicks)} ofertas · ${int(s.coupon_clicks)} cupons`} />
+        <Card label="Cliques para lojas" value={int(clicks)} hint={`${int(s.offer_clicks)} ofertas · ${int(s.coupon_clicks)} cupons${s.noise_clicks ? ` · sem contar ${int(s.noise_clicks)} de robôs e prévias` : ""}`} />
         <Card label="Taxa de clique" value={pct(clicks, s.visitors)} hint="cliques ÷ visitantes" />
         <Card label="Seguidores Instagram" value={int(social?.igFollowers)} hint={social?.igMedia != null ? `${int(social.igMedia)} posts` : undefined} />
         <Card label="Seguidores Facebook" value={int(social?.fbFollowers)} hint={`${int(posts)} posts publicados no período`} />

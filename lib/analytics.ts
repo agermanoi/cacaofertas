@@ -5,7 +5,7 @@
  */
 
 const BOT =
-  /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|meta-externalagent|embedly|preview|headless|lighthouse|pagespeed|vercel|monitor|curl|wget|python|axios|node-fetch|go-http|java\/|okhttp|scrapy|httpclient|whatsapp\/|telegrambot|discord|skype|slack/i;
+  /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|meta-externalagent|embedly|preview|headless|lighthouse|pagespeed|vercel|monitor|curl|wget|python|axios|node-fetch|go-http|java\/|okhttp|scrapy|httpclient|whatsapp\/|telegrambot|discord|skype|slack|chatgpt-user|oai-|perplexity|claude-|anthropic|mistralai|cohere|bytespider|petalbot|ahrefs|semrush|mj12|dataforseo/i;
 
 export function isBot(ua: string | null | undefined): boolean {
   return !ua || BOT.test(ua);
