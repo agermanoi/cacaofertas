@@ -6,6 +6,7 @@ const nextConfig = {
   // links curtos para bios (o TikTok aceita só 80 caracteres): /tt → ofertas de hoje marcadas como TikTok
   async redirects() {
     return [
+      { source: "/produto/smart-tv-lg-43-4k-up751c", destination: "/categoria/tvs", permanent: true },
       { source: "/tt", destination: "/hoje?utm_source=tiktok", permanent: false },
       { source: "/ig", destination: "/hoje?utm_source=instagram", permanent: false },
       { source: "/zap", destination: "/hoje?utm_source=whatsapp", permanent: false },
