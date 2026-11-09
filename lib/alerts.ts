@@ -51,7 +51,7 @@ export function shouldNotify(a: AlertRow, price: number, minAll: number | null, 
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function layout(body: string, footer: string): string {
+export function emailLayout(body: string, footer: string): string {
   return `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#F7F8FA;font-family:Arial,Helvetica,sans-serif;color:#17212F">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8FA;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:14px;border:1px solid #E3E7EE">
@@ -62,16 +62,16 @@ function layout(body: string, footer: string): string {
 </td></tr></table></body></html>`;
 }
 
-const button = (href: string, label: string) =>
+export const emailButton = (href: string, label: string) =>
   `<a href="${esc(href)}" style="display:inline-block;background:#FF7800;color:#fff;text-decoration:none;font-weight:800;padding:12px 22px;border-radius:999px">${esc(label)}</a>`;
 
 export function confirmEmail(o: { product: string; target: number | null; confirmUrl: string; cancelUrl: string }) {
   const what = o.target != null ? `quando o preço chegar a ${money(o.target)} ou menos` : "quando o preço cair";
   const subject = `Confirme o aviso de preço: ${o.product}`;
-  const html = layout(
+  const html = emailLayout(
     `<p style="margin:0 0 12px">Você pediu para ser avisado ${what} no <strong>${esc(o.product)}</strong>.</p>
 <p style="margin:0 0 20px">Para ativar o aviso, confirme seu e-mail:</p>
-<p style="margin:0 0 20px">${button(o.confirmUrl, "Confirmar aviso")}</p>
+<p style="margin:0 0 20px">${emailButton(o.confirmUrl, "Confirmar aviso")}</p>
 <p style="margin:0;font-size:14px;color:#5B6573">Se não foi você, ignore este e-mail: sem a confirmação, nada será enviado.</p>`,
     `Você recebeu este e-mail porque alguém pediu um aviso de preço com este endereço em cacaofertas.com.br. <a href="${esc(o.cancelUrl)}" style="color:#5B6573">Cancelar</a>.`
   );
@@ -103,12 +103,12 @@ export function dropEmail(o: {
     o.avg != null && o.avg > 0
       ? ` A média dos últimos 30 dias é ${money(o.avg)} (${o.price < o.avg ? `${Math.round((1 - o.price / o.avg) * 100)}% abaixo` : "o preço de hoje não está abaixo dela"}).`
       : "";
-  const html = layout(
+  const html = emailLayout(
     `<p style="margin:0 0 6px;font-size:14px;color:#5B6573">Aviso de preço</p>
 <p style="margin:0 0 12px;font-size:20px;font-weight:800;line-height:1.3">${esc(o.product)} ${esc(head)}</p>
 <p style="margin:0 0 4px;font-size:30px;font-weight:800;color:#FF7800">${money(o.price)}</p>
 <p style="margin:0 0 16px;color:#3B4656">${o.store ? `${esc(o.store)} · ` : ""}${esc(vs)}${esc(avg)}</p>
-<p style="margin:0 0 20px">${button(o.productUrl, "Ver histórico e lojas")}</p>
+<p style="margin:0 0 20px">${emailButton(o.productUrl, "Ver histórico e lojas")}</p>
 <p style="margin:0;font-size:13px;color:#5B6573">Preços mudam a qualquer momento: confira o valor final na loja antes de comprar.</p>`,
     `Você recebe este aviso porque pediu em cacaofertas.com.br. Alguns links para as lojas são de afiliado. <a href="${esc(o.cancelUrl)}" style="color:#5B6573">Não quero mais avisos deste produto</a>.`
   );

@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
 import { ADMIN_COOKIE, verifySession } from "@/lib/admin-auth";
 import { checkResendKey, DEFAULT_FROM, emailConfig, sendEmail } from "@/lib/email";
+import { pickWeekly, weeklyEmail } from "@/lib/newsletter";
+import { siteUrl } from "@/lib/site";
 
 function back(msg: { ok?: string; erro?: string }): never {
   redirect(`/admin/avisos?${new URLSearchParams(msg as Record<string, string>)}`);
@@ -53,4 +55,35 @@ export async function removeEmailKey() {
   await adminClient().from("kv").delete().eq("key", "resend_api_key");
   revalidatePath("/admin/avisos");
   back({ ok: "Chave removida. Os avisos ficam guardados sem envio." });
+}
+
+export async function sendNewsletterPreview(formData: FormData) {
+  await requireAdmin();
+  const to = String(formData.get("to") || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(to)) back({ erro: "Informe um e-mail válido para a prévia." });
+  const db = adminClient();
+  const { data: rows } = await db
+    .from("product_overview")
+    .select("name,slug,category,best_price,best_store,avg_30d,min_all,days_tracked,image_url")
+    .not("best_price", "is", null);
+  const picked = pickWeekly(rows || [], 6);
+  if (!picked.length) back({ erro: "Nenhum produto abaixo da média agora: a newsletter desta semana ficaria vazia." });
+  const base = siteUrl();
+  const msg = weeklyEmail({
+    items: picked.map((p) => ({
+      name: p.name,
+      slug: p.slug,
+      price: Number(p.best_price),
+      avg: p.avg_30d != null ? Number(p.avg_30d) : null,
+      minAll: p.min_all != null ? Number(p.min_all) : null,
+      store: p.best_store,
+      image: p.image_url,
+    })),
+    base,
+    dateLabel: new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", day: "numeric", month: "long" }),
+    unsubscribeUrl: `${base}/newsletter/cancelar?t=previa`,
+  });
+  const r = await sendEmail(await emailConfig(db), { to, ...msg, subject: `[PRÉVIA] ${msg.subject}` });
+  if (!r.ok) back({ erro: `Falhou: ${r.error}` });
+  back({ ok: `Prévia da newsletter enviada para ${to} (${picked.length} produtos).` });
 }

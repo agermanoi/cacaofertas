@@ -46,6 +46,10 @@ export default async function Privacidade() {
           mensagens.
         </li>
         <li>
+          <strong>Quedas da semana (newsletter):</strong> e-mail, para mandar um resumo semanal de ofertas. Base legal:
+          consentimento, confirmado pelo e-mail. Cada envio traz um link para cancelar.
+        </li>
+        <li>
           <strong>Avisos de preço:</strong> e-mail, produto e, se você informar, o preço desejado, para mandar o aviso
           quando o preço cair. Base legal: consentimento, dado ao marcar a caixa e confirmar pelo e-mail. Cada e-mail traz
           um link para cancelar; os dados de um aviso cancelado são apagados em até 90 dias.

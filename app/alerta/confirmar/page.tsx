@@ -12,7 +12,13 @@ export default async function Confirmar({ searchParams }: { searchParams: Promis
   const { data: a } = /^[a-f0-9]{36}$/.test(t)
     ? await db.from("price_alerts").select("id,product_id,target_price,confirmed_at,canceled_at").eq("token", t).maybeSingle()
     : { data: null };
-  if (a && !a.confirmed_at && !a.canceled_at) await db.from("price_alerts").update({ confirmed_at: new Date().toISOString() }).eq("id", a.id);
+  if (a && !a.confirmed_at && !a.canceled_at) {
+    const now = new Date().toISOString();
+    await db.from("price_alerts").update({ confirmed_at: now }).eq("id", a.id);
+    // quem marcou "Quedas da semana" junto com o aviso fica confirmado também
+    const { data: me } = await db.from("price_alerts").select("email").eq("id", a.id).single();
+    if (me) await db.from("newsletter_subscribers").update({ confirmed_at: now }).ilike("email", me.email).eq("source", "aviso").is("confirmed_at", null).is("canceled_at", null);
+  }
   const { data: p } = a ? await db.from("products").select("name,slug").eq("id", a.product_id).maybeSingle() : { data: null };
 
   return (

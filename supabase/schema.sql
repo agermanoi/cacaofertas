@@ -460,3 +460,20 @@ revoke all on price_alerts from anon, authenticated;
 
 -- relatório por loja (/loja/<slug>): vitórias, duelos com outras lojas, onde está mais barata hoje
 -- (definição completa aplicada pela migração store_report_v2; ver Supabase → Database → Functions)
+
+-- newsletter "Quedas da semana" (envio em scripts/newsletter.ts, quinta à noite)
+create table if not exists newsletter_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  token text not null unique default encode(gen_random_bytes(18), 'hex'),
+  source text,
+  created_at timestamptz not null default now(),
+  confirm_sent_at timestamptz,
+  confirmed_at timestamptz,
+  canceled_at timestamptz,
+  last_sent_at timestamptz,
+  sent_count int not null default 0
+);
+create unique index if not exists newsletter_email on newsletter_subscribers (lower(email));
+alter table newsletter_subscribers enable row level security;
+revoke all on newsletter_subscribers from anon, authenticated;

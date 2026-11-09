@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/site";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { countdownText, cssVars, getSettings } from "@/lib/settings";
@@ -141,6 +142,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </header>
         <main id="conteudo">{children}</main>
         <footer className="foot">
+          <div className="wrap foot-newsletter">
+            <NewsletterForm source="rodape" compact />
+          </div>
           <div className="wrap foot-grid">
             <div className="foot-brand">
               {/* eslint-disable-next-line @next/next/no-img-element */}

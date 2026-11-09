@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import { getDailySeries, getOverview, lastPriceUpdate } from "@/lib/data";
 import { isInflated, verdictFor } from "@/lib/verdict";
 import { Catalog, type CatalogItem } from "@/components/Catalog";
@@ -81,7 +82,10 @@ export default async function Home() {
         ) : null}
         <AdSlot id="home-topo" format="leaderboard" />
         {items.length ? (
-          <Catalog items={items} updatedAt={updatedAt} />
+          <>
+            <Catalog items={items} updatedAt={updatedAt} />
+            <NewsletterForm source="home" />
+          </>
         ) : (
           <p className="empty">Nenhum produto cadastrado. Rode “npm run seed” para cadastrar a lista inicial.</p>
         )}

@@ -1,4 +1,5 @@
 import { money } from "./format";
+import { emailButton, emailLayout } from "./alerts";
 
 /**
  * E-mail semanal "Quedas da semana": os produtos mais abaixo da média, com o veredito do histórico.
@@ -78,4 +79,39 @@ Alguns links são de afiliado: se você comprar por eles, a loja nos paga uma co
       .join("\n") +
     `\n\nPreços sujeitos a mudança. Links de afiliado.\nCancelar: ${o.unsubscribeUrl}`;
   return { subject, html, text };
+}
+
+/** E-mail de confirmação da inscrição na newsletter. */
+export function newsletterConfirmEmail(o: { confirmUrl: string; cancelUrl: string }) {
+  const subject = "Confirme sua inscrição nas Quedas da semana";
+  const html = emailLayout(
+    `<p style="margin:0 0 12px">Você pediu para receber as <strong>Quedas da semana</strong> do Caça Ofertas: toda quinta à noite, os produtos que realmente baixaram de preço, escolhidos pelo histórico.</p>
+<p style="margin:0 0 20px">${emailButton(o.confirmUrl, "Confirmar inscrição")}</p>
+<p style="margin:0;font-size:14px;color:#5B6573">Se não foi você, ignore este e-mail: sem a confirmação, nada será enviado.</p>`,
+    `Você recebeu este e-mail porque alguém usou este endereço em cacaofertas.com.br. <a href="${esc(o.cancelUrl)}" style="color:#5B6573">Cancelar</a>.`
+  );
+  const text = `Confirme sua inscrição nas Quedas da semana do Caça Ofertas: ${o.confirmUrl}\n\nSe não foi você, ignore este e-mail.`;
+  return { subject, html, text };
+}
+
+/** Escolhe os produtos da semana: mais abaixo da própria média, no máximo 2 por categoria. */
+export function pickWeekly<
+  T extends { best_price: number | string | null; avg_30d: number | string | null; min_all: number | string | null; days_tracked: number | string | null; category: string },
+>(rows: T[], n = 6): T[] {
+  const ok = rows
+    .map((r) => ({ r, price: Number(r.best_price), avg: Number(r.avg_30d), min: r.min_all == null ? null : Number(r.min_all) }))
+    .filter((x) => x.price > 0 && x.avg > 0 && Number(x.r.days_tracked || 0) >= 7)
+    .filter((x) => x.price <= x.avg * 0.97) // pelo menos 3% abaixo da média
+    .filter((x) => x.min == null || x.min >= x.price * 0.7) // mínimo histórico muito fora do padrão = dado suspeito
+    .sort((a, b) => a.price / a.avg - b.price / b.avg);
+  const per = new Map<string, number>();
+  const out: T[] = [];
+  for (const x of ok) {
+    const c = per.get(x.r.category) || 0;
+    if (c >= 2) continue;
+    per.set(x.r.category, c + 1);
+    out.push(x.r);
+    if (out.length >= n) break;
+  }
+  return out;
 }

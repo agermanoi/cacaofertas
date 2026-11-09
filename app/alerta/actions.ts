@@ -61,6 +61,15 @@ export async function subscribeAlert(_prev: AlertState, formData: FormData): Pro
     .is("canceled_at", null)
     .maybeSingle();
 
+  // opção "Quedas da semana": entra junto e é confirmada pelo mesmo e-mail do aviso
+  if (formData.get("newsletter") === "on") {
+    const { data: sub } = await db.from("newsletter_subscribers").select("id,confirmed_at,canceled_at").ilike("email", email).maybeSingle();
+    const now = new Date().toISOString();
+    if (!sub) await db.from("newsletter_subscribers").insert({ email, source: "aviso", confirm_sent_at: now, confirmed_at: verified ? now : null });
+    else if (sub.canceled_at || !sub.confirmed_at)
+      await db.from("newsletter_subscribers").update({ canceled_at: null, source: "aviso", confirmed_at: sub.confirmed_at ?? (verified ? now : null) }).eq("id", sub.id);
+  }
+
   let row = existing;
   if (existing) {
     await db.from("price_alerts").update({ target_price: target, price_at_signup: price }).eq("id", existing.id);

@@ -41,6 +41,10 @@ export function PriceAlert({ productId, price }: { productId: string; price: num
           Quero receber avisos de preço deste produto por e-mail. Li a <Link href="/politica-de-privacidade">Política de Privacidade</Link>.
         </span>
       </label>
+      <label className="check">
+        <input type="checkbox" name="newsletter" defaultChecked />
+        <span>Também quero receber as Quedas da semana (1 e-mail por semana).</span>
+      </label>
       {state.erro ? (
         <p className="flash flash-erro" role="alert">
           {state.erro}

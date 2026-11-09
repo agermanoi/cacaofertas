@@ -2202,3 +2202,16 @@ button.btn-ghost {
 .store-stats strong { font-size: 1.7rem; color: var(--primary, #ff7800); line-height: 1; }
 .store-stats span { font-size: 0.85rem; color: var(--ink-2, #3b4656); }
 .store-page section { margin-top: 28px; }
+
+/* newsletter "Quedas da semana" */
+.newsletter { margin: 32px 0; padding: 20px; border-radius: 16px; background: var(--ink, #17212f); color: #fff; }
+.newsletter-title { margin: 0 0 4px; font-family: Nunito, system-ui, sans-serif; font-weight: 900; font-size: 1.25rem; }
+.newsletter-sub { margin: 0 0 12px; color: #d5dae2; }
+.newsletter-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.newsletter-row input { flex: 1 1 220px; min-width: 0; font: inherit; padding: 11px 14px; border-radius: 999px; border: 0; }
+.newsletter-row .btn { white-space: nowrap; }
+.newsletter-legal { margin: 10px 0 0; font-size: 0.8rem; color: #aab3c0; }
+.newsletter-legal a { color: #fff; }
+.newsletter .flash { margin-top: 10px; }
+.newsletter-compact { margin: 0 0 24px; }
+.foot-newsletter { padding-top: 28px; }

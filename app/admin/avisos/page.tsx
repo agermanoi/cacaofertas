@@ -4,7 +4,7 @@ import { Flash } from "@/components/admin/Flash";
 import { checkResendKey, emailConfig } from "@/lib/email";
 import { money } from "@/lib/format";
 import { Card } from "@/components/admin/Metrics";
-import { removeEmailKey, saveEmailSettings, sendTestEmail } from "./actions";
+import { removeEmailKey, saveEmailSettings, sendNewsletterPreview, sendTestEmail } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,11 @@ export default async function AvisosPage({ searchParams }: { searchParams: Promi
     .order("created_at", { ascending: false })
     .limit(300);
   const all = rows || [];
+  const { data: subsRows } = await db.from("newsletter_subscribers").select("confirmed_at,canceled_at,source");
+  const subs = subsRows || [];
+  const subsActive = subs.filter((s) => s.confirmed_at && !s.canceled_at).length;
+  const subsWaiting = subs.filter((s) => !s.confirmed_at && !s.canceled_at).length;
+  const { data: lastNl } = await db.from("kv").select("value").eq("key", "newsletter_last_sent").maybeSingle();
   const active = all.filter((r) => r.confirmed_at && !r.canceled_at);
   const waiting = all.filter((r) => !r.confirmed_at && !r.canceled_at);
   const sent = all.reduce((n, r) => n + (r.notify_count || 0), 0);
@@ -54,6 +59,26 @@ export default async function AvisosPage({ searchParams }: { searchParams: Promi
         <Card label="Esperando confirmação" value={String(waiting.length)} hint={cfg.apiKey ? "o e-mail de confirmação já sai" : "saem quando o e-mail for configurado"} />
         <Card label="E-mails de queda enviados" value={String(sent)} />
       </div>
+
+      <section className="admin-section">
+        <h2>Quedas da semana (newsletter)</h2>
+        <div className="metric-cards">
+          <Card label="Inscritos confirmados" value={String(subsActive)} />
+          <Card label="Esperando confirmação" value={String(subsWaiting)} />
+          <Card label="Último envio" value={lastNl?.value ? day(String(lastNl.value)) : "nunca"} hint="sai sozinha toda quinta, na coleta das 21h" />
+        </div>
+        <p className="hint">
+          Entram até 6 produtos pelo menos 3% abaixo da própria média de 30 dias (no máximo 2 por categoria). Inscrição no
+          rodapé, na home e junto com o aviso de preço.
+        </p>
+        <form action={sendNewsletterPreview} className="admin-form inline-form">
+          <div className="field">
+            <label htmlFor="nl-to">Ver como vai ficar esta semana: enviar prévia para</label>
+            <input id="nl-to" name="to" type="email" placeholder="voce@email.com" />
+          </div>
+          <button type="submit" className="btn btn-ghost">Enviar prévia</button>
+        </form>
+      </section>
 
       <section className="admin-section">
         <h2>Envio de e-mail (Resend)</h2>
