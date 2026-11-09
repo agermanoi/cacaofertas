@@ -103,7 +103,9 @@ export default async function StorePage({ params }: Props) {
                         <td><Link href={`/produto/${p.slug}`}>{p.name}</Link></td>
                         <td className="num">{money(Number(p.price))}</td>
                         <td>{p.next_store ? `${p.next_store} · ${money(Number(p.next_price))}` : "só nesta loja"}</td>
-                        <td className="num">{p.gap != null && Number(p.gap) >= 0.005 ? `${Math.round(Number(p.gap) * 100)}%` : "–"}</td>
+                        <td className="num">{p.next_price && Number(p.next_price) > Number(p.price) * 1.005
+                            ? `${money(Number(p.next_price) - Number(p.price))} (${Math.round((1 - Number(p.price) / Number(p.next_price)) * 100)}%)`
+                            : "–"}</td>
                       </tr>
                     ))}
                   </tbody>

@@ -57,7 +57,7 @@ export function storeTexts(s: StoreInfo, r: StoreReport) {
         : med > 0
           ? `Na diferença típica (mediana), ${the(other)} ficou ${pct(med)} mais caro${other.art === "a" ? "a" : ""}.`
           : `Na diferença típica (mediana), ${the(s)} ficou ${pct(med)} mais car${s.art === "a" ? "a" : "o"}.`;
-    const line = `${The(s)} x ${the(other)}: em ${rv.n} comparações de ${rv.products} produtos, ${the(s)} foi mais barat${s.art === "a" ? "a" : "o"} em ${rv.cheaper} (${pct(rv.cheaper / rv.n)}), ${the(other)} em ${otherCheaper}${rv.tie ? ` e houve ${rv.tie} empates` : ""}. ${medTxt}`;
+    const line = `${s.name} x ${other.name}: em ${rv.n} comparações de ${rv.products} produtos, ${the(s)} foi mais barat${s.art === "a" ? "a" : "o"} em ${rv.cheaper} (${pct(rv.cheaper / rv.n)}), ${the(other)} em ${otherCheaper}${rv.tie ? ` e houve ${rv.tie} empates` : ""}. ${medTxt}`;
     paras.push(line);
     if (faq.length < 2)
       faq.push({
