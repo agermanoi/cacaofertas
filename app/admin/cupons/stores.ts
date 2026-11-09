@@ -13,3 +13,10 @@ export async function knownStores(): Promise<string[]> {
   for (const r of [...(offers || []), ...(coupons || [])]) if (r.store) set.add(String(r.store));
   return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
 }
+
+/** Produtos ativos (para vincular um cupom a um produto específico). */
+export async function productOptions(): Promise<{ id: string; name: string }[]> {
+  if (demo.enabled()) return [];
+  const { data } = await adminClient().from("products").select("id,name").eq("active", true).order("name");
+  return (data || []) as { id: string; name: string }[];
+}

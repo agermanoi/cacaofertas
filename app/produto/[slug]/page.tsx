@@ -69,7 +69,8 @@ export default async function ProductPage({ params }: Params) {
     getOffers(p.id),
   ]);
   const best = series.get(p.id) || [];
-  const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))]);
+  const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))], p.id);
+  const productCoupons = coupons.filter((c) => c.product_id === p.id);
   const verdict = verdictFor(p);
   const specs = getSpecs(p.slug, p.specs);
   const overview = await getOverview();
@@ -185,6 +186,19 @@ export default async function ProductPage({ params }: Params) {
 
       <section aria-labelledby="ofertas">
         <h2 id="ofertas">Onde comprar agora</h2>
+        {productCoupons.slice(0, 2).map((c) => (
+          <a key={c.id} className="product-coupon" href={`/c/${c.id}`} rel="nofollow sponsored noopener" target="_blank">
+            <span aria-hidden="true">🎟️</span>
+            <span>
+              <strong>
+                Cupom {c.store === "Mercado Livre" ? "no" : "na"} {c.store}
+                {c.discount ? `: ${c.discount}` : ""}
+              </strong>
+              <small>{c.code ? `Use o código ${c.code}` : "O desconto ativa pelo link"}{c.expires_at ? ` · ${expiresLabel(c.expires_at)}` : ""}</small>
+            </span>
+            <span className="product-coupon-cta">Ativar ›</span>
+          </a>
+        ))}
         {offers.length ? (
           <table className="offers">
             <thead>
@@ -231,7 +245,7 @@ export default async function ProductPage({ params }: Params) {
 
       {coupons.length ? (
         <section aria-labelledby="cupons">
-          <h2 id="cupons">Cupons das lojas deste produto</h2>
+          <h2 id="cupons">{productCoupons.length ? "Cupons para este produto" : "Cupons das lojas deste produto"}</h2>
           <div className="coupon-grid">
             {coupons.slice(0, 6).map((c) => (
               <CouponCard key={c.id} c={c} expires={expiresLabel(c.expires_at)} />

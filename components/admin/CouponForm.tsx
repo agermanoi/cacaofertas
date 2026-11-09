@@ -18,6 +18,7 @@ export type CouponRow = {
   highlight: boolean;
   active: boolean;
   clicks: number;
+  product_id?: string | null;
 };
 
 /** ISO → valor do input datetime-local no horário de Brasília. */
@@ -27,7 +28,7 @@ function local(iso: string | null): string {
   return d.toISOString().slice(0, 16);
 }
 
-export function CouponForm({ c, stores }: { c?: CouponRow; stores: string[] }) {
+export function CouponForm({ c, stores, products = [] }: { c?: CouponRow; stores: string[]; products?: { id: string; name: string }[] }) {
   const imported = c && c.source !== "manual";
   return (
     <form action={saveCoupon} className="admin-form">
@@ -79,6 +80,25 @@ export function CouponForm({ c, stores }: { c?: CouponRow; stores: string[] }) {
         <div className="field">
           <label htmlFor="rules">Regras (opcional)</label>
           <textarea id="rules" name="rules" rows={3} defaultValue={c?.rules || ""} placeholder="Válido para a primeira compra no app. Limite de R$ 100 de desconto." />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Produto</legend>
+        <div className="field">
+          <label htmlFor="product_id">Vale só para este produto (opcional)</label>
+          <select id="product_id" name="product_id" defaultValue={c?.product_id || ""}>
+            <option value="">Qualquer produto da loja</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <p className="hint">
+            Cupons do Mercado Livre Afiliados valem para um produto e ativam pelo link: escolha o produto aqui e cole o link
+            gerado em “Compartilhar” no campo Link de afiliado. Ele aparece em destaque só na página desse produto.
+          </p>
         </div>
       </fieldset>
 

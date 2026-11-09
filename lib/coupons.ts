@@ -16,9 +16,10 @@ export interface Coupon {
   expires_at: string | null;
   highlight: boolean;
   clicks: number;
+  product_id: string | null;
 }
 
-const COLS = "id,source,store,title,code,description,rules,discount,category,url,affiliate_url,starts_at,expires_at,highlight,clicks";
+const COLS = "id,source,store,title,code,description,rules,discount,category,url,affiliate_url,starts_at,expires_at,highlight,clicks,product_id";
 
 function configured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -50,12 +51,16 @@ export function storeKey(name: string): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
-/** Cupons das lojas informadas (para a página do produto). */
-export async function getCouponsForStores(stores: string[]): Promise<Coupon[]> {
-  if (!stores.length) return [];
+/**
+ * Cupons para a página do produto: os vinculados a este produto (primeiro) e os gerais das lojas
+ * que vendem o produto. Cupom vinculado a outro produto não aparece.
+ */
+export async function getCouponsForStores(stores: string[], productId?: string): Promise<Coupon[]> {
   const keys = new Set(stores.map(storeKey));
   const all = await getCoupons();
-  return all.filter((c) => keys.has(storeKey(c.store)));
+  const mine = productId ? all.filter((c) => c.product_id === productId) : [];
+  const general = all.filter((c) => !c.product_id && keys.has(storeKey(c.store)));
+  return [...mine, ...general];
 }
 
 export function expiresLabel(iso: string | null): string | null {

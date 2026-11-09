@@ -65,6 +65,7 @@ export async function saveCoupon(formData: FormData) {
     affiliate_url: aff || null,
     starts_at: starts,
     expires_at: expires,
+    product_id: /^[0-9a-f-]{36}$/i.test(text(formData, "product_id", 40)) ? text(formData, "product_id", 40) : null,
     highlight: formData.get("highlight") === "on",
     active: formData.get("active") === "on",
     updated_at: new Date().toISOString(),

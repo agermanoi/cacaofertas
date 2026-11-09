@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase";
 import { Flash } from "@/components/admin/Flash";
 import { CouponForm, type CouponRow } from "@/components/admin/CouponForm";
-import { knownStores } from "../stores";
+import { knownStores, productOptions } from "../stores";
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ erro?: string }> };
 
@@ -20,7 +20,7 @@ export default async function EditarCupom({ params, searchParams }: Props) {
         {c.clicks} {c.clicks === 1 ? "clique" : "cliques"} até agora.
       </p>
       <Flash erro={erro} />
-      <CouponForm c={c} stores={await knownStores()} />
+      <CouponForm c={c} stores={await knownStores()} products={await productOptions()} />
     </div>
   );
 }

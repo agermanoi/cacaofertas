@@ -1,6 +1,6 @@
 import { Flash } from "@/components/admin/Flash";
 import { CouponForm } from "@/components/admin/CouponForm";
-import { knownStores } from "../stores";
+import { knownStores, productOptions } from "../stores";
 
 type Props = { searchParams: Promise<{ erro?: string }> };
 
@@ -10,7 +10,7 @@ export default async function NovoCupom({ searchParams }: Props) {
     <div className="wrap admin-page">
       <h1>Novo cupom</h1>
       <Flash erro={erro} />
-      <CouponForm stores={await knownStores()} />
+      <CouponForm stores={await knownStores()} products={await productOptions()} />
     </div>
   );
 }
