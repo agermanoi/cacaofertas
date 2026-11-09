@@ -90,6 +90,8 @@ export function storeFromUrl(url: string): string {
 const BLOCKED_STORES = [
   /enjoei/i, /\bolx\b/i, /trocafy/i, /usado/i, /troca ?game/i, /^ebay/i, /aliexpress/i,
   /latam ?pass/i, /livelo/i, /smiles/i, /esfera/i, /recondicionad/i, /seminovo/i, /refurb/i,
+  // preços do feed muito acima do mercado (2x ou mais) e nunca a mais barata: só distorcia o comparador
+  /magazine ?mateus/i,
 ];
 
 export function isBlockedStore(name: string): boolean {

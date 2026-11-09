@@ -1,3 +1,4 @@
+import { isBlockedStore } from "../affiliate";
 import type { Collector, OfferInput, Product } from "../types";
 import { httpJson, http, sleep } from "../http";
 import { storeFromUrl } from "../affiliate";
@@ -59,6 +60,7 @@ export function lomadee(): Collector {
           const externalId = `${p.organizationId}:${p.id}`;
           if (seen.has(externalId)) continue;
           seen.add(externalId);
+          if (isBlockedStore(storeFromUrl(p.url))) continue;
           if (!titleMatches(product, title)) {
             if (refused.length < 6) refused.push(`${title} (busca "${q}")`);
             continue;
