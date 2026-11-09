@@ -24,6 +24,7 @@ export async function GET() {
     "- Os links para as lojas são de afiliado; isso não muda o preço para quem compra.",
     `- Metodologia: ${base}/como-funciona`,
     `- Quem somos (mantido por Alexandre Germano): ${base}/quem-somos`,
+    `- Qual loja é mais barata (Amazon x Mercado Livre, com dados dos últimos 14 dias): ${base}/lojas`,
     "",
     "## Guias de preço (o mais barato de hoje)",
     ...liveGuides(all).map((g) => `- [${g.guide.title}](${base}/precos/${g.guide.slug})`),

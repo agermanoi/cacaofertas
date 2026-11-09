@@ -436,3 +436,27 @@ create policy "public read events" on events for select using (active);
 grant select on events to anon, authenticated;
 alter table social_posts drop constraint if exists social_posts_kind_check;
 alter table social_posts add constraint social_posts_kind_check check (kind in ('product','coupon','event'));
+
+-- avisos de queda de preço por e-mail (inscrição pelo site, envio em scripts/alerts.ts)
+create table if not exists price_alerts (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references products(id) on delete cascade,
+  email text not null,
+  target_price numeric(12,2),
+  price_at_signup numeric(12,2),
+  token text not null unique default encode(gen_random_bytes(18), 'hex'),
+  created_at timestamptz not null default now(),
+  confirm_sent_at timestamptz,
+  confirmed_at timestamptz,
+  canceled_at timestamptz,
+  last_notified_at timestamptz,
+  last_notified_price numeric(12,2),
+  notify_count int not null default 0
+);
+create unique index if not exists price_alerts_product_email on price_alerts (product_id, lower(email)) where canceled_at is null;
+create index if not exists price_alerts_active on price_alerts (product_id) where confirmed_at is not null and canceled_at is null;
+alter table price_alerts enable row level security;
+revoke all on price_alerts from anon, authenticated;
+
+-- relatório por loja (/loja/<slug>): vitórias, duelos com outras lojas, onde está mais barata hoje
+-- (definição completa aplicada pela migração store_report_v2; ver Supabase → Database → Functions)

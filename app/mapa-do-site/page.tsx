@@ -74,6 +74,9 @@ export default async function MapaDoSite() {
             <Link href="/quem-somos">Quem somos</Link>
           </li>
           <li>
+            <Link href="/lojas">Qual loja é mais barata (Amazon, Mercado Livre)</Link>
+          </li>
+          <li>
             <Link href="/contato">Contato</Link>
           </li>
           <li>

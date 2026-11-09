@@ -1,3 +1,4 @@
+import { STORES } from "@/lib/stores";
 import { siteUrl } from "@/lib/site";
 import { categorySlug } from "@/lib/categories";
 import type { MetadataRoute } from "next";
@@ -16,6 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/hoje`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/como-funciona`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/quem-somos`, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${base}/lojas`, changeFrequency: "daily", priority: 0.6 },
+    ...STORES.map((s) => ({ url: `${base}/loja/${s.slug}`, changeFrequency: "daily" as const, priority: 0.6 })),
     { url: `${base}/contato`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/politica-de-privacidade`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${base}/termos-de-uso`, changeFrequency: "yearly", priority: 0.1 },

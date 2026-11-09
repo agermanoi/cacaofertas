@@ -2173,3 +2173,32 @@ button.btn-ghost {
 /* análise em texto do histórico do produto */
 .analysis p { max-width: 70ch; line-height: 1.6; margin: 0 0 10px; }
 .analysis p.note { margin-top: 4px; }
+
+/* aviso de queda de preço */
+.price-alert {
+  margin: 28px 0;
+  padding: 18px 20px;
+  border: 2px solid var(--primary, #ff7800);
+  border-radius: 16px;
+  background: #fff8f1;
+}
+.price-alert h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.price-alert > p { margin: 0 0 12px; color: var(--ink-2, #3b4656); }
+.price-alert-fields { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: end; }
+@media (min-width: 720px) { .price-alert-fields { grid-template-columns: 1.4fr 1fr auto; } }
+.price-alert-fields label { display: grid; gap: 4px; font-size: 0.85rem; font-weight: 700; }
+.price-alert-fields input { font: inherit; padding: 10px 12px; border: 1px solid var(--line, #e3e7ee); border-radius: 10px; background: #fff; min-width: 0; }
+.price-alert-fields .btn { white-space: nowrap; }
+.price-alert .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: 0.85rem; }
+.price-alert .check input { margin-top: 3px; flex: none; }
+.price-alert .flash { margin: 10px 0 0; }
+.price-alert-done { font-size: 1rem; }
+.admin-page ol.steps { padding-left: 20px; line-height: 1.6; margin: 12px 0 16px; }
+.admin-page .inline-form { margin-top: 16px; }
+
+/* páginas de loja */
+.store-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 18px 0 8px; }
+.store-stats > div { border: 1px solid var(--line, #e3e7ee); border-radius: 14px; padding: 14px 16px; background: #fff; display: grid; gap: 4px; }
+.store-stats strong { font-size: 1.7rem; color: var(--primary, #ff7800); line-height: 1; }
+.store-stats span { font-size: 0.85rem; color: var(--ink-2, #3b4656); }
+.store-page section { margin-top: 28px; }

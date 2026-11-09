@@ -17,6 +17,7 @@
     "indexnow": "tsx scripts/indexnow.ts",
     "review-video": "tsx scripts/review-video.ts",
     "cleanup-media": "tsx scripts/cleanup-media.ts",
+    "alerts": "tsx scripts/alerts.ts",
     "story-video": "tsx scripts/story-video.ts"
   },
   "dependencies": {

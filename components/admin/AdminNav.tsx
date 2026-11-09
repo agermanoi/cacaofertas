@@ -7,6 +7,7 @@ const TABS = [
   { href: "/admin", label: "Produtos", match: (p: string) => p === "/admin" || p.startsWith("/admin/produtos") },
   { href: "/admin/metricas", label: "Métricas", match: (p: string) => p.startsWith("/admin/metricas") },
   { href: "/admin/datas", label: "Datas", match: (p: string) => p.startsWith("/admin/datas") },
+  { href: "/admin/avisos", label: "Avisos", match: (p: string) => p.startsWith("/admin/avisos") },
   { href: "/admin/cupons", label: "Cupons", match: (p: string) => p.startsWith("/admin/cupons") },
   { href: "/admin/configuracoes", label: "Configurações", match: (p: string) => p.startsWith("/admin/configuracoes") },
   { href: "/admin/social", label: "Redes sociais", match: (p: string) => p.startsWith("/admin/social") },

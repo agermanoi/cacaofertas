@@ -33,7 +33,7 @@ export default async function Privacidade() {
       <h2>Resumo</h2>
       <ul>
         <li>Você não precisa criar conta nem informar dados para usar o site.</li>
-        <li>Só pedimos nome e e-mail se você enviar uma mensagem pelo Contato.</li>
+        <li>Só pedimos e-mail se você enviar uma mensagem pelo Contato ou pedir um aviso de preço.</li>
         <li>Não vendemos dados pessoais.</li>
         <li>As lojas para onde enviamos você têm as próprias políticas de privacidade.</li>
       </ul>
@@ -44,6 +44,11 @@ export default async function Privacidade() {
           <strong>Formulário de contato:</strong> nome, e-mail, assunto e mensagem, para responder você. Base legal:
           consentimento e legítimo interesse em atender pedidos. Guardamos por até 12 meses depois da última troca de
           mensagens.
+        </li>
+        <li>
+          <strong>Avisos de preço:</strong> e-mail, produto e, se você informar, o preço desejado, para mandar o aviso
+          quando o preço cair. Base legal: consentimento, dado ao marcar a caixa e confirmar pelo e-mail. Cada e-mail traz
+          um link para cancelar; os dados de um aviso cancelado são apagados em até 90 dias.
         </li>
         <li>
           <strong>Cliques em ofertas:</strong> quando você clica em “Ver na loja”, registramos qual oferta foi clicada,
@@ -77,7 +82,7 @@ export default async function Privacidade() {
 
       <h2>Com quem compartilhamos</h2>
       <p>
-        Usamos provedores que guardam e processam dados em nosso nome: hospedagem (Vercel) e banco de dados (Supabase),
+        Usamos provedores que guardam e processam dados em nosso nome: hospedagem (Vercel), banco de dados (Supabase) e envio de e-mails (Resend),
         que podem armazenar informações fora do Brasil com garantias contratuais de proteção. Também podemos
         compartilhar dados quando a lei ou uma autoridade exigir.
       </p>

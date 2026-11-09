@@ -18,6 +18,8 @@ import { CouponCard } from "@/components/CouponCard";
 import { expiresLabel, getCouponsForStores } from "@/lib/coupons";
 import { getSpecs } from "@/lib/specs";
 import { productAnalysis } from "@/lib/analysis";
+import { PriceAlert } from "@/components/PriceAlert";
+import { storeSlug } from "@/lib/stores";
 import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
@@ -167,10 +169,19 @@ export default async function ProductPage({ params }: Params) {
             <p key={i}>{t}</p>
           ))}
           <p className="note">
-            Texto gerado a partir das leituras de preço do Caça Ofertas. <Link href="/como-funciona">Veja como medimos</Link>.
+            Texto gerado a partir das leituras de preço do Caça Ofertas. <Link href="/como-funciona">Veja como medimos</Link>
+            {storeSlug(p.best_store) ? (
+              <>
+                {" "}
+                ou <Link href={`/loja/${storeSlug(p.best_store)}`}>quando {p.best_store} costuma ser a mais barata</Link>
+              </>
+            ) : null}
+            .
           </p>
         </section>
       ) : null}
+
+      {p.best_price != null ? <PriceAlert productId={p.id} price={Number(p.best_price)} /> : null}
 
       <section aria-labelledby="ofertas">
         <h2 id="ofertas">Onde comprar agora</h2>
