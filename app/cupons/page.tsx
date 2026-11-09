@@ -1,3 +1,4 @@
+import { isNicheCoupon } from "@/lib/coupon-niche";
 import type { Metadata } from "next";
 import { getCoupons, expiresLabel, type Coupon } from "@/lib/coupons";
 import { CouponCard } from "@/components/CouponCard";
@@ -32,9 +33,11 @@ export default async function Cupons() {
     byStore.set(c.store, list);
   }
   const highlights = coupons.filter((c) => c.highlight).slice(0, 6);
-  // Lojas com mais cupons com código primeiro
+  // Lojas do nicho do site (eletrônicos, eletro…) primeiro; depois as com mais cupons com código
+  const niche = (s: string, list: Coupon[]) => list.some((c) => isNicheCoupon(c)) || isNicheCoupon({ store: s });
   const stores = [...byStore.entries()].sort(
     (a, b) =>
+      Number(niche(b[0], b[1])) - Number(niche(a[0], a[1])) ||
       b[1].filter((c) => c.code).length - a[1].filter((c) => c.code).length ||
       b[1].length - a[1].length ||
       a[0].localeCompare(b[0], "pt-BR")

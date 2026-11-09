@@ -6,6 +6,7 @@ import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
 import { dispatchVideoJob } from "./github";
+import { isNicheCoupon } from "./coupon-niche";
 import { addDays, daysBetween, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
 
 /**
@@ -578,6 +579,7 @@ export interface CouponRow {
   discount: string | null;
   expires_at: string | null;
   highlight: boolean;
+  category?: string | null;
 }
 
 /** "26% OFF" → { pct: 26 }; "R$ 50 OFF" → { brl: 50 }. */
@@ -613,7 +615,7 @@ export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit =
   const soon = new Date(Date.now() + 6 * 3600_000).toISOString();
   const { data } = await db
     .from("coupons")
-    .select("id,store,title,code,discount,expires_at,highlight")
+    .select("id,store,title,code,discount,expires_at,highlight,category")
     .eq("active", true)
     .not("code", "is", null)
     .or(`expires_at.is.null,expires_at.gt.${soon}`)
@@ -635,12 +637,17 @@ export async function pickCoupons(db: SupabaseClient, cfg: SocialConfig, limit =
   };
   const ok = ((data || []) as CouponRow[]).filter((c) => {
     if (!c.code || !realStore(c.store) || usedCoupons.has(c.id) || usedStores.has(couponSlug(c))) return false;
+    // só cupons do nicho do site viram post (comida, moda e afins não vendem aqui e só geram clique de robô)
+    if (!c.highlight && !isNicheCoupon(c)) return false;
     if (c.highlight) return true;
     const d = parseDiscount(c.discount);
     return (d.pct ?? 0) >= cfg.couponMinPct || (d.brl ?? 0) >= cfg.couponMinPct * 3;
   });
   ok.sort((a, b) => score(b) - score(a));
   const out: CouponRow[] = [];
+  // no máximo um post de cupom por dia
+  const today = (recent || []).filter((r) => Date.now() - new Date(r.created_at).getTime() < 20 * 3600_000).length;
+  if (today >= 1) return [];
   for (const c of ok) {
     if (out.some((o) => couponSlug(o) === couponSlug(c))) continue;
     out.push(c);
