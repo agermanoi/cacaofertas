@@ -102,6 +102,7 @@ export function pickWeekly<
     .map((r) => ({ r, price: Number(r.best_price), avg: Number(r.avg_30d), min: r.min_all == null ? null : Number(r.min_all) }))
     .filter((x) => x.price > 0 && x.avg > 0 && Number(x.r.days_tracked || 0) >= 7)
     .filter((x) => x.price <= x.avg * 0.97) // pelo menos 3% abaixo da média
+    .filter((x) => x.price >= x.avg * 0.7) // queda de mais de 30% costuma ser anúncio suspeito ou versão diferente
     .filter((x) => x.min == null || x.min >= x.price * 0.7) // mínimo histórico muito fora do padrão = dado suspeito
     .sort((a, b) => a.price / a.avg - b.price / b.avg);
   const per = new Map<string, number>();
