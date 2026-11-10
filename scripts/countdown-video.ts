@@ -100,7 +100,7 @@ async function main() {
     <div class="ph">${p.photo ? `<img src="${p.photo}">` : ""}</div>
     <p class="avg">Média de 30 dias: <s>${money(p.avg)}</s></p>
     <p class="price">${money(p.price)}</p>
-    <p class="seen">Preço visto em ${p.seenAt} · pode mudar a qualquer momento</p>
+    <p class="seen">Preço visto em ${p.seenAt}</p>
   </div>
 </section>`
     )
@@ -120,12 +120,12 @@ body{background:linear-gradient(180deg,#FF7800 0%,#FF5A1F 100%);color:#fff}
 .tag{display:inline-block;background:#17212F;color:#fff;font-weight:900;font-size:32px;padding:12px 20px;border-radius:16px;margin-bottom:18px}
 .name{font-size:50px;font-weight:900;line-height:1.08}
 .store{font-size:32px;color:#5B6573;margin-top:12px;font-weight:800}
-.ph{position:absolute;left:50px;right:50px;top:330px;height:440px;display:flex;align-items:center;justify-content:center}
+.ph{position:absolute;left:50px;right:50px;top:320px;height:390px;display:flex;align-items:center;justify-content:center}
 .ph img{max-width:100%;max-height:100%;object-fit:contain}
 .avg{position:absolute;left:50px;bottom:250px;font-size:38px;color:#5B6573;font-weight:800}
 .price{position:absolute;left:50px;bottom:100px;font-size:132px;font-weight:900;color:#E24A00;letter-spacing:-3px}
 .seen{position:absolute;left:50px;right:50px;bottom:46px;font-size:28px;color:#5B6573;font-weight:800}
-#hook .date{position:absolute;left:70px;top:1340px;font-size:40px;font-weight:800;background:rgba(23,33,47,.25);padding:10px 22px;border-radius:999px}
+#hook .date{position:absolute;left:70px;top:1420px;font-size:40px;font-weight:800;background:rgba(23,33,47,.25);padding:10px 22px;border-radius:999px}
 #end h1{position:absolute;left:70px;right:170px;top:620px;font-size:140px;line-height:1;font-weight:900;letter-spacing:-3px}
 #end p{position:absolute;left:70px;right:170px;top:1000px;font-size:54px;font-weight:800;line-height:1.25}
 #logo{position:absolute;left:60px;bottom:120px;height:90px;background:#fff;border-radius:22px;padding:14px 22px}
