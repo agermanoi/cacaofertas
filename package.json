@@ -19,6 +19,7 @@
     "cleanup-media": "tsx scripts/cleanup-media.ts",
     "alerts": "tsx scripts/alerts.ts",
     "newsletter": "tsx scripts/newsletter.ts",
+    "countdown-video": "tsx scripts/countdown-video.ts",
     "story-video": "tsx scripts/story-video.ts"
   },
   "dependencies": {

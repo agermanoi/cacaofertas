@@ -1,0 +1,44 @@
+name: Vídeo contagem Black Friday (teste)
+
+# Gera o vídeo "Faltam N dias pra Black Friday" + as imagens de cada tela e salva no branch "videos".
+# Não posta em lugar nenhum.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Instalar Chromium e ffmpeg
+        timeout-minutes: 10
+        run: |
+          npx playwright install chromium
+          timeout 300 npx playwright install-deps chromium || echo "deps: seguindo com as do runner"
+          command -v ffmpeg || sudo apt-get install -y ffmpeg
+      - name: Gerar
+        timeout-minutes: 10
+        run: npm run countdown-video
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Salvar no branch videos
+        run: |
+          cd out/contagem
+          rm -f contagem.html
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          git init -q -b videos
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -qm "Vídeo contagem $(date -u +%F)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" videos
