@@ -24,10 +24,12 @@ import type { ProductOverview } from "../lib/types";
 import { isInflated, verdictFor } from "../lib/verdict";
 import { mergeSettings } from "../lib/settings";
 import { getSocialConfig, pickCandidates } from "../lib/social";
-import { tiktokPublishStatus, tiktokSendVideoDraft, tiktokStatus } from "../lib/tiktok";
+import { tiktokDirectEnabled, tiktokPublishStatus, tiktokSendVideoDraft, tiktokStatus } from "../lib/tiktok";
 import { VIDEO_FPS, VIDEO_SECONDS, videoHtml } from "../lib/video";
 
 const db: SupabaseClient = adminClient();
+/** marca dos vídeos prontos esperando a publicação direta pelo admin */
+const DIRECT_READY = "pronto para publicar";
 const OUT = join(process.cwd(), "out");
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 
@@ -238,6 +240,12 @@ async function runPending(checkOnly: boolean) {
         mp4 = await artVideo(post.slug.replace(/[^\w-]+/g, "-"), post.story_url);
       }
       const url = await upload(mp4, post.slug.replace(/[^\w-]+/g, "-"));
+      if (await tiktokDirectEnabled(db)) {
+        // postagem direta: o vídeo fica pronto e você publica pelo admin (legenda, privacidade, confirmação)
+        await db.from("social_posts").update({ tiktok_video_url: url, tiktok_error: DIRECT_READY }).eq("id", post.id);
+        console.log("  pronto para publicar em Admin → Redes sociais");
+        continue;
+      }
       const id = await sendAndWait(url);
       await db.from("social_posts").update({ tiktok_publish_id: id, tiktok_video_url: url, tiktok_error: null }).eq("id", post.id);
     } catch (e) {

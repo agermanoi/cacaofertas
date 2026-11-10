@@ -2222,3 +2222,14 @@ button.btn-ghost {
 .product-coupon strong { display: block; }
 .product-coupon small { color: var(--ink-2, #3b4656); }
 .product-coupon-cta { margin-left: auto; font-weight: 800; color: var(--brand, #ff7800); white-space: nowrap; }
+
+/* publicar no TikTok (Direct Post) */
+.tiktok-publish-grid { display: grid; gap: 24px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .tiktok-publish-grid { grid-template-columns: 340px 1fr; } }
+.tiktok-preview { width: 100%; max-width: 340px; aspect-ratio: 9 / 16; background: #000; border-radius: 16px; }
+.tiktok-creator { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.tiktok-creator img { border-radius: 50%; }
+.tiktok-creator strong { display: block; font-size: 1.1rem; }
+.tiktok-publish .check { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+.tiktok-publish .disclose { margin: 8px 0 0 24px; }
+.tiktok-publish .consent { margin: 14px 0 10px; font-size: 0.9rem; }

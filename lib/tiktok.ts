@@ -2,10 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { siteUrl } from "./site";
 
 /**
- * TikTok (Content Posting API). Manda cada post como RASCUNHO para a caixa de entrada
- * do TikTok (post_mode MEDIA_UPLOAD, escopo video.upload): você abre o app, escolhe a
- * música e publica. Não precisa da auditoria do TikTok, que só é exigida para postar
- * público direto pela API.
+ * TikTok (Content Posting API). Por padrão manda cada post como RASCUNHO para a caixa de
+ * entrada do TikTok (escopo video.upload): você abre o app, escolhe a música e publica.
+ * Com a postagem direta ligada (escopo video.publish, precisa de aprovação do TikTok),
+ * o admin tem a tela "Publicar no TikTok", que posta direto com a legenda.
  *
  * Chaves na tabela kv (gravadas pelo painel em /admin/tiktok):
  *   tiktok_client_key, tiktok_client_secret       app em developers.tiktok.com
@@ -75,12 +75,22 @@ export async function tiktokStatus(db: SupabaseClient): Promise<TiktokStatus> {
   };
 }
 
+/** Postagem direta (Direct Post, escopo video.publish) ligada no admin. */
+export async function tiktokDirectEnabled(db: SupabaseClient): Promise<boolean> {
+  const kv = await kvGet(db, ["tiktok_direct_post"]);
+  return kv.tiktok_direct_post === "1";
+}
+
+export async function tiktokSetDirect(db: SupabaseClient, on: boolean) {
+  await kvSet(db, { tiktok_direct_post: on ? "1" : "0" });
+}
+
 export async function tiktokAuthorizeUrl(db: SupabaseClient, state: string): Promise<string | null> {
-  const kv = await kvGet(db, ["tiktok_client_key"]);
+  const kv = await kvGet(db, ["tiktok_client_key", "tiktok_direct_post"]);
   if (!kv.tiktok_client_key) return null;
   const p = new URLSearchParams({
     client_key: kv.tiktok_client_key,
-    scope: TIKTOK_SCOPES,
+    scope: kv.tiktok_direct_post === "1" ? `${TIKTOK_SCOPES},video.publish` : TIKTOK_SCOPES,
     response_type: "code",
     redirect_uri: tiktokRedirectUri(),
     state,
@@ -312,4 +322,88 @@ export async function tiktokPublishStatus(db: SupabaseClient, publishId: string)
   } catch (e) {
     return { status: "ERRO", reason: (e as Error).message };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Postagem direta (Direct Post). Regras do TikTok (Content Sharing Guidelines):
+// antes de cada post a pessoa vê a prévia e o nome da conta, escolhe a privacidade (sem opção
+// marcada por padrão), liga ou não comentários/dueto/stitch (desligados por padrão), declara se é
+// conteúdo comercial e confirma ciente da Music Usage Confirmation. Nada é postado sem esse clique.
+// ---------------------------------------------------------------------------
+
+export interface CreatorInfo {
+  creator_avatar_url?: string;
+  creator_username?: string;
+  creator_nickname?: string;
+  privacy_level_options: string[];
+  comment_disabled: boolean;
+  duet_disabled: boolean;
+  stitch_disabled: boolean;
+  max_video_post_duration_sec: number;
+}
+
+function apiError(json: { error?: { code?: string; message?: string } }, status: number): string {
+  const code = json.error?.code || `HTTP ${status}`;
+  const hint: Record<string, string> = {
+    scope_not_authorized: "a conta foi conectada sem a permissão video.publish: ligue a postagem direta e reconecte o TikTok",
+    spam_risk_too_many_posts: "limite diário de posts da conta atingido; tente amanhã",
+    spam_risk_user_banned_from_posting: "o TikTok bloqueou postagens desta conta temporariamente",
+    reached_active_user_cap: "limite diário de usuários do app atingido; tente mais tarde",
+    unaudited_client_can_only_post_to_private_accounts: "o app ainda não foi aprovado para postagem pública: só dá para postar como privado (Só eu)",
+    privacy_level_option_mismatch: "a privacidade escolhida não está disponível para esta conta",
+    url_ownership_unverified: "o endereço dos vídeos ainda não foi verificado no app do TikTok",
+    access_token_invalid: "conexão expirada: conecte o TikTok de novo",
+  };
+  return hint[code] || json.error?.message || code;
+}
+
+/** Dados da conta para a tela de publicação (nome, privacidades permitidas, limites). */
+export async function tiktokCreatorInfo(db: SupabaseClient): Promise<CreatorInfo> {
+  const token = await accessToken(db);
+  const res = await fetch(`${API}/v2/post/publish/creator_info/query/`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json; charset=UTF-8" },
+    body: "{}",
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: CreatorInfo; error?: { code?: string; message?: string } };
+  if (!res.ok || (json.error?.code && json.error.code !== "ok") || !json.data) throw new Error(apiError(json, res.status));
+  return json.data;
+}
+
+export interface DirectPostOptions {
+  videoUrl: string;
+  title: string;
+  privacy: string;
+  allowComment: boolean;
+  allowDuet: boolean;
+  allowStitch: boolean;
+  /** conteúdo comercial: "sua marca" (Conteúdo promocional) */
+  brandOrganic: boolean;
+  /** conteúdo comercial: "conteúdo de marca" de terceiro (Parceria paga) */
+  brandContent: boolean;
+}
+
+/** Publica o vídeo direto no perfil, com a legenda. Devolve o publish_id. */
+export async function tiktokDirectPostVideo(db: SupabaseClient, o: DirectPostOptions): Promise<string> {
+  const token = await accessToken(db);
+  const res = await fetch(`${API}/v2/post/publish/video/init/`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json; charset=UTF-8" },
+    body: JSON.stringify({
+      post_info: {
+        title: o.title.slice(0, 2200),
+        privacy_level: o.privacy,
+        disable_comment: !o.allowComment,
+        disable_duet: !o.allowDuet,
+        disable_stitch: !o.allowStitch,
+        brand_organic_toggle: o.brandOrganic,
+        brand_content_toggle: o.brandContent,
+        video_cover_timestamp_ms: 1000,
+      },
+      source_info: { source: "PULL_FROM_URL", video_url: tiktokMediaUrl(o.videoUrl) },
+    }),
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: { publish_id?: string }; error?: { code?: string; message?: string } };
+  if (!res.ok || (json.error?.code && json.error.code !== "ok") || !json.data?.publish_id) throw new Error(apiError(json, res.status));
+  return json.data.publish_id;
 }

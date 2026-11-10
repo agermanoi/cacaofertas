@@ -3,9 +3,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase";
 import { Flash } from "@/components/admin/Flash";
-import { TIKTOK_SCOPES, TIKTOK_STATE_COOKIE, tiktokExchangeCode, tiktokRedirectUri, tiktokStatus } from "@/lib/tiktok";
+import { TIKTOK_SCOPES, TIKTOK_STATE_COOKIE, tiktokDirectEnabled, tiktokExchangeCode, tiktokRedirectUri, tiktokStatus } from "@/lib/tiktok";
 import { siteUrl } from "@/lib/site";
-import { disconnectTiktok, saveGithubToken, saveTiktokKeys, saveVerifyFile, startTiktokConnect } from "./actions";
+import { disconnectTiktok, saveGithubToken, saveTiktokKeys, saveVerifyFile, setDirectPost, startTiktokConnect } from "./actions";
 
 type Props = {
   searchParams: Promise<{ code?: string; state?: string; error?: string; error_description?: string; ok?: string; erro?: string }>;
@@ -17,6 +17,7 @@ const when = (iso?: string) =>
 export default async function TiktokPage({ searchParams }: Props) {
   const sp = await searchParams;
   const db = adminClient();
+  const direct = await tiktokDirectEnabled(db);
 
   // Volta da tela de autorização do TikTok: ?code=...&state=...
   if (sp.code || sp.error) {
@@ -184,6 +185,35 @@ export default async function TiktokPage({ searchParams }: Props) {
             <button className="btn">Salvar token</button>
           </div>
         </form>
+      </section>
+
+      <section className="admin-section" id="direct">
+        <h2>6. Postagem direta (Direct Post)</h2>
+        <p>
+          Situação: <strong>{direct ? "ligada" : "desligada"}</strong>
+          {direct && !(st.scopes || "").includes("video.publish") ? " · falta reconectar a conta para autorizar video.publish" : ""}
+        </p>
+        <p className="hint">
+          Ligada, os vídeos param de ir como rascunho: cada um aparece em Redes sociais com o botão <strong>Publicar no TikTok</strong>, onde
+          você confere a prévia, edita a legenda, escolhe a privacidade e confirma. Precisa do escopo <code>video.publish</code>, liberado pelo
+          TikTok depois da revisão do app com o Direct Post.
+        </p>
+        <form action={setDirectPost} className="form-actions">
+          <input type="hidden" name="on" value={direct ? "0" : "1"} />
+          <button className="btn">{direct ? "Desligar postagem direta" : "Ligar postagem direta"}</button>
+        </form>
+        <details>
+          <summary>Como gravar o vídeo para a revisão do TikTok</summary>
+          <ol className="steps">
+            <li>No developers.tiktok.com, abra o app e clique em <strong>Sandbox</strong> (topo). Ligue <strong>Direct Post</strong> e adicione a sua conta como usuário de teste (Target users).</li>
+            <li>Aqui no item 2, cole o <strong>Client key</strong> e o <strong>Client secret do Sandbox</strong> (guarde os de produção para voltar depois).</li>
+            <li>Ligue a postagem direta acima e clique em <strong>Conectar</strong> no item 4: a tela do TikTok vai pedir também a permissão de publicar.</li>
+            <li>Comece a gravar a tela: mostre cacaofertas.com.br, entre no admin, abra Redes sociais e clique em <strong>Publicar no TikTok</strong> num post com vídeo.</li>
+            <li>Mostre a prévia e a conta, edite a legenda, escolha a privacidade (no Sandbox, <strong>Só eu</strong>), mostre as opções de interação e de conteúdo comercial, e publique.</li>
+            <li>Mostre a situação mudando para publicado e o vídeo no perfil do TikTok.</li>
+            <li>No app de produção: <strong>Create Revision</strong>, ligue <strong>Direct Post</strong>, explique o uso do <code>video.publish</code>, anexe o vídeo e envie. Depois volte as chaves de produção no item 2.</li>
+          </ol>
+        </details>
       </section>
     </div>
   );

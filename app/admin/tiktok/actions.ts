@@ -6,7 +6,15 @@ import { revalidatePath } from "next/cache";
 import { adminClient } from "@/lib/supabase";
 import { ADMIN_COOKIE, verifySession } from "@/lib/admin-auth";
 import { checkDispatchToken } from "@/lib/github";
-import { TIKTOK_STATE_COOKIE, tiktokAuthorizeUrl, tiktokDisconnect, tiktokSaveKeys, tiktokSaveVerifyFile } from "@/lib/tiktok";
+import {
+  TIKTOK_STATE_COOKIE,
+  tiktokAuthorizeUrl,
+  tiktokDirectPostVideo,
+  tiktokDisconnect,
+  tiktokSaveKeys,
+  tiktokSaveVerifyFile,
+  tiktokSetDirect,
+} from "@/lib/tiktok";
 
 function back(msg: { ok?: string; erro?: string }): never {
   redirect(`/admin/tiktok?${new URLSearchParams(msg as Record<string, string>)}`);
@@ -72,4 +80,52 @@ export async function saveGithubToken(formData: FormData) {
   await adminClient().from("kv").upsert({ key: "github_dispatch_token", value: token, updated_at: new Date().toISOString() });
   revalidatePath("/admin/tiktok");
   back({ ok: "Token salvo: os vídeos agora são gerados logo depois de cada post." });
+}
+
+export async function setDirectPost(formData: FormData) {
+  await requireAdmin();
+  const on = formData.get("on") === "1";
+  await tiktokSetDirect(adminClient(), on);
+  revalidatePath("/admin/tiktok");
+  back({
+    ok: on
+      ? "Postagem direta ligada. Agora clique em Reconectar para autorizar a permissão video.publish."
+      : "Postagem direta desligada: os vídeos voltam a ir só como rascunho.",
+  });
+}
+
+/** Publica direto no perfil (Direct Post) com as escolhas feitas na tela de publicação. */
+export async function publishDirect(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const go = (msg: Record<string, string>): never => redirect(`/admin/tiktok/publicar/${id}?${new URLSearchParams(msg)}`);
+  if (!/^\d+$/.test(id)) redirect("/admin/social");
+  const title = String(formData.get("title") || "").trim();
+  const privacy = String(formData.get("privacy") || "");
+  const brandOrganic = formData.get("brand_organic") === "on";
+  const brandContent = formData.get("brand_content") === "on";
+  if (!title) go({ erro: "Escreva a legenda." });
+  if (!/^(PUBLIC_TO_EVERYONE|MUTUAL_FOLLOW_FRIENDS|FOLLOWER_OF_CREATOR|SELF_ONLY)$/.test(privacy)) go({ erro: "Escolha quem pode ver o vídeo." });
+  if (brandContent && privacy === "SELF_ONLY") go({ erro: "Conteúdo de marca não pode ser privado." });
+
+  const db = adminClient();
+  const { data: post } = await db.from("social_posts").select("tiktok_video_url").eq("id", id).maybeSingle();
+  if (!post?.tiktok_video_url) go({ erro: "Este post não tem vídeo." });
+  try {
+    const publishId = await tiktokDirectPostVideo(db, {
+      videoUrl: post!.tiktok_video_url,
+      title,
+      privacy,
+      allowComment: formData.get("allow_comment") === "on",
+      allowDuet: formData.get("allow_duet") === "on",
+      allowStitch: formData.get("allow_stitch") === "on",
+      brandOrganic,
+      brandContent,
+    });
+    await db.from("social_posts").update({ tiktok_publish_id: publishId, tiktok_error: null }).eq("id", id);
+  } catch (e) {
+    go({ erro: `O TikTok recusou: ${(e as Error).message}` });
+  }
+  revalidatePath("/admin/social");
+  go({ ok: "Enviado! O TikTok está processando o vídeo; ele aparece no perfil em alguns minutos." });
 }

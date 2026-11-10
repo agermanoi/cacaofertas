@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Fragment } from "react";
 import { adminClient } from "@/lib/supabase";
 import { tiktokPublishStatus, tiktokStatus } from "@/lib/tiktok";
@@ -446,6 +447,13 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                     {p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 72 * 3600_000 ? (
                       <span className="social-retry">
                         <CopyButton text={tiktokCaption(p.caption)} />
+                      </span>
+                    ) : null}
+                    {p.tiktok_video_url && !p.tiktok_publish_id ? (
+                      <span className="social-retry">
+                        <Link className="btn btn-small" href={`/admin/tiktok/publicar/${p.id}`}>
+                          Publicar no TikTok
+                        </Link>
                       </span>
                     ) : null}
                     {p.error ? (
