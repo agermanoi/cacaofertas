@@ -16,7 +16,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 function parsePrice(v: string): number | null | undefined {
   const s = v.replace(/[^\d,.]/g, "");
   if (!s) return null;
-  const n = Number(s.includes(",") ? s.replace(/\./g, "").replace(",", ".") : s);
+  // "1.899,90" e "3.500" (ponto de milhar, jeito brasileiro); "1899.90" também é aceito
+  const n = Number(
+    s.includes(",") ? s.replace(/\./g, "").replace(",", ".") : /^\d{1,3}(\.\d{3})+$/.test(s) ? s.replace(/\./g, "") : s
+  );
   return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : undefined;
 }
 
