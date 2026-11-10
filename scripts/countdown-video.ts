@@ -42,9 +42,18 @@ async function main() {
   const days = Math.round((Date.parse(BF) - Date.parse(today)) / 86_400_000);
   const { data: rows } = await db
     .from("product_overview")
-    .select("name,slug,category,best_price,best_store,avg_30d,min_all,days_tracked,image_url")
+    .select("name,slug,category,best_price,best_store,avg_30d,min_all,days_tracked,image_url,best_offer_id")
     .not("best_price", "is", null);
   const picked = pickWeekly(rows || [], 4);
+  const ids = picked.map((p) => p.best_offer_id).filter(Boolean);
+  const { data: seenRows } = ids.length ? await db.from("offers").select("id,last_seen_at").in("id", ids) : { data: [] };
+  const seen = new Map((seenRows || []).map((o) => [o.id, o.last_seen_at as string]));
+  const tz = "America/Sao_Paulo";
+  const when = (iso?: string | null) => {
+    const d = iso ? new Date(iso) : new Date();
+    return `${d.toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit" })} às ${d.toLocaleTimeString("pt-BR", { timeZone: tz, hour: "2-digit", minute: "2-digit" })}`;
+  };
+  const todayLabel = new Date().toLocaleDateString("pt-BR", { timeZone: tz, day: "2-digit", month: "2-digit", year: "numeric" });
   if (picked.length < 3) throw new Error("Poucos produtos abaixo da média hoje.");
   const items = await Promise.all(
     picked.map(async (p) => {
@@ -59,7 +68,7 @@ async function main() {
         .slice(0, 4)
         .join(" ");
       const head = record ? `Menor preço que já vimos no ${short}` : `${money0(avg - price)} a menos no ${short}`;
-      return { ...p, price, avg, record, pct, head, photo: await img(p.image_url) };
+      return { ...p, price, avg, record, pct, head, seenAt: when(seen.get(p.best_offer_id as string)), photo: await img(p.image_url) };
     })
   );
   console.log(`Faltam ${days} dias · ${items.map((i) => `${i.name} ${money(i.price)} (-${i.pct}% vs média)`).join(" | ")}`);
@@ -91,6 +100,7 @@ async function main() {
     <div class="ph">${p.photo ? `<img src="${p.photo}">` : ""}</div>
     <p class="avg">Média de 30 dias: <s>${money(p.avg)}</s></p>
     <p class="price">${money(p.price)}</p>
+    <p class="seen">Preço visto em ${p.seenAt} · pode mudar a qualquer momento</p>
   </div>
 </section>`
     )
@@ -112,16 +122,18 @@ body{background:linear-gradient(180deg,#FF7800 0%,#FF5A1F 100%);color:#fff}
 .store{font-size:32px;color:#5B6573;margin-top:12px;font-weight:800}
 .ph{position:absolute;left:50px;right:50px;top:330px;height:440px;display:flex;align-items:center;justify-content:center}
 .ph img{max-width:100%;max-height:100%;object-fit:contain}
-.avg{position:absolute;left:50px;bottom:200px;font-size:38px;color:#5B6573;font-weight:800}
-.price{position:absolute;left:50px;bottom:60px;font-size:132px;font-weight:900;color:#E24A00;letter-spacing:-3px}
+.avg{position:absolute;left:50px;bottom:250px;font-size:38px;color:#5B6573;font-weight:800}
+.price{position:absolute;left:50px;bottom:100px;font-size:132px;font-weight:900;color:#E24A00;letter-spacing:-3px}
+.seen{position:absolute;left:50px;right:50px;bottom:46px;font-size:28px;color:#5B6573;font-weight:800}
+#hook .date{position:absolute;left:70px;top:1340px;font-size:40px;font-weight:800;background:rgba(23,33,47,.25);padding:10px 22px;border-radius:999px}
 #end h1{position:absolute;left:70px;right:170px;top:620px;font-size:140px;line-height:1;font-weight:900;letter-spacing:-3px}
 #end p{position:absolute;left:70px;right:170px;top:1000px;font-size:54px;font-weight:800;line-height:1.25}
 #logo{position:absolute;left:60px;bottom:120px;height:90px;background:#fff;border-radius:22px;padding:14px 22px}
 #bar{position:absolute;left:0;top:0;height:10px;background:#17212F}
 </style></head><body>
-<section class="sc" id="hook"><h1>Faltam ${days} dias pra Black Friday…</h1><p>…e esses já estão abaixo do preço normal 👇</p></section>
+<section class="sc" id="hook"><h1>Faltam ${days} dias pra Black Friday…</h1><p>…e esses já estão abaixo do preço normal 👇</p><span class="date">Preços consultados em ${todayLabel}</span></section>
 ${cards}
-<section class="sc" id="end"><h1>Links na bio 🔗</h1><p>Histórico de preço de cada um em cacaofertas.com.br</p></section>
+<section class="sc" id="end"><h1>Links na bio 🔗</h1><p>Histórico de preço de cada um em cacaofertas.com.br</p><p style="top:1260px;font-size:38px;opacity:.9">Preços de ${todayLabel}. Confira o valor final na loja.</p></section>
 <div id="bar"></div>
 <script>
 const S=${JSON.stringify(timed.map(({ id, start, end }) => ({ id, start, end })))};const T=${total};
