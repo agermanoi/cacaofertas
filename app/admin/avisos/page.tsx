@@ -161,6 +161,17 @@ export default async function AvisosPage({ searchParams }: { searchParams: Promi
       </section>
 
       <section className="admin-section">
+        <h2>Contatos (CRM)</h2>
+        <p className="hint">
+          Baixe a lista de quem confirmou o e-mail, com a finalidade de cada um (avisos de preço e/ou newsletter), os produtos e
+          os preços-alvo. Abre no Excel ou no Google Planilhas e pode ser importada em CRM (HubSpot, RD Station, Brevo…).
+          Use só para o que a pessoa aceitou: avisos dos produtos dela e as Quedas da semana. Para outro tipo de campanha, peça
+          um novo consentimento.
+        </p>
+        <a className="btn" href="/admin/avisos/exportar">Baixar contatos (CSV)</a>
+      </section>
+
+      <section className="admin-section">
         <h2>Últimas inscrições</h2>
         {all.length ? (
           <table className="admin-table">
