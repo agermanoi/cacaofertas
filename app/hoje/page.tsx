@@ -8,6 +8,7 @@ import { CouponCard } from "@/components/CouponCard";
 import type { ProductOverview } from "@/lib/types";
 import { categorySlug } from "@/lib/categories";
 import { getSettings } from "@/lib/settings";
+import { TelegramCta } from "@/components/TelegramCta";
 import { PriceTag } from "@/components/PriceTag";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { imgProps } from "@/lib/img";
@@ -107,7 +108,13 @@ export default async function Hoje() {
               🎵 TikTok
             </a>
           ) : null}
+          {s.contact.telegram ? (
+            <a href={`https://t.me/${s.contact.telegram}`} rel="noopener">
+              📲 Telegram
+            </a>
+          ) : null}
         </nav>
+        <TelegramCta channel={s.contact.telegram} />
       </header>
 
       {posted.length ? (

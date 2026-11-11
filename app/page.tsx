@@ -6,6 +6,7 @@ import { slimCatalog } from "@/lib/catalog";
 import { HeroCarousel, type HeroSlide } from "@/components/HeroCarousel";
 import { AdSlot } from "@/components/AdSlot";
 import { getSettings } from "@/lib/settings";
+import { TelegramCta } from "@/components/TelegramCta";
 import { categorySlug } from "@/lib/categories";
 
 export const revalidate = 3600;
@@ -81,6 +82,7 @@ export default async function Home() {
           </nav>
         ) : null}
         <AdSlot id="home-topo" format="leaderboard" />
+        <TelegramCta channel={settings.contact.telegram} compact />
         {items.length ? (
           <Catalog items={slimCatalog(items)} updatedAt={updatedAt} />
         ) : (

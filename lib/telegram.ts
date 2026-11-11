@@ -44,7 +44,8 @@ export function telegramCaption(fbCaption: string): { text: string; link: string
       link = m[0].replace("utm_source=facebook", "utm_source=telegram");
       return false;
     }
-    return !/^(#\S+\s*)+$/.test(l.trim());
+    // hashtags e o convite para o próprio canal ficam de fora
+    return !/^(#\S+\s*)+$/.test(l.trim()) && !/t\.me\//.test(l);
   });
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   const html = lines.map((l, i) => (i === 1 ? `<b>${esc(l)}</b>` : esc(l))).join("\n");

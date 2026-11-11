@@ -22,6 +22,8 @@ import { PriceAlert } from "@/components/PriceAlert";
 import { storeSlug } from "@/lib/stores";
 import { categorySlug } from "@/lib/categories";
 import { imgProps } from "@/lib/img";
+import { getSettings } from "@/lib/settings";
+import { TelegramCta } from "@/components/TelegramCta";
 
 export const revalidate = 3600;
 
@@ -64,10 +66,11 @@ export default async function ProductPage({ params }: Params) {
   if (!p || !p.active) notFound(); // pausado no /admin = fora do site
   if (p.best_price == null && p.min_all == null) notFound(); // nunca teve preço: ainda não entra no site
 
-  const [series, stores, offers] = await Promise.all([
+  const [series, stores, offers, settings] = await Promise.all([
     getDailySeries([p.id], 90),
     getStoreSeries(p.id, 90),
     getOffers(p.id),
+    getSettings(),
   ]);
   const best = series.get(p.id) || [];
   const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))], p.id);
@@ -184,6 +187,7 @@ export default async function ProductPage({ params }: Params) {
       ) : null}
 
       {p.best_price != null ? <PriceAlert productId={p.id} price={Number(p.best_price)} /> : null}
+      <TelegramCta channel={settings.contact.telegram} compact />
 
       <section aria-labelledby="ofertas">
         <h2 id="ofertas">Onde comprar agora</h2>

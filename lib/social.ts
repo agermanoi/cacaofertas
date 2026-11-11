@@ -57,6 +57,8 @@ export interface SocialConfig {
   eventHours: number[];
   /** posts de contagem regressiva ("faltam 7 dias para o 11.11"), em dias antes da data, às 19h */
   teaserDays: number[];
+  /** canal do Telegram (t.me/…), vindo da chave telegram_chat; entra no fim das legendas de produto */
+  telegram?: string;
 }
 
 export const DEFAULT_SOCIAL: SocialConfig = {
@@ -139,8 +141,11 @@ async function kvGet(db: SupabaseClient, keys: string[]): Promise<Record<string,
 }
 
 export async function getSocialConfig(db: SupabaseClient): Promise<SocialConfig> {
-  const kv = await kvGet(db, ["social_config"]);
-  return parseSocial(kv.social_config);
+  const kv = await kvGet(db, ["social_config", "telegram_chat"]);
+  const cfg = parseSocial(kv.social_config);
+  const tg = String(kv.telegram_chat || "").trim();
+  if (/^@[A-Za-z0-9_]{4,}$/.test(tg)) cfg.telegram = `t.me/${tg.slice(1)}`;
+  return cfg;
 }
 
 export interface MetaAccount {
@@ -214,6 +219,7 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventR
   const compose = (link: string) => {
     const parts = [lines.join("\n"), "", link];
     if (cfg.footer) parts.push(cfg.footer);
+    if (cfg.telegram) parts.push(`📲 Alertas de menor preço no Telegram: ${cfg.telegram}`);
     if (uniqueTags) parts.push("", uniqueTags);
     return parts.join("\n").trim();
   };

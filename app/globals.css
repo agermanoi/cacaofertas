@@ -2246,3 +2246,16 @@ button.btn-ghost {
 .cookie-status:empty { display: none; }
 @keyframes cookie-flash { 0%, 100% { transform: none; } 20% { transform: translateY(-6px); box-shadow: 0 0 0 3px #ff7800, 0 8px 28px rgba(23,33,47,.18); } 60% { box-shadow: 0 0 0 3px #ff7800, 0 8px 28px rgba(23,33,47,.18); } }
 .cookie-flash { animation: cookie-flash .9s ease-out; }
+
+/* convite para o canal do Telegram */
+.tg-cta { display: flex; align-items: center; gap: 14px; margin: 24px 0; padding: 14px 18px; border-radius: 16px; background: #eaf6fc; border: 1px solid #bfe3f5; }
+.tg-cta strong { display: block; font-size: 1.02rem; }
+.tg-cta p { margin: 2px 0 0; font-size: .92rem; color: var(--ink-2, #3b4656); }
+.tg-cta > div { flex: 1; min-width: 0; }
+.tg-cta-icon { flex: none; }
+.tg-cta .tg-cta-btn { background: #229ED9; border-color: #229ED9; color: #fff; white-space: nowrap; }
+.tg-cta-compact { margin: 14px 0; padding: 10px 14px; }
+@media (max-width: 560px) {
+  .tg-cta { flex-wrap: wrap; }
+  .tg-cta .tg-cta-btn { width: 100%; text-align: center; }
+}
