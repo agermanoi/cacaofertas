@@ -2240,3 +2240,5 @@ button.btn-ghost {
 .cookie-actions { display: flex; gap: 8px; margin-left: auto; }
 .cookie-actions .btn { padding: 8px 16px; }
 .link-button { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; text-align: left; }
+.cookie-bar[hidden] { display: none; }
+.cookie-bar { z-index: 2147483000; }
