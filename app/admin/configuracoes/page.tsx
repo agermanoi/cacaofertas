@@ -197,6 +197,10 @@ export default async function SettingsPage({ searchParams }: Props) {
             <label htmlFor="contact_tiktok">TikTok (opcional)</label>
             <input id="contact_tiktok" name="contact_tiktok" defaultValue={s.contact.tiktok} placeholder="cacaofertas.com.br" />
           </div>
+          <div className="field">
+            <label htmlFor="contact_telegram">Canal no Telegram (opcional)</label>
+            <input id="contact_telegram" name="contact_telegram" defaultValue={s.contact.telegram} placeholder="cacaofertascombr" />
+          </div>
           <p className="hint">Só o usuário ou o link do perfil. Aparecem no rodapé, na página de Contato e para o Google como perfis oficiais do site.</p>
         </fieldset>
 

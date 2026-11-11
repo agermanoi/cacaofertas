@@ -94,6 +94,7 @@ export async function saveSettings(formData: FormData) {
       instagram: text(formData, "contact_instagram"),
       facebook: text(formData, "contact_facebook"),
       tiktok: text(formData, "contact_tiktok"),
+      telegram: text(formData, "contact_telegram"),
     },
     analytics: {
       gaId: text(formData, "ga_id"),

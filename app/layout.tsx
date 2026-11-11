@@ -99,6 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 s.contact.instagram ? `https://www.instagram.com/${s.contact.instagram}/` : null,
                 s.contact.facebook ? `https://www.facebook.com/${s.contact.facebook}/` : null,
                 s.contact.tiktok ? `https://www.tiktok.com/@${s.contact.tiktok}` : null,
+                s.contact.telegram ? `https://t.me/${s.contact.telegram}` : null,
               ].filter(Boolean),
                 },
               ],
@@ -149,7 +150,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logoSrc} alt="" className="foot-logo" width={180} height={44} loading="lazy" />
               <p className="foot-tagline">{s.tagline}</p>
-              {s.contact.instagram || s.contact.facebook || s.contact.tiktok ? (
+              {s.contact.instagram || s.contact.facebook || s.contact.tiktok || s.contact.telegram ? (
                 <div className="foot-social" aria-label="Redes sociais">
                   {s.contact.instagram ? (
                     <a href={`https://www.instagram.com/${s.contact.instagram}/`} target="_blank" rel="noopener" aria-label="Instagram">
@@ -176,6 +177,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         <path
                           fill="currentColor"
                           d="M16.6 3c.3 2.2 1.6 3.7 3.9 3.9v3a7 7 0 0 1-3.8-1.2v6.1A5.8 5.8 0 1 1 10.9 9v3.1a2.8 2.8 0 1 0 2.7 2.8V3h3Z"
+                        />
+                      </svg>
+                    </a>
+                  ) : null}
+                  {s.contact.telegram ? (
+                    <a href={`https://t.me/${s.contact.telegram}`} target="_blank" rel="noopener" aria-label="Canal no Telegram">
+                      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M21.4 4.3 2.9 11.4c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.8-1.5-1.3ZM9.9 14.8l-.4 3.9-1.5-4.8 10.6-6.7-8.7 7.6Z"
                         />
                       </svg>
                     </a>
