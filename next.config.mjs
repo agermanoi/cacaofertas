@@ -4,8 +4,6 @@ import { IMAGE_HOSTS } from "./lib/img-hosts.mjs";
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // CSS dentro do HTML: o texto aparece sem esperar o download de um arquivo .css à parte (ajuda o FCP/LCP no 4G)
-  experimental: { inlineCss: true },
   // Fotos das lojas reduzidas e em WebP (lib/img.ts). Cache longo: a foto de um produto quase nunca muda.
   images: {
     remotePatterns: IMAGE_HOSTS.map((hostname) => ({ protocol: "https", hostname })),
