@@ -5,6 +5,7 @@ import type { ProductOverview } from "./types";
 import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
+import { telegramCaption, telegramConfig, telegramSendPhoto } from "./telegram";
 import { dispatchVideoJob } from "./github";
 import { isNicheCoupon } from "./coupon-niche";
 import { addDays, daysBetween, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
@@ -519,9 +520,25 @@ export async function publishPost(db: SupabaseClient, id: number, cfgIn?: Social
       errors.push(`TikTok: ${(e as Error).message}`);
     }
   };
+  const telegram = async () => {
+    if (post.telegram_msg_id || !post.feed_url) return;
+    const tg = await telegramConfig(db);
+    if (!tg.token || !tg.chat) return;
+    try {
+      const { text, link } = telegramCaption(String(post.fb_caption || post.caption));
+      upd.telegram_msg_id = await telegramSendPhoto(tg, {
+        photo: post.feed_url,
+        caption: text,
+        link,
+        button: post.kind === "coupon" ? "Ver cupom" : "Ver histórico e lojas",
+      });
+    } catch (e) {
+      errors.push(`Telegram: ${(e as Error).message}`);
+    }
+  };
   // as redes ao mesmo tempo (cabe no limite de tempo da função)
-  await Promise.all([instagram(), facebook(), tiktok()]);
-  const any = wasPublished || Boolean(upd.ig_media_id || upd.ig_story_id || upd.fb_post_id || upd.tiktok_publish_id);
+  await Promise.all([instagram(), facebook(), tiktok(), telegram()]);
+  const any = wasPublished || Boolean(upd.ig_media_id || upd.ig_story_id || upd.fb_post_id || upd.tiktok_publish_id || upd.telegram_msg_id);
   if (!any && !errors.length) errors.push("Nenhuma rede ligada nas configurações (Instagram, Facebook ou TikTok).");
 
   await db

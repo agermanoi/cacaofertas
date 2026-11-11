@@ -477,3 +477,6 @@ create table if not exists newsletter_subscribers (
 create unique index if not exists newsletter_email on newsletter_subscribers (lower(email));
 alter table newsletter_subscribers enable row level security;
 revoke all on newsletter_subscribers from anon, authenticated;
+
+-- Canal do Telegram: id da mensagem enviada (evita mandar o mesmo post duas vezes)
+alter table social_posts add column if not exists telegram_msg_id bigint;
