@@ -82,6 +82,36 @@ const INFO: Record<string, CategoryInfo> = {
       "Air fryers, cafeteiras e robôs aspiradores com o menor preço de hoje e o histórico. Muitos modelos têm versão 110 V e 220 V com preços diferentes.",
     tips: ["Confira a voltagem no anúncio antes de comprar.", "Em cafeteiras de cápsula, considere o preço das cápsulas no uso do dia a dia."],
   },
+  "Beleza e cuidados pessoais": {
+    title: "Secadores, escovas e barbeadores na Black Friday",
+    intro:
+      "Secadores, escovas secadoras, pranchas, barbeadores e aparadores com o menor preço de hoje e o histórico. Nesta categoria há muito anúncio de kit, refil e peça avulsa: os filtros de cada produto acompanham só o aparelho.",
+    tips: [
+      "Confira a voltagem: a maioria dos secadores e escovas não é bivolt.",
+      "Em barbeadores, compare o que vem na caixa (lâminas e pentes extras) antes de olhar só o preço.",
+      "Desconfie de preço muito abaixo da média em vendedor sem reputação: pode ser produto falsificado.",
+    ],
+  },
+  "Ventiladores e climatização": {
+    title: "Ventiladores, climatizadores e ar-condicionado na Black Friday",
+    intro:
+      "Ventiladores, climatizadores e ar-condicionado com o menor preço de hoje e o histórico. Com o calor, o preço desses itens costuma subir de novembro a fevereiro: a Black Friday é uma boa hora para comprar.",
+    tips: [
+      "Climatizador refresca bem em clima seco; em lugares úmidos, ventilador ou ar-condicionado rendem mais.",
+      "Para ar-condicionado, calcule uns 600 BTUs por m² e confira se a instalação está inclusa.",
+      "Confira a voltagem: quase nenhum ventilador é bivolt.",
+    ],
+  },
+  Ferramentas: {
+    title: "Parafusadeiras e lavadoras de alta pressão na Black Friday",
+    intro:
+      "Parafusadeiras, furadeiras e lavadoras de alta pressão com o menor preço de hoje e o histórico. O mesmo modelo é vendido em kits com 1 ou 2 baterias e acessórios: o preço muda bastante entre eles.",
+    tips: [
+      "Em parafusadeira, um kit com 2 baterias costuma valer a pena para quem usa com frequência.",
+      "Para furar parede de tijolo ou concreto, escolha um modelo com impacto.",
+      "Em lavadora de alta pressão, confira a voltagem e o comprimento da mangueira.",
+    ],
+  },
   Eletrodomésticos: {
     title: "Eletrodomésticos na Black Friday",
     intro:
