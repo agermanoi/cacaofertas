@@ -15,7 +15,7 @@ const SCRIPT = `(function(){
   }
   function choose(c){bar.hidden=true;try{localStorage.setItem('co_consent',c)}catch(e){}apply(c);}
   bar.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-consent]');if(b){e.preventDefault();choose(b.getAttribute('data-consent'));}});
-  document.addEventListener('click',function(e){var l=e.target.closest&&e.target.closest('[data-cookie-prefs]');if(l){e.preventDefault();bar.hidden=false;}});
+  document.addEventListener('click',function(e){var l=e.target.closest&&e.target.closest('[data-cookie-prefs]');if(l){e.preventDefault();bar.hidden=false;bar.classList.remove('cookie-flash');void bar.offsetWidth;bar.classList.add('cookie-flash');var c=get(),st=bar.querySelector('.cookie-status');if(st)st.textContent=c==='granted'?'Sua escolha atual: aceitos.':c==='denied'?'Sua escolha atual: recusados.':'';var f=bar.querySelector('[data-consent]');if(f)f.focus({preventScroll:true});}});
   if(!get())bar.hidden=false;
 })();`;
 
@@ -25,7 +25,7 @@ export function CookieConsent() {
       <div id="cookie-bar" className="cookie-bar" role="dialog" aria-live="polite" aria-label="Aviso de cookies" hidden suppressHydrationWarning>
         <p>
           Usamos cookies para medir a audiência e para anúncios. Sem o seu aceite, os anúncios não são personalizados.{" "}
-          <a href="/politica-de-privacidade#cookies">Saiba mais</a>
+          <a href="/politica-de-privacidade#cookies">Saiba mais</a> <strong className="cookie-status"></strong>
         </p>
         <div className="cookie-actions">
           <button type="button" className="btn btn-ghost" data-consent="denied">

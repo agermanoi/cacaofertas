@@ -2242,3 +2242,7 @@ button.btn-ghost {
 .link-button { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; text-align: left; }
 .cookie-bar[hidden] { display: none; }
 .cookie-bar { z-index: 2147483000; }
+
+.cookie-status:empty { display: none; }
+@keyframes cookie-flash { 0%, 100% { transform: none; } 20% { transform: translateY(-6px); box-shadow: 0 0 0 3px #ff7800, 0 8px 28px rgba(23,33,47,.18); } 60% { box-shadow: 0 0 0 3px #ff7800, 0 8px 28px rgba(23,33,47,.18); } }
+.cookie-flash { animation: cookie-flash .9s ease-out; }
