@@ -54,7 +54,7 @@ export function verdictFor(p: ProductOverview): Verdict {
       return {
         kind: "half",
         label: "Metade do dobro",
-        detail: `Anunciado com ${Math.round(announced * 100)}% de desconto, mas o preço de hoje está na média dos últimos ${per}.`,
+        detail: `Anunciado com ${Math.round(announced * 100)}% de desconto (de ${fmt(list)}), mas esse preço nunca apareceu: o de hoje é o normal dos últimos ${per}. Não é caro, só não é promoção.`,
         vsAvg,
       };
     }
