@@ -15,6 +15,7 @@ import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/
 import { scraper } from "../lib/collectors/scraper";
 import { amazonSerp } from "../lib/collectors/amazon";
 import { afilio, afilioCampaigns } from "../lib/collectors/afilio";
+import { shopee } from "../lib/collectors/shopee";
 import { importCoupons } from "./coupons";
 
 const db = adminClient();
@@ -111,6 +112,8 @@ async function loadKeysFromDb() {
     afilio_siteid: "AFILIO_SITEID",
     afilio_feeds: "AFILIO_FEEDS",
     serpapi_renew_day: "SERPAPI_RENEW_DAY",
+    shopee_app_id: "SHOPEE_APP_ID",
+    shopee_secret: "SHOPEE_SECRET",
   };
   const { data } = await db.from("kv").select("key, value").in("key", Object.keys(map));
   for (const row of data || []) {
@@ -219,7 +222,7 @@ async function main() {
   if (process.argv.length <= 2 || process.env.IMPORT_COUPONS === "1") await importCoupons(db);
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
-  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), afilioCollector, scraper()].filter((c) => c.enabled());
+  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), afilioCollector, shopee(), scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
   const afilioInfo = afilioCollector.enabled() ? await afilioCollector.prepare() : null;
 
