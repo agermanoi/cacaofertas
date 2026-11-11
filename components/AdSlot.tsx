@@ -54,6 +54,14 @@ function ensureListeners(cfg: AdsConfig) {
   st.listeners = true;
   w.googletag.cmd.push(() => {
     const pubads = w.googletag.pubads();
+    // anúncios não personalizados até a pessoa aceitar os cookies de publicidade (LGPD)
+    let consent: string | null = null;
+    try {
+      consent = localStorage.getItem("co_consent");
+    } catch {
+      /* sem armazenamento: trata como não aceito */
+    }
+    pubads.setPrivacySettings({ nonPersonalizedAds: consent !== "granted" });
 
     pubads.addEventListener("slotRenderEnded", (e: any) => {
       const el = document.getElementById(e.slot.getSlotElementId());

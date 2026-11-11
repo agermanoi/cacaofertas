@@ -2233,3 +2233,10 @@ button.btn-ghost {
 .tiktok-publish .check { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
 .tiktok-publish .disclose { margin: 8px 0 0 24px; }
 .tiktok-publish .consent { margin: 14px 0 10px; font-size: 0.9rem; }
+
+/* aviso de cookies */
+.cookie-bar { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60; max-width: 760px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px; background: #fff; color: var(--ink, #17212f); border: 1px solid var(--line, #e3e7ee); border-radius: 14px; box-shadow: 0 8px 28px rgba(23, 33, 47, 0.18); font-size: 0.9rem; }
+.cookie-bar p { margin: 0; flex: 1 1 280px; line-height: 1.4; }
+.cookie-actions { display: flex; gap: 8px; margin-left: auto; }
+.cookie-actions .btn { padding: 8px 16px; }
+.link-button { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; text-align: left; }

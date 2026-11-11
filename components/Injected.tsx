@@ -62,6 +62,12 @@ function adsClickScript(adsId: string, label: string) {
   return `document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!/^(https?:\\/\\/[^/]*cacaofertas\\.com\\.br)?\\/(go|c)\\//.test(h))return;if(window.gtag)gtag('event','conversion',{send_to:'${adsId}/${label}',transport_type:'beacon'});},true);`;
 }
 
+/**
+ * Consent Mode do Google (LGPD): publicidade fica sem cookies até a pessoa aceitar no aviso;
+ * medição (Analytics) segue ligada, a menos que ela recuse. A escolha fica em localStorage (co_consent).
+ */
+const CONSENT_DEFAULT = `(function(){var c=null;try{c=localStorage.getItem('co_consent')}catch(e){}var ads=c==='granted'?'granted':'denied';var an=c==='denied'?'denied':'granted';gtag('consent','default',{ad_storage:ads,ad_user_data:ads,ad_personalization:ads,analytics_storage:an,wait_for_update:500});})();`;
+
 export function HeadInjections({ s }: { s: SiteSettings }) {
   const { gaId, gtmId, adsId, adsClickLabel } = s.analytics;
   const tagId = gaId || adsId;
@@ -73,7 +79,7 @@ export function HeadInjections({ s }: { s: SiteSettings }) {
           {gaId ? <script dangerouslySetInnerHTML={{ __html: adminGuard(gaId) }} /> : null}
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}if(location.pathname.indexOf('/admin')!==0){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${tagId}';document.head.appendChild(s);gtag('js',new Date());${configs}}`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}${CONSENT_DEFAULT}if(location.pathname.indexOf('/admin')!==0){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${tagId}';document.head.appendChild(s);gtag('js',new Date());${configs}}`,
             }}
           />
           {adsId && adsClickLabel ? <script dangerouslySetInnerHTML={{ __html: adsClickScript(adsId, adsClickLabel) }} /> : null}

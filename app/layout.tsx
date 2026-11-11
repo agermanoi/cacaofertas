@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/site";
+import { CookieConsent, CookiePrefsLink } from "@/components/CookieConsent";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
@@ -195,6 +196,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/politica-de-privacidade">Política de privacidade</Link>
               <Link href="/termos-de-uso">Termos de uso</Link>
               <Link href="/mapa-do-site">Mapa do site</Link>
+              <CookiePrefsLink />
             </nav>
             <div className="foot-notes">
               <p>
@@ -238,6 +240,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </footer>
         <BodyEndInjections s={s} />
         <PageTracker />
+      <CookieConsent />
       </body>
     </html>
   );

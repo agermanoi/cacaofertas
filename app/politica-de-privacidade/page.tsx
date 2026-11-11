@@ -65,7 +65,13 @@ export default async function Privacidade() {
         </li>
       </ul>
 
-      <h2>Cookies</h2>
+      <h2 id="cookies">Cookies</h2>
+      <p>
+        Na primeira visita mostramos um aviso para você <strong>aceitar ou recusar</strong> os cookies de medição e de
+        publicidade. Enquanto você não aceita, os anúncios exibidos <strong>não são personalizados</strong> e a tag do Google
+        Ads não grava cookies de publicidade (Consent Mode do Google). Se você recusar, o Google Analytics também deixa de
+        gravar cookies. Você pode mudar a escolha a qualquer momento em “Preferências de cookies”, no rodapé do site.
+      </p>
       <p>
         O site usa a tag do Google Ads para medir quantas visitas vindas de anúncios clicam em uma oferta; ela pode gravar
         cookies do Google no seu navegador. Ao clicar em um link de oferta, a loja ou a rede de
