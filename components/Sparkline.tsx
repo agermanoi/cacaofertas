@@ -1,7 +1,7 @@
 import type { DailyPoint } from "@/lib/types";
 
 /** Mini gráfico de 30 dias. A bolinha marca o preço mais recente. */
-export function Sparkline({ points, width = 120, height = 32 }: { points: DailyPoint[]; width?: number; height?: number }) {
+export function Sparkline({ points, width = 120, height = 32 }: { points: Pick<DailyPoint, "min_price">[]; width?: number; height?: number }) {
   if (points.length < 2) {
     return (
       <svg className="spark" width={width} height={height} aria-hidden="true">

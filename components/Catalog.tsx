@@ -7,14 +7,18 @@ import type { Verdict } from "@/lib/verdict";
 import { Sparkline } from "./Sparkline";
 import { VerdictBadge } from "./VerdictBadge";
 import { AdSlot } from "./AdSlot";
+import { imgProps } from "@/lib/img";
 
 /** Anúncios in-feed depois destas posições da lista (1 = primeira linha). */
 const INFEED_AFTER = [6, 14];
 
+/** Só os campos que a lista usa: tudo o que passa para cá vai junto no HTML da página. */
+export type CatalogProduct = Pick<ProductOverview, "id" | "slug" | "name" | "category" | "image_url" | "best_price" | "best_store" | "offers_count">;
+
 export interface CatalogItem {
-  product: ProductOverview;
-  verdict: Verdict;
-  series: DailyPoint[];
+  product: CatalogProduct;
+  verdict: Pick<Verdict, "kind" | "label" | "detail" | "vsAvg">;
+  series: Pick<DailyPoint, "min_price">[];
 }
 
 type Sort = "popular" | "drop" | "price";
@@ -104,7 +108,7 @@ export function Catalog({
             <li>
               <Link href={`/produto/${p.slug}`} className="row">
                 <span className="row-img">
-                  {p.image_url ? <img src={p.image_url} alt="" loading="lazy" /> : null}
+                  {p.image_url ? <img {...imgProps(p.image_url, 56)} alt="" width={52} height={52} loading="lazy" decoding="async" /> : null}
                 </span>
                 <span className="row-main">
                   <span className="row-name">{p.name}</span>

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Verdict } from "@/lib/verdict";
 import { PriceTag } from "./PriceTag";
 import { VerdictBadge } from "./VerdictBadge";
+import { imgProps } from "@/lib/img";
 
 export interface HeroSlide {
   slug: string;
@@ -100,7 +101,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 {s.image ? (
                   <span className="hero-deal-img">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={s.image} alt="" loading={i === 0 ? "eager" : "lazy"} decoding="async" />
+                    <img {...imgProps(s.image, 150)} alt="" width={150} height={170} loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : undefined} decoding="async" />
                   </span>
                 ) : null}
               </span>

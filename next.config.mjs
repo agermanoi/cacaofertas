@@ -1,7 +1,19 @@
+import { IMAGE_HOSTS } from "./lib/img-hosts.mjs";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // CSS dentro do HTML: o texto aparece sem esperar o download de um arquivo .css à parte (ajuda o FCP/LCP no 4G)
+  experimental: { inlineCss: true },
+  // Fotos das lojas reduzidas e em WebP (lib/img.ts). Cache longo: a foto de um produto quase nunca muda.
+  images: {
+    remotePatterns: IMAGE_HOSTS.map((hostname) => ({ protocol: "https", hostname })),
+    imageSizes: [64, 96, 128, 160, 256, 320, 384, 480],
+    deviceSizes: [640, 828, 1080],
+    formats: ["image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   // Arquivo de verificação do TikTok na raiz (https://SITE/tiktokXXXX.txt) → servido pela rota /tiktok/
   // links curtos para bios (o TikTok aceita só 80 caracteres): /tt → ofertas de hoje marcadas como TikTok
   async redirects() {

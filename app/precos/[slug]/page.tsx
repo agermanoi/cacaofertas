@@ -8,7 +8,8 @@ import { breadcrumbLd, faqLd } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 import { money } from "@/lib/format";
 import { getSpecs } from "@/lib/specs";
-import { Catalog, type CatalogItem } from "@/components/Catalog";
+import { Catalog } from "@/components/Catalog";
+import { slimCatalog } from "@/lib/catalog";
 import { AdSlot } from "@/components/AdSlot";
 
 export const revalidate = 3600;
@@ -54,7 +55,7 @@ export default async function GuidePage({ params }: Params) {
 
   const series = await getDailySeries(items.map((p) => p.id), 30);
   const rows = items.map((p) => ({ p, v: verdictFor(p) }));
-  const catalog: CatalogItem[] = rows.map(({ p, v }) => ({ product: p, verdict: v, series: series.get(p.id) || [] }));
+  const catalog = rows.map(({ p, v }) => ({ product: p, verdict: v, series: series.get(p.id) || [] }));
   const first = rows[0];
   const deals = rows.filter((r) => r.v.kind === "record" || r.v.kind === "below").sort((a, b) => (b.v.vsAvg ?? 0) - (a.v.vsAvg ?? 0));
   const inflated = rows.filter((r) => r.v.kind === "fake" || r.v.kind === "half");
@@ -199,7 +200,7 @@ export default async function GuidePage({ params }: Params) {
 
       <AdSlot id="guia-topo" format="leaderboard" />
 
-      <Catalog items={catalog} title={`${guide.title}: gráficos e vereditos`} showCategories={false} adPrefix="guia" updatedAt={await lastPriceUpdate()} />
+      <Catalog items={slimCatalog(catalog)} title={`${guide.title}: gráficos e vereditos`} showCategories={false} adPrefix="guia" updatedAt={await lastPriceUpdate()} />
 
       <section aria-labelledby="perguntas" className="faq">
         <h2 id="perguntas">Perguntas frequentes</h2>

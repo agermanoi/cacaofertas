@@ -21,6 +21,7 @@ import { productAnalysis } from "@/lib/analysis";
 import { PriceAlert } from "@/components/PriceAlert";
 import { storeSlug } from "@/lib/stores";
 import { categorySlug } from "@/lib/categories";
+import { imgProps } from "@/lib/img";
 
 export const revalidate = 3600;
 
@@ -126,7 +127,7 @@ export default async function ProductPage({ params }: Params) {
 
       <header className="product-head">
         <div className="product-id">
-          {p.image_url ? <img src={p.image_url} alt="" className="product-img" /> : null}
+          {p.image_url ? <img {...imgProps(p.image_url, 96)} alt="" className="product-img" width={96} height={96} fetchPriority="high" /> : null}
           <h1>{p.name}</h1>
         </div>
         <div className="product-price">

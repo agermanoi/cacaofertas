@@ -68,6 +68,12 @@ function adsClickScript(adsId: string, label: string) {
  */
 const CONSENT_DEFAULT = `(function(){var c=null;try{c=localStorage.getItem('co_consent')}catch(e){}var ads=c==='granted'?'granted':'denied';var an=c==='denied'?'denied':'granted';gtag('consent','default',{ad_storage:ads,ad_user_data:ads,ad_personalization:ads,analytics_storage:an,wait_for_update:500});})();`;
 
+/**
+ * Carrega o script do Google só depois que a página terminou de abrir (evento load), para não disputar
+ * a internet do celular com o conteúdo. Os eventos chamados antes ficam na fila (dataLayer) e não se perdem.
+ */
+const LATER = `(function(f){if(document.readyState==='complete')setTimeout(f,0);else addEventListener('load',function(){setTimeout(f,0)},{once:true});})`;
+
 export function HeadInjections({ s }: { s: SiteSettings }) {
   const { gaId, gtmId, adsId, adsClickLabel } = s.analytics;
   const tagId = gaId || adsId;
@@ -79,7 +85,7 @@ export function HeadInjections({ s }: { s: SiteSettings }) {
           {gaId ? <script dangerouslySetInnerHTML={{ __html: adminGuard(gaId) }} /> : null}
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}${CONSENT_DEFAULT}if(location.pathname.indexOf('/admin')!==0){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${tagId}';document.head.appendChild(s);gtag('js',new Date());${configs}}`,
+              __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}${CONSENT_DEFAULT}if(location.pathname.indexOf('/admin')!==0){gtag('js',new Date());${configs}${LATER}(function(){var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${tagId}';document.head.appendChild(s);});}`,
             }}
           />
           {adsId && adsClickLabel ? <script dangerouslySetInnerHTML={{ __html: adsClickScript(adsId, adsClickLabel) }} /> : null}
@@ -88,7 +94,7 @@ export function HeadInjections({ s }: { s: SiteSettings }) {
       {gtmId ? (
         <script
           dangerouslySetInnerHTML={{
-            __html: `if(location.pathname.indexOf('/admin')!==0){(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');}`,
+            __html: `if(location.pathname.indexOf('/admin')!==0){window.dataLayer=window.dataLayer||[];dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});${LATER}(function(){var j=document.createElement('script');j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id=${gtmId}';document.head.appendChild(j);});}`,
           }}
         />
       ) : null}

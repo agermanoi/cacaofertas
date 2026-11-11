@@ -10,6 +10,7 @@ import { categorySlug } from "@/lib/categories";
 import { getSettings } from "@/lib/settings";
 import { PriceTag } from "@/components/PriceTag";
 import { VerdictBadge } from "@/components/VerdictBadge";
+import { imgProps } from "@/lib/img";
 
 export const revalidate = 600;
 
@@ -121,7 +122,7 @@ export default async function Hoje() {
                     <span className="today-img">
                       {x.p.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={x.p.image_url} alt="" loading="eager" />
+                        <img {...imgProps(x.p.image_url, 96)} alt="" width={96} height={96} loading="eager" />
                       ) : null}
                     </span>
                     <span className="today-info">
@@ -156,7 +157,7 @@ export default async function Hoje() {
               <span className="today-img">
                 {p.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image_url} alt="" loading={i < 3 ? "eager" : "lazy"} />
+                  <img {...imgProps(p.image_url, 96)} alt="" width={96} height={96} loading={i < 3 ? "eager" : "lazy"} />
                 ) : null}
               </span>
               <span className="today-info">

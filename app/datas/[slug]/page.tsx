@@ -10,6 +10,7 @@ import { daysBetween, eventDeals, getPublicEvents, mentionsEvent, todayBR, type 
 import { money } from "@/lib/format";
 import { CouponCard } from "@/components/CouponCard";
 import { VerdictBadge } from "@/components/VerdictBadge";
+import { imgProps } from "@/lib/img";
 
 export const revalidate = 900;
 
@@ -140,7 +141,7 @@ export default async function EventPage({ params }: Props) {
                       <Link href={`/produto/${d.p.slug}`} className="prod">
                         {d.p.image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={d.p.image_url} alt="" loading="lazy" />
+                          <img {...imgProps(d.p.image_url, 44)} alt="" width={44} height={44} loading="lazy" />
                         ) : null}
                         <span>{d.p.name}</span>
                       </Link>
@@ -183,7 +184,7 @@ export default async function EventPage({ params }: Props) {
                     <Link href={`/produto/${p.slug}`} className="prod">
                       {p.image_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.image_url} alt="" loading="lazy" />
+                        <img {...imgProps(p.image_url, 44)} alt="" width={44} height={44} loading="lazy" />
                       ) : null}
                       <span>{p.name}</span>
                     </Link>

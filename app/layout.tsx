@@ -7,6 +7,8 @@ import { countdownText, cssVars, getSettings } from "@/lib/settings";
 import { countdownEvent, countdownLabel, getPublicEvents, navEvent } from "@/lib/events";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import { PageTracker } from "@/components/PageTracker";
+import "@fontsource-variable/nunito";
+import "@fontsource-variable/nunito-sans";
 import "./globals.css";
 
 const SITE_URL = siteUrl();
@@ -56,15 +58,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const countdownHref = ce?.e.page ? `/datas/${ce.e.slug}` : null;
   const navEv = navEvent(events);
   const year = new Date().getFullYear();
+  // o logo padrão tem 1200 px e 270 KB; na tela ele ocupa 240 px: usamos a versão 480 px em WebP (26 KB)
+  const logoSrc = s.logoUrl === "/brand/logo.png" ? "/brand/logo-480.webp" : s.logoUrl;
   return (
     <html lang="pt-BR">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap"
-        />
         <style dangerouslySetInnerHTML={{ __html: cssVars(s) }} />
         <HeadInjections s={s} />
         {s.gam.enabled ? (
@@ -115,7 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="wrap top-inner">
             <Link href="/" className="brand" aria-label={`${s.siteName}, página inicial`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.logoUrl} alt={s.siteName} className="brand-logo" width={240} height={58} />
+              <img src={logoSrc} alt={s.siteName} className="brand-logo" width={240} height={58} fetchPriority="high" />
             </Link>
             {countdown ? (
               countdownHref ? (
@@ -149,7 +147,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="wrap foot-grid">
             <div className="foot-brand">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.logoUrl} alt="" className="foot-logo" width={180} height={44} />
+              <img src={logoSrc} alt="" className="foot-logo" width={180} height={44} loading="lazy" />
               <p className="foot-tagline">{s.tagline}</p>
               {s.contact.instagram || s.contact.facebook || s.contact.tiktok ? (
                 <div className="foot-social" aria-label="Redes sociais">

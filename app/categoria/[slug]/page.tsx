@@ -7,7 +7,8 @@ import { getDailySeries, getOverview, lastPriceUpdate } from "@/lib/data";
 import { periodLabel, verdictFor } from "@/lib/verdict";
 import { guideItems, liveGuides } from "@/lib/guides";
 import { categoryInfo, categorySlug } from "@/lib/categories";
-import { Catalog, type CatalogItem } from "@/components/Catalog";
+import { Catalog } from "@/components/Catalog";
+import { slimCatalog } from "@/lib/catalog";
 import { AdSlot } from "@/components/AdSlot";
 import { money } from "@/lib/format";
 
@@ -48,7 +49,7 @@ export default async function CategoryPage({ params }: Params) {
   const info = categoryInfo(name);
 
   const series = await getDailySeries(products.map((p) => p.id), 30);
-  const items: CatalogItem[] = products.map((p) => ({ product: p, verdict: verdictFor(p), series: series.get(p.id) || [] }));
+  const items = products.map((p) => ({ product: p, verdict: verdictFor(p), series: series.get(p.id) || [] }));
   const drops = items
     .filter((i) => ["record", "below"].includes(i.verdict.kind))
     .sort((a, b) => (b.verdict.vsAvg ?? 0) - (a.verdict.vsAvg ?? 0))
@@ -121,7 +122,7 @@ export default async function CategoryPage({ params }: Params) {
 
       <AdSlot id="categoria-topo" format="leaderboard" />
 
-      <Catalog items={items} title={`${name}: todos os produtos`} showCategories={false} adPrefix="categoria" updatedAt={await lastPriceUpdate()} />
+      <Catalog items={slimCatalog(items)} title={`${name}: todos os produtos`} showCategories={false} adPrefix="categoria" updatedAt={await lastPriceUpdate()} />
 
       {info.tips.length ? (
         <section aria-labelledby="dicas" className="page-text category-tips">
