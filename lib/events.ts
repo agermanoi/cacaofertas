@@ -90,15 +90,18 @@ export function countdownLabel(x: { e: EventRow; days: number }): string {
   return `${days === 1 ? "Falta 1 dia" : `Faltam ${days} dias`} para ${e.article} ${e.name}`;
 }
 
-/** Datas com página que aparecem no menu (da janela do contador até 1 dia depois). */
+/**
+ * Data com página que aparece no menu: a próxima dentro da janela do contador.
+ * O dia seguinte de uma data que acabou (ex.: 12/11 para o 11.11) só aparece se não houver outra a caminho.
+ */
 export function navEvent(events: EventRow[], today = todayBR()): EventRow | null {
-  return (
-    events.find((e) => {
-      if (!e.page) return false;
-      const days = daysBetween(today, e.date);
-      return days >= -1 && days <= e.countdown_days;
-    }) || null
-  );
+  const withPage = events.filter((e) => e.page);
+  const next = withPage
+    .map((e) => ({ e, days: daysBetween(today, e.date) }))
+    .filter((x) => x.days >= 0 && x.days <= x.e.countdown_days)
+    .sort((a, b) => a.days - b.days)[0];
+  if (next) return next.e;
+  return withPage.find((e) => daysBetween(today, e.date) === -1) || null;
 }
 
 const plain = (s: string) =>
