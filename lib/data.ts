@@ -26,10 +26,9 @@ export async function getOverview(): Promise<ProductOverview[]> {
     .eq("active", true)
     .not("best_price", "is", null)
     .order("popularity", { ascending: false });
-  if (error) {
-    console.error("[data] overview:", error.message);
-    return [];
-  }
+  // erro (ex.: tempo esgotado no banco durante a coleta) não pode virar página vazia em cache:
+  // lançando o erro, o Next mantém a última versão boa da página e tenta de novo na próxima visita
+  if (error) throw new Error(`[data] overview: ${error.message}`);
   return (data || []) as ProductOverview[];
 }
 
@@ -37,7 +36,7 @@ export async function getProductBySlug(slug: string): Promise<ProductOverview | 
   if (demo.enabled()) return demo.bySlug(slug);
   if (!configured()) return null;
   const { data, error } = await publicClient().from("product_overview").select("*").eq("slug", slug).maybeSingle();
-  if (error) console.error("[data] product:", error.message);
+  if (error) throw new Error(`[data] product: ${error.message}`);
   return (data as ProductOverview) || null;
 }
 
@@ -53,10 +52,7 @@ export async function getDailySeries(productIds: string[], days = 30): Promise<M
     .gte("day", daysAgo(days))
     .order("day", { ascending: true })
     .limit(10000);
-  if (error) {
-    console.error("[data] daily:", error.message);
-    return out;
-  }
+  if (error) throw new Error(`[data] daily: ${error.message}`);
   for (const r of data || []) {
     const list = out.get(r.product_id) || [];
     list.push({ day: r.day, min_price: Number(r.min_price) });
@@ -81,10 +77,7 @@ export async function getStoreSeries(productId: string, days = 90): Promise<Stor
     .gte("captured_on", daysAgo(days))
     .order("captured_on", { ascending: true })
     .limit(10000);
-  if (error) {
-    console.error("[data] store series:", error.message);
-    return [];
-  }
+  if (error) throw new Error(`[data] store series: ${error.message}`);
   const byStore = new Map<string, Map<string, number>>();
   for (const r of data as any[]) {
     const store = String(Array.isArray(r.offers) ? r.offers[0]?.store : r.offers?.store);
@@ -114,7 +107,7 @@ export async function getOffers(productId: string): Promise<OfferRow[]> {
     .not("last_price", "is", null)
     .order("last_price", { ascending: true })
     .limit(30);
-  if (error) console.error("[data] offers:", error.message);
+  if (error) throw new Error(`[data] offers: ${error.message}`);
   // Amazon (consultada em rodízio) vale por 3 dias; as outras lojas, lidas em toda coleta, por 2
   const cut2 = Date.now() - 2 * 86_400_000;
   return ((data || []) as OfferRow[]).filter((o) => o.source === "amazon" || new Date(o.last_seen_at).getTime() >= cut2);

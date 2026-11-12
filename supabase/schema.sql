@@ -480,3 +480,6 @@ revoke all on newsletter_subscribers from anon, authenticated;
 
 -- Canal do Telegram: id da mensagem enviada (evita mandar o mesmo post duas vezes)
 alter table social_posts add column if not exists telegram_msg_id bigint;
+
+-- product_daily: janela particionada também por produto, para o filtro por produto descer até o índice (overview: 1,4 s -> 50 ms)
+-- (ver migração product_daily_partition_by_product)
