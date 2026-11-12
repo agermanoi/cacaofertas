@@ -187,7 +187,7 @@ export default async function ProductPage({ params }: Params) {
       ) : null}
 
       {p.best_price != null ? <PriceAlert productId={p.id} price={Number(p.best_price)} /> : null}
-      <TelegramCta channel={settings.contact.telegram} compact />
+      <TelegramCta channel={settings.contact.telegram} whatsapp={settings.contact.whatsappChannel} compact />
 
       <section aria-labelledby="ofertas">
         <h2 id="ofertas">Onde comprar agora</h2>

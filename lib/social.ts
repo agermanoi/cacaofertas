@@ -6,6 +6,7 @@ import { isInflated, verdictFor, type Verdict } from "./verdict";
 import { siteUrl } from "./site";
 import { tiktokSendDraft } from "./tiktok";
 import { telegramCaption, telegramConfig, telegramSendPhoto } from "./telegram";
+import { waChannel } from "./settings";
 import { dispatchVideoJob } from "./github";
 import { isNicheCoupon } from "./coupon-niche";
 import { addDays, daysBetween, eventDeals, getEvents, mentionsEvent, todayBR, type EventRow } from "./events";
@@ -59,6 +60,8 @@ export interface SocialConfig {
   teaserDays: number[];
   /** canal do Telegram (t.me/…), vindo da chave telegram_chat; entra no fim das legendas de produto */
   telegram?: string;
+  /** canal do WhatsApp (whatsapp.com/channel/…), das configurações do site */
+  whatsapp?: string;
 }
 
 export const DEFAULT_SOCIAL: SocialConfig = {
@@ -145,6 +148,9 @@ export async function getSocialConfig(db: SupabaseClient): Promise<SocialConfig>
   const cfg = parseSocial(kv.social_config);
   const tg = String(kv.telegram_chat || "").trim();
   if (/^@[A-Za-z0-9_]{4,}$/.test(tg)) cfg.telegram = `t.me/${tg.slice(1)}`;
+  const { data: site } = await db.from("site_settings").select("data").eq("id", 1).maybeSingle();
+  const wa = waChannel((site?.data as { contact?: { whatsappChannel?: string } } | null)?.contact?.whatsappChannel);
+  if (wa) cfg.whatsapp = wa.replace(/^https:\/\//, "");
   return cfg;
 }
 
@@ -219,7 +225,10 @@ export function buildCaptions(p: ProductOverview, cfg: SocialConfig, ev?: EventR
   const compose = (link: string) => {
     const parts = [lines.join("\n"), "", link];
     if (cfg.footer) parts.push(cfg.footer);
-    if (cfg.telegram) parts.push(`📲 Alertas de menor preço no Telegram: ${cfg.telegram}`);
+    if (cfg.whatsapp || cfg.telegram)
+      parts.push(
+        `📲 Alertas de menor preço${cfg.whatsapp ? `\nWhatsApp: ${cfg.whatsapp}` : ""}${cfg.telegram ? `\nTelegram: ${cfg.telegram}` : ""}`
+      );
     if (uniqueTags) parts.push("", uniqueTags);
     return parts.join("\n").trim();
   };

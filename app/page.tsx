@@ -82,7 +82,7 @@ export default async function Home() {
           </nav>
         ) : null}
         <AdSlot id="home-topo" format="leaderboard" />
-        <TelegramCta channel={settings.contact.telegram} compact />
+        <TelegramCta channel={settings.contact.telegram} whatsapp={settings.contact.whatsappChannel} compact />
         {items.length ? (
           <Catalog items={slimCatalog(items)} updatedAt={updatedAt} />
         ) : (

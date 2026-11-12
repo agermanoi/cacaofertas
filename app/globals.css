@@ -2252,10 +2252,13 @@ button.btn-ghost {
 .tg-cta strong { display: block; font-size: 1.02rem; }
 .tg-cta p { margin: 2px 0 0; font-size: .92rem; color: var(--ink-2, #3b4656); }
 .tg-cta > div { flex: 1; min-width: 0; }
-.tg-cta-icon { flex: none; }
+.tg-cta-icon { flex: none; font-size: 1.6rem; line-height: 1; }
+.tg-cta-btns { display: flex; gap: 8px; flex: none; }
+.tg-cta .tg-cta-btn.wa { background: #1fa855; border-color: #1fa855; }
 .tg-cta .tg-cta-btn { background: #229ED9; border-color: #229ED9; color: #fff; white-space: nowrap; }
 .tg-cta-compact { margin: 14px 0; padding: 10px 14px; }
 @media (max-width: 560px) {
   .tg-cta { flex-wrap: wrap; }
-  .tg-cta .tg-cta-btn { width: 100%; text-align: center; }
+  .tg-cta-btns { width: 100%; }
+  .tg-cta .tg-cta-btn { flex: 1; text-align: center; }
 }

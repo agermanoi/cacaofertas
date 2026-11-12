@@ -30,6 +30,9 @@ async function call<T>(token: string, method: string, body: Record<string, unkno
   return json.result as T;
 }
 
+/** Linhas do convite para os canais ("📲 Alertas de menor preço", WhatsApp, Telegram): saem dos posts nos próprios canais. */
+export const isChannelInvite = (l: string) => /t\.me\/|whatsapp\.com\/channel|^📲 Alertas de menor preço/.test(l.trim());
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /**
@@ -45,7 +48,7 @@ export function telegramCaption(fbCaption: string): { text: string; link: string
       return false;
     }
     // hashtags e o convite para o próprio canal ficam de fora
-    return !/^(#\S+\s*)+$/.test(l.trim()) && !/t\.me\//.test(l);
+    return !/^(#\S+\s*)+$/.test(l.trim()) && !isChannelInvite(l);
   });
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   const html = lines.map((l, i) => (i === 1 ? `<b>${esc(l)}</b>` : esc(l))).join("\n");

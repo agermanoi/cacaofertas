@@ -32,6 +32,8 @@ export interface SiteSettings {
     tiktok: string;
     /** Canal no Telegram (só o nome, sem @: t.me/<nome>) */
     telegram: string;
+    /** Canal no WhatsApp (link completo whatsapp.com/channel/…) */
+    whatsappChannel: string;
   };
   /** Google Analytics 4 (G-XXXX) e Google Tag Manager (GTM-XXXX). Vazio = desligado. */
   analytics: {
@@ -105,7 +107,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroText:
     "Acompanhamos os produtos mais buscados da Black Friday duas vezes por dia. Quando o desconto é de verdade, você vê no gráfico. Quando é o velho “metade do dobro”, também.",
   announcement: "",
-  contact: { email: "", whatsapp: "", instagram: "", facebook: "", tiktok: "", telegram: "" },
+  contact: { email: "", whatsapp: "", instagram: "", facebook: "", tiktok: "", telegram: "", whatsappChannel: "" },
   analytics: { gaId: "", gtmId: "", adsId: "", adsClickLabel: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
   gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
@@ -167,6 +169,7 @@ export function mergeSettings(raw: unknown): SiteSettings {
       facebook: handle(r.contact?.facebook, "facebook.com"),
       tiktok: handle(r.contact?.tiktok, "tiktok.com"),
       telegram: handle(r.contact?.telegram, "t.me"),
+      whatsappChannel: waChannel(r.contact?.whatsappChannel),
     },
     analytics: {
       gaId: GA.test(opt(r.analytics?.gaId).toUpperCase()) ? opt(r.analytics?.gaId).toUpperCase() : "",
@@ -261,4 +264,10 @@ export function countdownText(c: SiteSettings["countdown"], now = new Date()): s
   if (days > 0) return fill(c.before) || null;
   if (days === 0) return fill(c.today) || null;
   return c.after ? fill(c.after) : null;
+}
+
+/** Link de canal do WhatsApp (https://whatsapp.com/channel/<código>); qualquer outra coisa vira vazio. */
+export function waChannel(v: unknown): string {
+  const m = String(v ?? "").trim().match(/(?:https?:\/\/)?(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9]+)/);
+  return m ? `https://whatsapp.com/channel/${m[1]}` : "";
 }

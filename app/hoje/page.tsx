@@ -108,13 +108,18 @@ export default async function Hoje() {
               🎵 TikTok
             </a>
           ) : null}
+          {s.contact.whatsappChannel ? (
+            <a href={s.contact.whatsappChannel} rel="noopener">
+              💬 WhatsApp
+            </a>
+          ) : null}
           {s.contact.telegram ? (
             <a href={`https://t.me/${s.contact.telegram}`} rel="noopener">
               📲 Telegram
             </a>
           ) : null}
         </nav>
-        <TelegramCta channel={s.contact.telegram} />
+        <TelegramCta channel={s.contact.telegram} whatsapp={s.contact.whatsappChannel} />
       </header>
 
       {posted.length ? (

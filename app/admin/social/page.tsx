@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { adminClient } from "@/lib/supabase";
 import { tiktokPublishStatus, tiktokStatus } from "@/lib/tiktok";
+import { whatsappText } from "@/lib/whatsapp";
+import { recentRecords, type SentRecord } from "@/lib/telegram-records";
 import CopyButton from "@/components/admin/CopyButton";
 import { getEvents, type EventRow } from "@/lib/events";
 import { demo } from "@/lib/mock";
@@ -46,16 +48,17 @@ const STATUS: Record<string, string> = {
 
 async function load() {
   if (demo.enabled()) {
-    return { cfg: DEFAULT_SOCIAL, acc: null as MetaAccount | null, queue: [] as Post[], history: [] as Post[], products: [], lastRun: null, events: [] as EventRow[] };
+    return { cfg: DEFAULT_SOCIAL, acc: null as MetaAccount | null, queue: [] as Post[], history: [] as Post[], products: [], lastRun: null, events: [] as EventRow[], records: [] as SentRecord[] };
   }
   const db = adminClient();
-  const [cfg, acc, posts, prods, last, events] = await Promise.all([
+  const [cfg, acc, posts, prods, last, events, records] = await Promise.all([
     getSocialConfig(db),
     getMetaAccount(db),
     db.from("social_posts").select("*").neq("status", "discarded").order("created_at", { ascending: false }).limit(60),
     db.from("product_overview").select("slug,name,best_price").eq("active", true).not("best_price", "is", null).order("name"),
     db.from("kv").select("value").eq("key", "social_last_run").maybeSingle(),
     getEvents(db),
+    recentRecords(db),
   ]);
   const list = (posts.data || []) as Post[];
   let lastRun: { at?: string; queued?: string[]; published?: string[]; errors?: string[] } | null = null;
@@ -72,6 +75,7 @@ async function load() {
     products: (prods.data || []) as { slug: string; name: string; best_price: number }[],
     lastRun,
     events: events.filter((e) => e.extra_posts),
+    records,
   };
 }
 
@@ -288,7 +292,7 @@ function QueueItem({ p }: { p: Post }) {
 
 export default async function Social({ searchParams }: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { ok, erro } = await searchParams;
-  const { cfg, acc, queue, history, products, lastRun, events } = await load();
+  const { cfg, acc, queue, history, products, lastRun, events, records } = await load();
   // aviso de reconexão do TikTok (o refresh token vale 180 dias)
   const tt = cfg.tiktok && !demo.enabled() ? await tiktokStatus(adminClient()) : null;
   const ttDays = tt?.refreshExpires ? Math.floor((new Date(tt.refreshExpires).getTime() - Date.now()) / 86_400_000) : null;
@@ -399,6 +403,48 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
         <Settings cfg={cfg} />
       </section>
 
+      {cfg.whatsapp ? (
+        <section className="admin-section">
+          <h2>Canal do WhatsApp</h2>
+          <p className="hint">
+            O WhatsApp não tem API para postar em canal: copie o texto e a arte de cada post (aqui embaixo, em Publicados, e nos recordes de
+            preço) e cole no <a href={`https://${cfg.whatsapp}`} target="_blank" rel="noopener">canal</a>. No celular: abra a arte, segure o dedo nela e salve; no
+            canal, toque no clipe, escolha a imagem e cole o texto como legenda.
+          </p>
+          {records.length ? (
+            <>
+              <h3>Recordes de preço (últimas 48 h)</h3>
+              <ul className="social-history">
+                {records.map((r) => (
+                  <li key={`${r.slug}-${r.at}`}>
+                    {r.photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={r.photo} alt="" loading="lazy" width={72} height={90} />
+                    ) : null}
+                    <span>
+                      <strong>🚨 {r.name}</strong>
+                      <span className="social-meta">
+                        {when(r.at)}
+                        <span className="social-retry">
+                          <CopyButton text={r.wa || ""} label="Copiar texto p/ WhatsApp" />{" "}
+                          {r.photo ? (
+                            <a className="btn btn-small btn-ghost" href={r.photo} target="_blank" rel="noopener">
+                              Abrir arte
+                            </a>
+                          ) : null}
+                        </span>
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="muted">Nenhum recorde de preço nas últimas 48 h. Quando sair um no Telegram, ele aparece aqui também.</p>
+          )}
+        </section>
+      ) : null}
+
       <section className="admin-section">
         <h2>Publicados</h2>
         {history.length ? (
@@ -444,6 +490,14 @@ export default async function Social({ searchParams }: { searchParams: Promise<{
                       </>
                     ) : null}
                     {p.error ? <span className="muted"> · {p.error}</span> : null}
+                    {cfg.whatsapp && p.feed_url && Date.now() - new Date(p.published_at || p.created_at).getTime() < 48 * 3600_000 ? (
+                      <span className="social-retry">
+                        <CopyButton text={whatsappText(String(p.fb_caption || p.caption))} label="Copiar texto p/ WhatsApp" />{" "}
+                        <a className="btn btn-small btn-ghost" href={p.feed_url} target="_blank" rel="noopener">
+                          Abrir arte
+                        </a>
+                      </span>
+                    ) : null}
                     {p.tiktok_publish_id && Date.now() - new Date(p.published_at || p.created_at).getTime() < 72 * 3600_000 ? (
                       <span className="social-retry">
                         <CopyButton text={tiktokCaption(p.caption)} />
