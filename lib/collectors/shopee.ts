@@ -23,6 +23,7 @@ import { matchesProduct, titleMatches } from "../match";
 const URL_API = "https://open-api.affiliate.shopee.com.br/graphql";
 const MIN_RATING = 4.5;
 const MIN_SALES = 10;
+const USED = /\b(semi ?novo|seminova|usad[oa]|vitrine|mostru[aá]rio|poucas marcas|marcas de uso|reembalad[oa]|recondicionad[oa]|refurbished|open ?box|sem caixa|caixa aberta|com defeito|retirada de pe[cç]as|leia a descri[cç][aã]o)\b/i;
 /** Revendas oficiais que não têm o nome da marca (a busca de lojas é por nome). */
 const RESELLERS: Record<string, string[]> = { iphone: ["iplace"], ipad: ["iplace"], apple: ["iplace"], macbook: ["iplace"], airpods: ["iplace"] };
 const STOP = new Set(["smart", "tv", "console", "air", "fryer", "fone", "notebook", "cafeteira", "de", "com", "para", "gamer", "monitor", "midia", "fisica", "wifi", "5g", "4k", "uhd"]);
@@ -128,6 +129,11 @@ export function shopee(): Collector {
           const title = String(n.productName || "");
           // preço "a partir de" com variações muito diferentes (ex.: capa a R$ 10 e aparelho a R$ 3.000) não serve
           if (!price || Number(n.priceMax) > price * 1.15) continue;
+          // usado, vitrine e recondicionado não entram (o histórico compara produto novo)
+          if (USED.test(title)) {
+            if (refused.length < 6) refused.push(`${title} (usado/recondicionado)`);
+            continue;
+          }
           if (!titleMatches(product, title)) {
             if (refused.length < 6) refused.push(`${title} (${how})`);
             continue;
