@@ -2262,3 +2262,26 @@ button.btn-ghost {
   .tg-cta-btns { width: 100%; }
   .tg-cta .tg-cta-btn { flex: 1; text-align: center; }
 }
+
+/* rodapé organizado: marca + 3 colunas de links + faixa de baixo (aviso, ©, ADAM Labs, selos) */
+.foot-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 2.7fr); gap: 40px; padding-bottom: 32px; }
+.foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.foot-col { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.foot-col h2 { margin: 0 0 4px; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); font-family: var(--font); font-weight: 800; }
+.foot-col a, .foot-col .link-button { font-weight: 700; color: var(--ink); text-decoration: none; font-size: .92rem; }
+.foot-col a:hover, .foot-col .link-button:hover { color: var(--brand-dark); text-decoration: underline; }
+.foot-bottom { border-top: 1px solid var(--line); padding-top: 18px; padding-bottom: 28px; display: grid; gap: 12px; font-size: .8rem; color: var(--ink-2); }
+.foot-disclosure { margin: 0; max-width: 90ch; line-height: 1.5; }
+.foot-legal { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.foot-legal p { margin: 0; }
+.foot-adam { color: var(--ink); text-decoration: none; white-space: nowrap; }
+.foot-adam strong { letter-spacing: .02em; }
+.foot-adam:hover { text-decoration: underline; }
+.foot-bottom .foot-seals { margin-top: 0; }
+@media (max-width: 800px) {
+  .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 520px) {
+  .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 28px; }
+  .foot-legal { flex-direction: column; align-items: flex-start; }
+}

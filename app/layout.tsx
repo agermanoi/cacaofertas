@@ -205,56 +205,71 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </div>
               ) : null}
             </div>
-            <nav className="foot-nav" aria-label="Institucional">
-              <Link href="/cupons">Cupons de desconto</Link>
-              <Link href="/datas">Calendário de promoções</Link>
-              <Link href="/precos">Guias de preço</Link>
-              <Link href="/como-funciona">Como funciona</Link>
-              <Link href="/lojas">Qual loja é mais barata</Link>
-              <Link href="/quem-somos">Quem somos</Link>
-              <Link href="/contato">Contato</Link>
-              <Link href="/politica-de-privacidade">Política de privacidade</Link>
-              <Link href="/termos-de-uso">Termos de uso</Link>
-              <Link href="/mapa-do-site">Mapa do site</Link>
-              <CookiePrefsLink />
+            <nav className="foot-cols" aria-label="Rodapé">
+              <div className="foot-col">
+                <h2>Ofertas</h2>
+                <Link href="/cupons">Cupons de desconto</Link>
+                <Link href="/datas">Calendário de promoções</Link>
+                <Link href="/precos">Guias de preço</Link>
+                <Link href="/lojas">Qual loja é mais barata</Link>
+              </div>
+              <div className="foot-col">
+                <h2>O site</h2>
+                <Link href="/como-funciona">Como funciona</Link>
+                <Link href="/quem-somos">Quem somos</Link>
+                <Link href="/contato">Contato</Link>
+                <Link href="/mapa-do-site">Mapa do site</Link>
+              </div>
+              <div className="foot-col">
+                <h2>Privacidade</h2>
+                <Link href="/politica-de-privacidade">Política de privacidade</Link>
+                <Link href="/termos-de-uso">Termos de uso</Link>
+                <CookiePrefsLink />
+              </div>
             </nav>
-            <div className="foot-notes">
-              <p>
-                Alguns links são de afiliado: se você comprar por eles, a loja nos paga uma comissão e o preço para você
-                não muda. Isso não influencia o veredito, que é calculado só pelo histórico.
-              </p>
-              <p>Preços coletados automaticamente e sujeitos a mudança. Confira o valor final na loja antes de pagar.</p>
+          </div>
+          <div className="wrap foot-bottom">
+            <p className="foot-disclosure">
+              Alguns links são de afiliado: se você comprar por eles, a loja nos paga uma comissão e o preço para você não muda.
+              Isso não influencia o veredito, calculado só pelo histórico. Preços coletados automaticamente e sujeitos a mudança:
+              confira o valor final na loja.
+            </p>
+            <div className="foot-legal">
               <p>
                 © {year} {s.legal.ownerName || s.siteName}
                 {s.legal.document ? ` · ${s.legal.document}` : ""}
+                {" · "}
+                <a href="https://adamlabs.com.br" target="_blank" rel="noopener" className="foot-adam">
+                  Um projeto <strong>ADAM Labs</strong>
+                </a>
               </p>
-              {s.seals.safeBrowsing || s.seals.html ? (
-                <div className="foot-seals" aria-label="Selos de confiança">
-                  {s.seals.safeBrowsing ? (
-                    <a
-                      className="seal"
-                      href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(
-                        SITE_URL.replace(/^https?:\/\//, "")
-                      )}&hl=pt_BR`}
-                      target="_blank"
-                      rel="noopener"
-                      title="Abre a verificação do Google sobre este site"
-                    >
-                      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-                        <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="#146C2E" />
-                        <path d="m8.5 12.2 2.4 2.4 4.8-5" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <span>
-                        <strong>Navegação segura</strong>
-                        <small>Ver relatório do Google</small>
-                      </span>
-                    </a>
-                  ) : null}
-                  {s.seals.html ? (
-                    <div className="seal-custom" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: s.seals.html }} />
-                  ) : null}
-                </div>
-              ) : null}
+                {s.seals.safeBrowsing || s.seals.html ? (
+                  <div className="foot-seals" aria-label="Selos de confiança">
+                    {s.seals.safeBrowsing ? (
+                      <a
+                        className="seal"
+                        href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(
+                          SITE_URL.replace(/^https?:\/\//, "")
+                        )}&hl=pt_BR`}
+                        target="_blank"
+                        rel="noopener"
+                        title="Abre a verificação do Google sobre este site"
+                      >
+                        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                          <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="#146C2E" />
+                          <path d="m8.5 12.2 2.4 2.4 4.8-5" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span>
+                          <strong>Navegação segura</strong>
+                          <small>Ver relatório do Google</small>
+                        </span>
+                      </a>
+                    ) : null}
+                    {s.seals.html ? (
+                      <div className="seal-custom" suppressHydrationWarning dangerouslySetInnerHTML={{ __html: s.seals.html }} />
+                    ) : null}
+                  </div>
+                ) : null}
             </div>
           </div>
         </footer>
