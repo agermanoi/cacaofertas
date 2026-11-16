@@ -197,6 +197,79 @@ export const GUIDES: Guide[] = [
     intro: "Cafeteiras de cápsula Nespresso e Dolce Gusto, da mais barata à mais cara hoje.",
     match: (p) => /cafeteira|nespresso|dolce gusto/i.test(p.name),
   },
+  {
+    slug: "presente-de-natal-ate-300",
+    title: "Presentes de Natal até R$ 300",
+    noun: "presente",
+    range: "até R$ 300",
+    art: "o",
+    intro:
+      "Ideias de presente de Natal até R$ 300 entre os produtos que acompanhamos: fones, caixinhas de som, smartwatch, Fire TV Stick, aparadores e mais. Do mais barato ao mais caro hoje, com a média recente de cada um, para você ver se o preço da Black Friday vale a pena antes de comprar.",
+    match: (p) => price(p) <= 300,
+    until: "2026-12-25",
+  },
+  {
+    slug: "presente-de-natal-ate-500",
+    title: "Presentes de Natal de R$ 300 a R$ 500",
+    noun: "presente",
+    range: "de R$ 300 a R$ 500",
+    art: "o",
+    intro:
+      "Presentes de Natal entre R$ 300 e R$ 500: Alexa, controles de videogame, air fryer, cafeteiras de cápsula e outros. Comprar na Black Friday costuma sair mais barato que em dezembro; o histórico de cada produto mostra se a queda é real.",
+    match: (p) => price(p) > 300 && price(p) <= 500,
+    until: "2026-12-25",
+  },
+  {
+    slug: "smart-tv-55-polegadas",
+    title: "Smart TV 55 polegadas mais barata",
+    noun: "TV de 55 polegadas",
+    art: "a",
+    intro:
+      "As smart TVs de 55 polegadas que acompanhamos, de 4K LED a Mini LED e OLED, da mais barata à mais cara hoje. 55\" é o tamanho mais procurado na Black Friday; compare o preço de hoje com a média de cada modelo.",
+    match: (p) => cat(p, "TVs") && /\b55\b/.test(p.name),
+  },
+  {
+    slug: "alexa-echo-mais-barata",
+    title: "Alexa (Echo) mais barata",
+    noun: "Alexa",
+    art: "a",
+    intro:
+      "Os dispositivos Echo com Alexa que acompanhamos, do Echo Pop ao Echo Show com tela, do mais barato ao mais caro hoje. Os aparelhos com Alexa costumam ter algumas das maiores quedas do ano na Black Friday.",
+    match: (p) => /\becho\b/i.test(p.name),
+  },
+  {
+    slug: "kindle-mais-barato",
+    title: "Kindle mais barato",
+    noun: "Kindle",
+    art: "o",
+    intro: "Os Kindles que acompanhamos, do Paperwhite ao Colorsoft, do mais barato ao mais caro hoje, com a média recente de cada um.",
+    match: (p) => /kindle/i.test(p.name),
+  },
+  {
+    slug: "caixa-de-som-jbl-mais-barata",
+    title: "Caixa de som JBL mais barata",
+    noun: "caixa de som JBL",
+    art: "a",
+    intro: "As caixas de som bluetooth JBL que acompanhamos (Go, Flip e Charge), da mais barata à mais cara hoje.",
+    match: (p) => /jbl/i.test(p.name) && /go|flip|charge|caixa/i.test(p.name),
+  },
+  {
+    slug: "ventilador-mais-barato",
+    title: "Ventilador e climatizador mais baratos",
+    noun: "ventilador",
+    art: "o",
+    intro:
+      "Ventiladores de mesa e de torre e climatizadores que acompanhamos, do mais barato ao mais caro hoje. Com o verão chegando, o preço destes produtos costuma subir em dezembro: o histórico mostra se o preço de agora está bom.",
+    match: (p) => /ventilador|climatizador/i.test(p.name),
+  },
+  {
+    slug: "secador-e-escova-secadora",
+    title: "Secador, escova secadora e prancha mais baratos",
+    noun: "aparelho para cabelo",
+    art: "o",
+    intro: "Secadores, escovas secadoras e pranchas que acompanhamos, do mais barato ao mais caro hoje, com a média recente de cada um.",
+    match: (p) => /secador|escova|prancha/i.test(p.name),
+  },
 ];
 
 export function guideItems(g: Guide, all: ProductOverview[]): ProductOverview[] {
