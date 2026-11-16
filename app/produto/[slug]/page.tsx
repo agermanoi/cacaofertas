@@ -24,6 +24,7 @@ import { categorySlug } from "@/lib/categories";
 import { imgProps } from "@/lib/img";
 import { getSettings } from "@/lib/settings";
 import { TelegramCta } from "@/components/TelegramCta";
+import { storeHrefs } from "@/lib/store-links";
 
 export const revalidate = 3600;
 
@@ -72,6 +73,7 @@ export default async function ProductPage({ params }: Params) {
     getOffers(p.id),
     getSettings(),
   ]);
+  const links = await storeHrefs(offers);
   const best = series.get(p.id) || [];
   const coupons = await getCouponsForStores([...new Set(offers.map((o) => o.store))], p.id);
   const productCoupons = coupons.filter((c) => c.product_id === p.id);
@@ -231,7 +233,7 @@ export default async function ProductPage({ params }: Params) {
                     <span className="seen">{seenLabel(o.last_seen_at)}</span>
                   </td>
                   <td>
-                    <StoreLink href={`/go/${o.id}`} className="btn">
+                    <StoreLink href={links.get(o.id)?.href || `/go/${o.id}`} track={links.get(o.id)?.track} className="btn">
                       Ver na loja
                     </StoreLink>
                   </td>

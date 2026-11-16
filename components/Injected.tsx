@@ -55,11 +55,11 @@ function adminGuard(gaId: string) {
 }
 
 /**
- * Conversão do Google Ads: cada clique em oferta (/go/…) ou cupom (/c/…) conta como "clique para a loja".
+ * Conversão do Google Ads: cada clique em oferta (/go/… ou botão de loja com link direto) ou cupom (/c/…) conta como "clique para a loja".
  * Usa beacon para não perder o evento quando a página troca para a loja.
  */
 function adsClickScript(adsId: string, label: string) {
-  return `document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!/^(https?:\\/\\/[^/]*cacaofertas\\.com\\.br)?\\/(go|c)\\//.test(h))return;if(window.gtag)gtag('event','conversion',{send_to:'${adsId}/${label}',transport_type:'beacon'});},true);`;
+  return `document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'';if(!a.hasAttribute('data-store-click')&&!/^(https?:\\/\\/[^/]*cacaofertas\\.com\\.br)?\\/(go|c)\\//.test(h))return;if(window.gtag)gtag('event','conversion',{send_to:'${adsId}/${label}',transport_type:'beacon'});},true);`;
 }
 
 /**
