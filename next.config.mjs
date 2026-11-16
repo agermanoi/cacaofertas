@@ -16,6 +16,8 @@ const nextConfig = {
   // links curtos para bios (o TikTok aceita só 80 caracteres): /tt → ofertas de hoje marcadas como TikTok
   async redirects() {
     return [
+      // Amazon saiu do comparador em 16/11/2026
+      { source: "/loja/amazon", destination: "/lojas", permanent: false },
       { source: "/categoria/eletrodomesticos", destination: "/categoria/ventiladores-e-climatizacao", permanent: true },
       { source: "/produto/smart-tv-tcl-50-p755", destination: "/categoria/tvs", permanent: true },
       { source: "/produto/smart-tv-lg-43-4k-up751c", destination: "/categoria/tvs", permanent: true },

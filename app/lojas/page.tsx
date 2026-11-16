@@ -6,7 +6,7 @@ import { breadcrumbLd } from "@/lib/seo";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Qual loja é mais barata? Amazon x Mercado Livre e outras",
+  title: "Qual loja é mais barata? Mercado Livre x Shopee e outras",
   description: "Quantas vezes cada loja teve o menor preço nos últimos 14 dias, com comparação direta entre as lojas, a partir do histórico do Caça Ofertas.",
   alternates: { canonical: "/lojas" },
 };

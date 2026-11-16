@@ -3,8 +3,8 @@ import { demo } from "./mock";
 
 /** Lojas com página própria (/loja/<slug>): só as que têm volume para comparar. */
 export const STORES = [
-  { slug: "amazon", name: "Amazon", art: "a" },
   { slug: "mercado-livre", name: "Mercado Livre", art: "o" },
+  { slug: "shopee", name: "Shopee", art: "a" },
 ] as const;
 export type StoreInfo = (typeof STORES)[number];
 

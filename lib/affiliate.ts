@@ -92,6 +92,8 @@ const BLOCKED_STORES = [
   /latam ?pass/i, /livelo/i, /smiles/i, /esfera/i, /recondicionad/i, /seminovo/i, /refurb/i,
   // preços do feed muito acima do mercado (2x ou mais) e nunca a mais barata: só distorcia o comparador
   /magazine ?mateus/i,
+  // Amazon encerrou a conta de associado em 16/11/2026 (não permite histórico nem alerta de preço): fora do comparador
+  /amazon/i,
 ];
 
 export function isBlockedStore(name: string): boolean {

@@ -1,3 +1,4 @@
+import { isBlockedStore } from "./affiliate";
 import { publicClient } from "./supabase";
 import type { DailyPoint, OfferRow, ProductOverview } from "./types";
 import { demo } from "./mock";
@@ -79,7 +80,7 @@ export async function getStoreSeries(productId: string, days = 90): Promise<Stor
     .limit(10000);
   if (error) throw new Error(`[data] store series: ${error.message}`);
   const byStore = new Map<string, Map<string, number>>();
-  for (const r of data as any[]) {
+  for (const r of (data as any[]).filter((x) => !isBlockedStore(String(x.offers?.store || "")))) {
     const store = String(Array.isArray(r.offers) ? r.offers[0]?.store : r.offers?.store);
     const m = byStore.get(store) || new Map<string, number>();
     const prev = m.get(r.captured_on);

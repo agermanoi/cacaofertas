@@ -75,7 +75,7 @@ export default async function Privacidade() {
       <p>
         O site usa a tag do Google Ads para medir quantas visitas vindas de anúncios clicam em uma oferta; ela pode gravar
         cookies do Google no seu navegador. Ao clicar em um link de oferta, a loja ou a rede de
-        afiliados (como Mercado Livre, Amazon e Lomadee) pode gravar cookies no seu navegador para atribuir a venda. Se
+        afiliados (como Mercado Livre, Shopee e Lomadee) pode gravar cookies no seu navegador para atribuir a venda. Se
         exibirmos anúncios, parceiros como o Google podem usar cookies para mostrar anúncios relevantes; você pode
         desativar anúncios personalizados em{" "}
         <a href="https://adssettings.google.com" rel="noopener">

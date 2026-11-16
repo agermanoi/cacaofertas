@@ -13,7 +13,6 @@ import { mercadoLivre } from "../lib/collectors/mercadolivre";
 import { serpApi, serpApiSearchesLeft, serpSample } from "../lib/collectors/serpapi";
 import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
-import { amazonSerp } from "../lib/collectors/amazon";
 import { afilio, afilioCampaigns } from "../lib/collectors/afilio";
 import { shopee } from "../lib/collectors/shopee";
 import { importCoupons } from "./coupons";
@@ -222,7 +221,7 @@ async function main() {
   if (process.argv.length <= 2 || process.env.IMPORT_COUPONS === "1") await importCoupons(db);
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
-  const collectors: Collector[] = [mercadoLivre(db), amazonSerp(), serpApi(), lomadee(), afilioCollector, shopee(), scraper()].filter((c) => c.enabled());
+  const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), afilioCollector, shopee(), scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
   const afilioInfo = afilioCollector.enabled() ? await afilioCollector.prepare() : null;
 
