@@ -94,9 +94,11 @@ export async function mlExchangeCode(code: string): Promise<{ ok: true; nickname
       { key: KV_USER, value: nickname, updated_at: now },
     ]);
   if (error) return { ok: false, error: `Autorizado, mas não consegui salvar no banco: ${error.message}` };
+  // token de acesso guardado era da conexão anterior
+  await adminClient().from("kv").delete().eq("key", "ml_access_token");
   return { ok: true, nickname };
 }
 
 export async function mlDisconnect(): Promise<void> {
-  await adminClient().from("kv").delete().in("key", [KV_TOKEN, KV_USER]);
+  await adminClient().from("kv").delete().in("key", [KV_TOKEN, KV_USER, "ml_access_token"]);
 }

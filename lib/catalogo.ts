@@ -1,0 +1,319 @@
+import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { HttpError, httpJson, sleep } from "./http";
+import { getMlAccessToken } from "./ml-token";
+import { applyAffiliateTags } from "./click-tags";
+import { shopeeQuery } from "./collectors/shopee";
+
+/**
+ * Catálogo para sites parceiros (API privada /api/catalogo).
+ *
+ * Usa as credenciais do Mercado Livre e da Shopee deste projeto para:
+ *  - link:    a partir do link de um produto, devolver nome, foto e link de afiliado;
+ *  - buscar:  procurar produtos por termo;
+ *  - checar:  dizer se cada produto ainda está à venda.
+ *
+ * Não devolve preço: quem consome mostra só "ver preço na loja".
+ * Amazon não passa por aqui (cada site parceiro usa a própria conta de associado).
+ */
+
+export type Loja = "mercadolivre" | "shopee";
+
+export interface ItemCatalogo {
+  loja: Loja;
+  /** referência estável para checar depois: ml:p:MLB123 (catálogo), ml:i:MLB123 (anúncio) ou shopee:SHOP.ITEM */
+  ref: string;
+  nome: string;
+  imagem: string | null;
+  link: string;
+  disponivel: boolean;
+  vendas?: number | null;
+  nota?: number | null;
+  oficial?: boolean;
+}
+
+const ML_API = "https://api.mercadolibre.com";
+const ML_HOST = /(^|\.)(mercadoli(vre|bre)\.com(\.br)?|meli\.la)$/i;
+const SHOPEE_HOST = /(^|\.)(shopee\.com\.br|shp\.ee)$/i;
+const AMAZON_HOST = /(^|\.)(amazon\.com(\.br)?|amzn\.to|a\.co)$/i;
+const USED = /\b(semi ?novo|seminova|usad[oa]|vitrine|mostru[aá]rio|reembalad[oa]|recondicionad[oa]|refurbished|open ?box|com defeito)\b/i;
+
+export class CatalogoErro extends Error {}
+
+function https(u?: string | null): string | null {
+  return u ? u.replace(/^http:\/\//i, "https://") : null;
+}
+
+/** Segue links curtos (meli.la, mercadolivre.com/sec, s.shopee.com.br) até o endereço final. */
+async function resolve(url: string): Promise<string> {
+  let cur = url;
+  for (let i = 0; i < 6; i++) {
+    const u = new URL(cur);
+    const short = /^(meli\.la|s\.shopee\.com\.br|shp\.ee)$/i.test(u.hostname) || /\/(sec|social)\//.test(u.pathname);
+    if (!short) return cur;
+    const res = await fetch(cur, { redirect: "manual", headers: { "user-agent": "Mozilla/5.0" }, cache: "no-store" });
+    const loc = res.headers.get("location");
+    if (!loc) return cur;
+    cur = new URL(loc, cur).toString();
+  }
+  return cur;
+}
+
+export function lojaDoLink(url: string): Loja | "amazon" | null {
+  try {
+    const h = new URL(url).hostname;
+    if (ML_HOST.test(h)) return "mercadolivre";
+    if (SHOPEE_HOST.test(h)) return "shopee";
+    if (AMAZON_HOST.test(h)) return "amazon";
+  } catch {
+    /* inválido */
+  }
+  return null;
+}
+
+/* ─── Mercado Livre ─────────────────────────────────────────────────────────── */
+
+function ml(db: SupabaseClient) {
+  let token: string | null = null;
+  async function get<T>(path: string): Promise<T> {
+    for (let attempt = 0; ; attempt++) {
+      token = token || (await getMlAccessToken(db, attempt > 0));
+      try {
+        const r = await httpJson<T>(`${ML_API}${path}`, { headers: { authorization: `Bearer ${token}` } });
+        await sleep(300);
+        return r;
+      } catch (e) {
+        if (e instanceof HttpError && e.status === 401 && attempt === 0) {
+          token = null; // token guardado venceu antes da hora: renova uma vez
+          continue;
+        }
+        if (e instanceof HttpError && e.status === 429 && attempt < 2) {
+          await sleep(4000);
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+
+  type Produto = { id: string; name: string; permalink?: string; pictures?: { url?: string; secure_url?: string }[]; buy_box_winner?: { item_id?: string } | null; status?: string };
+  type Anuncio = { id: string; title: string; permalink?: string; status?: string; available_quantity?: number; pictures?: { url?: string; secure_url?: string }[]; thumbnail?: string; catalog_product_id?: string | null };
+
+  async function deProduto(id: string): Promise<ItemCatalogo> {
+    const p = await get<Produto>(`/products/${id}`);
+    const link = p.permalink || `https://www.mercadolivre.com.br/p/${id}`;
+    return {
+      loja: "mercadolivre",
+      ref: `ml:p:${id}`,
+      nome: p.name,
+      imagem: https(p.pictures?.[0]?.secure_url || p.pictures?.[0]?.url),
+      link: await applyAffiliateTags(db, link),
+      disponivel: Boolean(p.buy_box_winner?.item_id) && p.status !== "inactive",
+    };
+  }
+
+  async function deAnuncio(id: string): Promise<ItemCatalogo> {
+    let a: Anuncio;
+    try {
+      a = await get<Anuncio>(`/items/${id}`);
+    } catch (e) {
+      throw new CatalogoErro(`O Mercado Livre não deixou ler o anúncio ${id} (${e instanceof HttpError ? e.status : "erro"}). Tente o link da página do produto (com /p/MLB…).`);
+    }
+    if (a.catalog_product_id) {
+      try {
+        return await deProduto(a.catalog_product_id);
+      } catch {
+        /* segue com o anúncio */
+      }
+    }
+    const link = a.permalink || `https://produto.mercadolivre.com.br/${id.replace(/^([A-Z]+)(\d+)$/, "$1-$2")}`;
+    return {
+      loja: "mercadolivre",
+      ref: `ml:i:${id}`,
+      nome: a.title,
+      imagem: https(a.pictures?.[0]?.secure_url || a.pictures?.[0]?.url || a.thumbnail),
+      link: await applyAffiliateTags(db, link),
+      disponivel: a.status === "active" && (a.available_quantity ?? 1) > 0,
+    };
+  }
+
+  return {
+    async link(url: string): Promise<ItemCatalogo> {
+      const final = await resolve(url);
+      const u = new URL(final);
+      const p = u.pathname.match(/\/p\/(MLB\d+)/i);
+      const filtro = (u.searchParams.get("pdp_filters") || "").match(/item_id[:%3A]+(MLB\d+)/i) || (u.searchParams.get("wid") || "").match(/^(MLB\d+)$/i);
+      const item = u.pathname.match(/\/(MLB)-?(\d{6,})/i);
+      if (p) return deProduto(p[1].toUpperCase());
+      if (filtro) return deAnuncio(filtro[1].toUpperCase());
+      if (item) return deAnuncio(`MLB${item[2]}`);
+      throw new CatalogoErro("Não achei o código do produto nesse link do Mercado Livre. Abra o produto e copie o endereço da barra (ele tem MLB e números).");
+    },
+
+    async buscar(termo: string, limite: number): Promise<ItemCatalogo[]> {
+      const params = new URLSearchParams({ site_id: "MLB", status: "active", q: termo, limit: "20" });
+      const hits = (await get<{ results?: { id: string }[] }>(`/products/search?${params}`)).results || [];
+      const out: ItemCatalogo[] = [];
+      for (const h of hits) {
+        if (out.length >= limite) break;
+        try {
+          const it = await deProduto(h.id);
+          if (it.disponivel && !USED.test(it.nome)) out.push(it);
+        } catch {
+          /* pula */
+        }
+      }
+      return out;
+    },
+
+    async checar(ref: string): Promise<boolean | null> {
+      const [, tipo, id] = ref.split(":");
+      try {
+        return tipo === "p" ? (await deProduto(id)).disponivel : (await deAnuncio(id)).disponivel;
+      } catch (e) {
+        if (e instanceof HttpError && e.status === 404) return false;
+        if (e instanceof CatalogoErro) return null;
+        return null;
+      }
+    },
+  };
+}
+
+/* ─── Shopee ────────────────────────────────────────────────────────────────── */
+
+type ShopeeNode = {
+  itemId: number;
+  shopId?: number;
+  productName: string;
+  sales?: number | null;
+  ratingStar?: string | null;
+  shopType?: number[] | null;
+  productLink: string;
+  offerLink: string;
+  imageUrl?: string | null;
+};
+const SHOPEE_FIELDS = "itemId shopId productName sales ratingStar shopType productLink offerLink imageUrl";
+
+function shopee(subId: string | null) {
+  async function q<T>(query: string): Promise<T> {
+    try {
+      return await shopeeQuery<T>(query);
+    } finally {
+      await sleep(400);
+    }
+  }
+
+  async function linkCurto(n: ShopeeNode): Promise<string> {
+    if (!subId) return n.offerLink;
+    try {
+      const d = await q<{ generateShortLink: { shortLink: string } }>(
+        `mutation{generateShortLink(input:{originUrl:${JSON.stringify(n.productLink)},subIds:[${JSON.stringify(subId)}]}){shortLink}}`
+      );
+      return d?.generateShortLink?.shortLink || n.offerLink;
+    } catch {
+      return n.offerLink;
+    }
+  }
+
+  async function paraItem(n: ShopeeNode, shopId?: number | string): Promise<ItemCatalogo> {
+    return {
+      loja: "shopee",
+      ref: `shopee:${n.shopId ?? shopId ?? 0}.${n.itemId}`,
+      nome: String(n.productName || "").trim(),
+      imagem: https(n.imageUrl),
+      link: await linkCurto(n),
+      disponivel: true,
+      vendas: n.sales ?? null,
+      nota: n.ratingStar ? Number(n.ratingStar) : null,
+      oficial: (n.shopType || []).includes(1),
+    };
+  }
+
+  async function porId(shopId: string, itemId: string): Promise<ShopeeNode | null> {
+    for (const args of [`shopId:${shopId},itemId:${itemId}`, `itemId:${itemId}`]) {
+      try {
+        const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(${args},page:1,limit:1){nodes{${SHOPEE_FIELDS}}}}`);
+        const n = d?.productOfferV2?.nodes?.[0];
+        if (n) return n;
+      } catch {
+        /* tenta o próximo formato */
+      }
+    }
+    return null;
+  }
+
+  return {
+    async link(url: string): Promise<ItemCatalogo> {
+      const final = decodeURIComponent(await resolve(url));
+      const m = final.match(/-i\.(\d+)\.(\d+)/) || final.match(/\/product\/(\d+)\/(\d+)/);
+      if (!m) throw new CatalogoErro("Não achei o código do produto nesse link da Shopee. Abra o produto e copie o endereço da barra.");
+      const n = await porId(m[1], m[2]);
+      if (!n) throw new CatalogoErro("A Shopee não devolveu esse produto pelo programa de afiliados (pode estar fora do programa ou sem estoque).");
+      return paraItem(n, m[1]);
+    },
+
+    async buscar(termo: string, limite: number): Promise<ItemCatalogo[]> {
+      let nodes: ShopeeNode[] = [];
+      try {
+        // sortType 2 = mais vendidos
+        const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)},sortType:2,page:1,limit:40){nodes{${SHOPEE_FIELDS}}}}`);
+        nodes = d?.productOfferV2?.nodes || [];
+      } catch (e) {
+        throw new CatalogoErro(`A busca da Shopee falhou agora (${(e as Error).message}). Tente de novo mais tarde ou cole o link do produto.`);
+      }
+      const out: ItemCatalogo[] = [];
+      for (const n of nodes) {
+        if (out.length >= limite) break;
+        if (USED.test(n.productName || "")) continue;
+        const oficial = (n.shopType || []).includes(1);
+        if (!oficial && (Number(n.ratingStar || 0) < 4.5 || Number(n.sales || 0) < 10)) continue;
+        out.push(await paraItem(n));
+      }
+      return out;
+    },
+
+    async checar(ref: string): Promise<boolean | null> {
+      const m = ref.match(/^shopee:(\d+)\.(\d+)$/);
+      if (!m) return null;
+      try {
+        return Boolean(await porId(m[1], m[2]));
+      } catch {
+        return null;
+      }
+    },
+  };
+}
+
+/* ─── Entrada única ─────────────────────────────────────────────────────────── */
+
+export function catalogo(db: SupabaseClient, subId: string | null) {
+  const m = ml(db);
+  const s = shopee(subId);
+  const temMl = Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET);
+  const temShopee = Boolean(process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET);
+  const loja = (l: Loja) => {
+    if (l === "mercadolivre" && !temMl) throw new CatalogoErro("Mercado Livre não configurado neste projeto.");
+    if (l === "shopee" && !temShopee) throw new CatalogoErro("Shopee não configurada neste projeto.");
+    return l === "mercadolivre" ? m : s;
+  };
+
+  return {
+    async link(url: string): Promise<ItemCatalogo> {
+      const l = lojaDoLink(url);
+      if (l === "amazon") throw new CatalogoErro("Links da Amazon não passam por este catálogo.");
+      if (!l) throw new CatalogoErro("Cole um link do Mercado Livre ou da Shopee.");
+      return loja(l).link(url);
+    },
+    async buscar(l: Loja, termo: string, limite: number): Promise<ItemCatalogo[]> {
+      return loja(l).buscar(termo, limite);
+    },
+    async checar(refs: string[]): Promise<{ ref: string; disponivel: boolean | null }[]> {
+      const out = [];
+      for (const ref of refs) {
+        const l: Loja | null = ref.startsWith("ml:") ? "mercadolivre" : ref.startsWith("shopee:") ? "shopee" : null;
+        out.push({ ref, disponivel: l ? await loja(l).checar(ref) : null });
+      }
+      return out;
+    },
+  };
+}

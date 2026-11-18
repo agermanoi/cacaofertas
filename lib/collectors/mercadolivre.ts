@@ -3,6 +3,7 @@ import type { Collector, OfferInput, Product } from "../types";
 import { httpJson, http, HttpError, sleep } from "../http";
 import { toAffiliate } from "../affiliate";
 import { titleMatches } from "../match";
+import { getMlAccessToken } from "../ml-token";
 
 /**
  * Mercado Livre: API oficial, via CATÁLOGO.
@@ -13,8 +14,8 @@ import { titleMatches } from "../match";
  *   2) GET /products/{id}                                      -> buy_box_winner (preço de quem vende agora)
  *   3) GET /products/{id}/items                                -> demais ofertas do mesmo produto (se liberado)
  *
- * O token dura 6h e o refresh token é de uso único: a cada renovação
- * o novo refresh token é salvo na tabela `kv` do Supabase.
+ * O token dura 6h e o refresh token é de uso único: ver lib/ml-token.ts (token guardado e
+ * reaproveitado na tabela `kv`, para não brigar com a API de catálogo).
  *
  * Env: ML_CLIENT_ID, ML_CLIENT_SECRET
  *      ML_AFFILIATE_TEMPLATE (opcional: link do programa de afiliados com {url})
@@ -22,7 +23,6 @@ import { titleMatches } from "../match";
  */
 
 const API = "https://api.mercadolibre.com";
-const KV_KEY = "ml_refresh_token";
 const PER_QUERY = Number(process.env.ML_CATALOG_PRODUCTS || 4);
 
 interface CatalogHit {
@@ -73,23 +73,7 @@ export function mercadoLivre(db: SupabaseClient): Collector {
 
   async function getToken(): Promise<string> {
     if (accessToken) return accessToken;
-    const { data } = await db.from("kv").select("value").eq("key", KV_KEY).maybeSingle();
-    const refresh = data?.value || process.env.ML_REFRESH_TOKEN;
-    if (!refresh) throw new Error("Mercado Livre não conectado. Use o painel: Mercado Livre → Conectar.");
-
-    const res = await http(`${API}/oauth/token`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: process.env.ML_CLIENT_ID!,
-        client_secret: process.env.ML_CLIENT_SECRET!,
-        refresh_token: refresh,
-      }),
-    });
-    const json = (await res.json()) as { access_token: string; refresh_token: string };
-    accessToken = json.access_token;
-    await db.from("kv").upsert({ key: KV_KEY, value: json.refresh_token, updated_at: new Date().toISOString() });
+    accessToken = await getMlAccessToken(db);
     return accessToken;
   }
 
