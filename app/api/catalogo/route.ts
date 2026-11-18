@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { adminClient } from "@/lib/supabase";
-import { catalogo, CatalogoErro, type Loja } from "@/lib/catalogo";
+import { carregarChaves, catalogo, CatalogoErro, ultimoDiagnostico, type Loja } from "@/lib/catalogo";
 
 /**
  * API privada de catálogo para sites parceiros (servidor com servidor).
@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
   }
 
   const origem = String(body.origem || "").replace(/[^a-z0-9]/gi, "").slice(0, 30) || null;
-  const cat = catalogo(adminClient(), origem);
+  const db = adminClient();
+  await carregarChaves(db);
+  const cat = catalogo(db, origem);
 
   try {
     switch (body.acao) {
@@ -54,7 +56,9 @@ export async function POST(req: NextRequest) {
         const termo = String(body.termo || "").trim().slice(0, 80);
         if (termo.length < 3) return resposta({ ok: false, erro: "Termo muito curto." }, 400);
         const limite = Math.min(12, Math.max(1, Number(body.limite) || 8));
-        return resposta({ ok: true, itens: await cat.buscar(loja as Loja, termo, limite) });
+        const itens = await cat.buscar(loja as Loja, termo, limite);
+        const diag = ultimoDiagnostico();
+        return resposta({ ok: true, itens, ...(diag ? { diagnostico: diag } : {}) });
       }
       case "checar": {
         const refs = (Array.isArray(body.refs) ? body.refs : []).map(String).filter(Boolean).slice(0, 40);

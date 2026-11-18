@@ -73,6 +73,13 @@ export function lojaDoLink(url: string): Loja | "amazon" | null {
 
 /* ─── Mercado Livre ─────────────────────────────────────────────────────────── */
 
+let diagnostico = "";
+export function ultimoDiagnostico(): string {
+  const d = diagnostico;
+  diagnostico = "";
+  return d;
+}
+
 function ml(db: SupabaseClient) {
   let token: string | null = null;
   async function get<T>(path: string): Promise<T> {
@@ -99,6 +106,21 @@ function ml(db: SupabaseClient) {
   type Produto = { id: string; name: string; permalink?: string; pictures?: { url?: string; secure_url?: string }[]; buy_box_winner?: { item_id?: string } | null; status?: string };
   type Anuncio = { id: string; title: string; permalink?: string; status?: string; available_quantity?: number; pictures?: { url?: string; secure_url?: string }[]; thumbnail?: string; catalog_product_id?: string | null };
 
+  let itemsBloqueado = false;
+  /** Alguém vende esse produto de catálogo agora? (buy box ou, sem ela, a lista de vendedores) */
+  async function temVendedor(p: Produto): Promise<boolean> {
+    if (p.status === "inactive") return false;
+    if (p.buy_box_winner?.item_id) return true;
+    if (itemsBloqueado) return false;
+    try {
+      const r = await get<{ results?: { item_id?: string }[] }>(`/products/${p.id}/items?limit=1`);
+      return Boolean(r.results?.length);
+    } catch (e) {
+      if (e instanceof HttpError && (e.status === 403 || e.status === 401)) itemsBloqueado = true;
+      return false;
+    }
+  }
+
   async function deProduto(id: string): Promise<ItemCatalogo> {
     const p = await get<Produto>(`/products/${id}`);
     const link = p.permalink || `https://www.mercadolivre.com.br/p/${id}`;
@@ -108,7 +130,7 @@ function ml(db: SupabaseClient) {
       nome: p.name,
       imagem: https(p.pictures?.[0]?.secure_url || p.pictures?.[0]?.url),
       link: await applyAffiliateTags(db, link),
-      disponivel: Boolean(p.buy_box_winner?.item_id) && p.status !== "inactive",
+      disponivel: await temVendedor(p),
     };
   }
 
@@ -154,14 +176,21 @@ function ml(db: SupabaseClient) {
       const params = new URLSearchParams({ site_id: "MLB", status: "active", q: termo, limit: "20" });
       const hits = (await get<{ results?: { id: string }[] }>(`/products/search?${params}`)).results || [];
       const out: ItemCatalogo[] = [];
+      let examinados = 0;
+      let semVendedor = 0;
       for (const h of hits) {
-        if (out.length >= limite) break;
+        if (out.length >= limite || examinados >= limite * 3) break;
+        examinados++;
         try {
           const it = await deProduto(h.id);
-          if (it.disponivel && !USED.test(it.nome)) out.push(it);
+          if (!it.disponivel) semVendedor++;
+          else if (!USED.test(it.nome)) out.push(it);
         } catch {
           /* pula */
         }
+      }
+      if (!out.length) {
+        diagnostico = `catálogo do ML: ${hits.length} produtos para "${termo}", ${semVendedor} sem vendedor agora${itemsBloqueado ? " (lista de vendedores bloqueada para o app)" : ""}`;
       }
       return out;
     },
@@ -285,6 +314,16 @@ function shopee(subId: string | null) {
 }
 
 /* ─── Entrada única ─────────────────────────────────────────────────────────── */
+
+/** As chaves da Shopee podem estar na tabela kv (como na coleta) em vez de variável de ambiente. */
+export async function carregarChaves(db: SupabaseClient): Promise<void> {
+  if (process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET) return;
+  const { data } = await db.from("kv").select("key,value").in("key", ["shopee_app_id", "shopee_secret"]);
+  for (const r of data || []) {
+    const env = r.key === "shopee_app_id" ? "SHOPEE_APP_ID" : "SHOPEE_SECRET";
+    if (!process.env[env] && r.value) process.env[env] = String(r.value);
+  }
+}
 
 export function catalogo(db: SupabaseClient, subId: string | null) {
   const m = ml(db);
