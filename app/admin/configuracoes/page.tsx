@@ -2,6 +2,7 @@ import { Flash } from "@/components/admin/Flash";
 import { DEFAULT_SETTINGS, countdownText, getSettings } from "@/lib/settings";
 import { resetColors, saveSettings } from "./actions";
 import { FORMATS, POSITIONS, sizesLabel } from "@/lib/ad-formats";
+import CopyButton from "@/components/admin/CopyButton";
 
 type Props = { searchParams: Promise<{ ok?: string; erro?: string }> };
 
@@ -263,10 +264,25 @@ export default async function SettingsPage({ searchParams }: Props) {
         </fieldset>
 
         <fieldset id="gam">
-          <legend>Anúncios (Google Ad Manager)</legend>
+          <legend>Anúncios</legend>
           <label className="check">
-            <input type="checkbox" name="gam_enabled" defaultChecked={s.gam.enabled} /> Exibir anúncios do GAM no site
+            <input type="checkbox" name="gam_enabled" defaultChecked={s.gam.enabled} /> Exibir anúncios no site
           </label>
+          <div className="field">
+            <span className="label-like">Quem entrega os anúncios</span>
+            <label className="check">
+              <input type="radio" name="gam_mode" value="gam" defaultChecked={s.gam.mode !== "parceiro"} /> Google Ad Manager (o site chama o GAM com
+              o código da rede abaixo)
+            </label>
+            <label className="check">
+              <input type="radio" name="gam_mode" value="parceiro" defaultChecked={s.gam.mode === "parceiro"} /> Parceiro (TagLovers ou outro): o
+              site só cria os espaços e o script do parceiro preenche
+            </label>
+            <p className="hint">
+              No modo parceiro, cole o script dele em <strong>Códigos no &lt;head&gt;</strong> (acima) e passe a lista de espaços abaixo. Os campos do
+              GAM não são usados; um espaço que o parceiro não preencher em 10 segundos fica escondido.
+            </p>
+          </div>
           <div className="field-row">
             <div className="field">
               <label htmlFor="gam_network">Código da rede</label>
@@ -274,9 +290,9 @@ export default async function SettingsPage({ searchParams }: Props) {
               <p className="hint">Em Admin → Configurações globais da rede, no GAM.</p>
             </div>
             <div className="field">
-              <label htmlFor="gam_parent">Ad unit pai</label>
+              <label htmlFor="gam_parent">Ad unit pai (opcional)</label>
               <input id="gam_parent" name="gam_parent" defaultValue={s.gam.parentAdUnit} placeholder="cacaofertas" autoComplete="off" />
-              <p className="hint">O código do ad unit, não o nome. Pode ter níveis: cacaofertas/site.</p>
+              <p className="hint">O código do ad unit, não o nome. Pode ter níveis: cacaofertas/site. Vazio = cada posição é um ad unit na raiz da rede.</p>
             </div>
           </div>
           <div className="field-row">
@@ -296,20 +312,37 @@ export default async function SettingsPage({ searchParams }: Props) {
             </div>
           </div>
           <p className="hint">
-            {s.gam.childUnits
+            {!s.gam.parentAdUnit
+              ? "Ad units usados: /rede/posição (crie um ad unit para cada posição abaixo, com o mesmo código)."
+              : s.gam.childUnits
               ? "Ad units usados: /rede/pai/posição (crie um filho para cada posição abaixo)."
               : "Todos os espaços usam o ad unit pai. A posição vai na segmentação pos=… (crie a chave “pos” no GAM)."}{" "}
             Toda solicitação leva também as chaves <code>formato</code>, <code>pagina</code> e <code>refresh</code> (0 na primeira exibição).
           </p>
 
           <details className="gam-details">
-            <summary>Posições e tamanhos gerados ({POSITIONS.length})</summary>
+            <summary>Espaços de anúncio do site ({POSITIONS.length})</summary>
+            <p className="hint">
+              Cada espaço é um <code>&lt;div id=&quot;ad-…&quot; class=&quot;ad-slot ad-…&quot;&gt;</code> (id e classe com o mesmo nome) com <code>data-ad-slot</code> (posição) e <code>data-ad-format</code>{" "}
+              (formato). É essa a lista para passar a um parceiro.{" "}
+              <CopyButton
+                text={[
+                  "id;classe;posicao;onde;formato;desktop;tablet;celular",
+                  ...POSITIONS.map((p) => {
+                    const f = FORMATS[p.format];
+                    return [`#ad-${p.id}`, `.ad-${p.id}`, p.id, p.where, p.format, sizesLabel(f.desktop), sizesLabel(f.tablet), sizesLabel(f.mobile)].join(";");
+                  }),
+                ].join("\n")}
+                label="Copiar lista (CSV)"
+              />
+            </p>
             <div className="table-scroll">
               <table className="admin-table gam-table">
                 <thead>
                   <tr>
                     <th scope="col">Posição</th>
-                    <th scope="col">Ad unit</th>
+                    <th scope="col">Elemento</th>
+                    <th scope="col">Ad unit (modo GAM)</th>
                     <th scope="col">Desktop</th>
                     <th scope="col">Celular</th>
                   </tr>
@@ -317,13 +350,20 @@ export default async function SettingsPage({ searchParams }: Props) {
                 <tbody>
                   {POSITIONS.map((p) => {
                     const f = FORMATS[p.format];
-                    const unit = `/${s.gam.networkCode || "REDE"}/${s.gam.parentAdUnit || "PAI"}${s.gam.childUnits ? `/${p.id}` : ""}`;
+                    const unit = s.gam.parentAdUnit
+                      ? `/${s.gam.networkCode || "REDE"}/${s.gam.parentAdUnit}${s.gam.childUnits ? `/${p.id}` : ""}`
+                      : `/${s.gam.networkCode || "REDE"}/${p.id}`;
                     return (
                       <tr key={p.id}>
                         <td>
                           <code>{p.id}</code>
                           <br />
                           <small className="muted">{p.where}</small>
+                        </td>
+                        <td>
+                          <code>#ad-{p.id}</code>
+                          <br />
+                          <code>.ad-{p.id}</code>
                         </td>
                         <td>
                           <code>{unit}</code>

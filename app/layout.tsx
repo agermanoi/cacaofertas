@@ -65,11 +65,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <style dangerouslySetInnerHTML={{ __html: cssVars(s) }} />
         <HeadInjections s={s} />
-        {s.gam.enabled ? (
+        {s.gam.enabled && s.gam.mode === "gam" ? (
           <>
             <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" />
             <script dangerouslySetInnerHTML={{ __html: gptInit(s.gam) }} />
           </>
+        ) : null}
+        {s.gam.enabled && s.gam.mode === "parceiro" ? (
+          // espaços prontos para o script do parceiro (colado em "Códigos no <head>")
+          <script dangerouslySetInnerHTML={{ __html: "window.__coAdsPartner=true;" }} />
         ) : null}
       </head>
       <body className={s.gam.enabled ? undefined : "ads-off"}>

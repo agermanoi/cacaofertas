@@ -10,8 +10,12 @@ export type { AdFormat } from "@/lib/ad-formats";
  * Espaço de anúncio servido pelo Google Ad Manager (GPT).
  *
  * A configuração (rede, ad unit pai, lazy load, refresh) vem de Admin → Configurações
- * e é colocada em window.__coAds pelo layout. Sem GAM ativo, os espaços ficam ocultos
+ * e é colocada em window.__coAds pelo layout. Sem anúncios ativos, os espaços ficam ocultos
  * (classe ads-off no body), sem deixar buracos na página.
+ *
+ * Modo "parceiro" (window.__coAdsPartner): o site só cria o <div id="ad-<posição>"> e um script de
+ * terceiros (ex.: TagLovers) o preenche. Se nada for colocado no espaço em 10 s, ele se esconde
+ * (classe ad-empty) e volta a aparecer quando o parceiro preencher.
  *
  * - Altura mínima reservada para não causar CLS.
  * - Lazy load nativo do GPT.
@@ -31,6 +35,7 @@ declare global {
   interface Window {
     googletag: any;
     __coAds?: AdsConfig;
+    __coAdsPartner?: boolean;
     __coAdsState?: { visible: Map<string, number>; timers: Map<string, number>; refreshes: Map<string, number>; listeners: boolean };
   }
 }
@@ -104,6 +109,22 @@ export function AdSlot({ id, format, className }: { id: string; format: AdFormat
   const elId = `ad-${id}`;
   const debug = process.env.NEXT_PUBLIC_ADS_DEBUG === "1";
 
+  // modo parceiro: só observa se o espaço foi preenchido
+  useEffect(() => {
+    const el = ref.current;
+    if (!window.__coAdsPartner || !el) return;
+    const box = el.closest(".ad");
+    const filled = () => Array.from(el.children).some((c) => !c.classList.contains("ad-debug-info"));
+    const update = () => box?.classList.toggle("ad-empty", !filled());
+    const obs = new MutationObserver(update);
+    obs.observe(el, { childList: true, subtree: true });
+    const timer = window.setTimeout(update, 10_000);
+    return () => {
+      obs.disconnect();
+      window.clearTimeout(timer);
+    };
+  }, [elId, path]);
+
   useEffect(() => {
     const cfg = window.__coAds;
     if (!cfg || !ref.current) return;
@@ -115,7 +136,7 @@ export function AdSlot({ id, format, className }: { id: string; format: AdFormat
     w.googletag.cmd.push(() => {
       const gt = w.googletag;
       if (!document.getElementById(elId)) return;
-      const unit = `/${cfg.network}/${cfg.parent}${cfg.child ? `/${id}` : ""}`;
+      const unit = cfg.parent ? `/${cfg.network}/${cfg.parent}${cfg.child ? `/${id}` : ""}` : `/${cfg.network}/${id}`;
       slot = gt.defineSlot(unit, allSizes(f), elId);
       if (!slot) return; // já definido (ex.: renderização dupla em desenvolvimento)
       const mapping = gt
@@ -151,7 +172,7 @@ export function AdSlot({ id, format, className }: { id: string; format: AdFormat
       aria-label="Publicidade"
     >
       <span className="ad-label">Publicidade</span>
-      <div ref={ref} id={elId} className="ad-slot" data-ad-slot={id} data-ad-format={format}>
+      <div ref={ref} id={elId} className={`ad-slot ${elId}`} data-ad-slot={id} data-ad-format={format}>
         {debug ? (
           <span className="ad-debug-info">
             #{elId} · desktop {sizesLabel(f.desktop)} · celular {sizesLabel(f.mobile)}

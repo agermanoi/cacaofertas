@@ -53,9 +53,15 @@ export interface SiteSettings {
   /** Google Ad Manager: slots gerados a partir dos espaços de anúncio do site. */
   gam: {
     enabled: boolean;
+    /**
+     * gam = o site chama o Google Ad Manager (GPT) sozinho;
+     * parceiro = o site só cria os espaços (<div id="ad-…">) e um script do parceiro (ex.: TagLovers),
+     * colado em "Códigos no <head>", preenche cada um.
+     */
+    mode: "gam" | "parceiro";
     /** Código da rede (só números), ex.: 21234567890 */
     networkCode: string;
-    /** Ad unit pai, ex.: "cacaofertas" ou "cacaofertas/site" */
+    /** Ad unit pai, ex.: "cacaofertas" ou "cacaofertas/site". Vazio = cada posição é um ad unit na raiz da rede (/rede/home-topo). */
     parentAdUnit: string;
     /** true = um ad unit filho por posição (pai/home-topo); false = só o pai, com a posição na segmentação */
     childUnits: boolean;
@@ -110,7 +116,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   contact: { email: "", whatsapp: "", instagram: "", facebook: "", tiktok: "", telegram: "", whatsappChannel: "" },
   analytics: { gaId: "", gtmId: "", adsId: "", adsClickLabel: "" },
   scripts: { head: "", bodyStart: "", bodyEnd: "" },
-  gam: { enabled: false, networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
+  gam: { enabled: false, mode: "gam", networkCode: "", parentAdUnit: "", childUnits: false, lazyLoad: true, refreshSeconds: 30 },
   adsTxt: "",
   countdown: {
     enabled: true,
@@ -187,11 +193,14 @@ export function mergeSettings(raw: unknown): SiteSettings {
       const networkCode = opt(g.networkCode).replace(/\D/g, "").slice(0, 20);
       const parentAdUnit = opt(g.parentAdUnit).replace(/^\/+|\/+$/g, "").replace(/[^A-Za-z0-9_\-./]/g, "").slice(0, 100);
       const rs = Number(g.refreshSeconds ?? D.gam.refreshSeconds);
+      const mode = g.mode === "parceiro" ? "parceiro" : "gam";
       return {
-        enabled: Boolean(g.enabled) && Boolean(networkCode) && Boolean(parentAdUnit),
+        enabled: Boolean(g.enabled) && (mode === "parceiro" || Boolean(networkCode)),
+        mode,
         networkCode,
         parentAdUnit,
-        childUnits: Boolean(g.childUnits),
+        // sem ad unit pai, cada posição vira o próprio ad unit
+        childUnits: Boolean(g.childUnits) || !parentAdUnit,
         lazyLoad: g.lazyLoad === undefined ? true : Boolean(g.lazyLoad),
         refreshSeconds: !Number.isFinite(rs) || rs <= 0 ? 0 : Math.max(30, Math.min(600, Math.round(rs))),
       };

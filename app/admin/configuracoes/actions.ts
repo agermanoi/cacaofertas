@@ -66,9 +66,8 @@ export async function saveSettings(formData: FormData) {
     if (raw(formData, k).length > SCRIPT_MAX) back({ erro: `Um dos campos de script passa de ${SCRIPT_MAX} caracteres.` });
   }
 
-  if (formData.get("gam_enabled") === "on") {
+  if (formData.get("gam_enabled") === "on" && text(formData, "gam_mode") !== "parceiro") {
     if (!/^\d{3,20}$/.test(text(formData, "gam_network"))) back({ erro: "O código da rede do GAM deve ter só números (ex.: 21234567890)." });
-    if (!text(formData, "gam_parent")) back({ erro: "Informe o ad unit pai do GAM (ex.: cacaofertas)." });
   }
 
   const email = text(formData, "contact_email");
@@ -110,6 +109,7 @@ export async function saveSettings(formData: FormData) {
     },
     gam: {
       enabled: formData.get("gam_enabled") === "on",
+      mode: text(formData, "gam_mode") === "parceiro" ? "parceiro" : "gam",
       networkCode: text(formData, "gam_network"),
       parentAdUnit: text(formData, "gam_parent"),
       childUnits: formData.get("gam_child") === "on",
