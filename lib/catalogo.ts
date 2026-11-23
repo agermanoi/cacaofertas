@@ -223,7 +223,42 @@ type ShopeeNode = {
 };
 const SHOPEE_FIELDS = "itemId shopId productName sales ratingStar shopType productLink offerLink imageUrl";
 
-function shopee(subId: string | null) {
+/**
+ * Lojas oficiais (Shopee Mall) de marcas de cozinha. A busca geral por palavra da Shopee às vezes
+ * devolve "error [10000]: System Error"; a busca dentro de uma loja (keyword + shopId) continua
+ * funcionando, então ela é o plano B. A lista de lojas fica em cache na kv por 7 dias.
+ */
+const MARCAS_COZINHA = ["tramontina", "brinox", "rochedo", "mondial", "britania", "philco", "oster", "electrolux", "arno", "wap", "panelux", "oxford"];
+const KV_LOJAS = "shopee_lojas_cozinha";
+
+async function lojasCozinha(db: SupabaseClient, q: <T>(query: string) => Promise<T>): Promise<number[]> {
+  const { data } = await db.from("kv").select("value,updated_at").eq("key", KV_LOJAS).maybeSingle();
+  if (data?.value && data.updated_at && Date.now() - new Date(data.updated_at).getTime() < 7 * 86400000) {
+    try {
+      const ids = JSON.parse(String(data.value)) as number[];
+      if (ids.length) return ids;
+    } catch {
+      /* refaz */
+    }
+  }
+  const ids: number[] = [];
+  for (const marca of MARCAS_COZINHA) {
+    try {
+      const d = await q<{ shopOfferV2: { nodes: { shopId: number; shopName: string; shopType?: number[] }[] } }>(
+        `{shopOfferV2(keyword:${JSON.stringify(marca)},limit:20){nodes{shopId shopName shopType}}}`
+      );
+      for (const sh of d?.shopOfferV2?.nodes || []) {
+        if ((sh.shopType || []).includes(1) && sh.shopName.toLowerCase().includes(marca) && !ids.includes(sh.shopId)) ids.push(sh.shopId);
+      }
+    } catch {
+      /* próxima marca */
+    }
+  }
+  if (ids.length) await db.from("kv").upsert({ key: KV_LOJAS, value: JSON.stringify(ids), updated_at: new Date().toISOString() });
+  return ids;
+}
+
+function shopee(db: SupabaseClient, subId: string | null) {
   async function q<T>(query: string): Promise<T> {
     try {
       return await shopeeQuery<T>(query);
@@ -283,12 +318,35 @@ function shopee(subId: string | null) {
 
     async buscar(termo: string, limite: number): Promise<ItemCatalogo[]> {
       let nodes: ShopeeNode[] = [];
-      try {
-        // sortType 2 = mais vendidos
-        const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)},sortType:2,page:1,limit:40){nodes{${SHOPEE_FIELDS}}}}`);
-        nodes = d?.productOfferV2?.nodes || [];
-      } catch (e) {
-        throw new CatalogoErro(`A busca da Shopee falhou agora (${(e as Error).message}). Tente de novo mais tarde ou cole o link do produto.`);
+      let falha = "";
+      // 1) busca geral (sortType 2 = mais vendidos; se falhar, sem ordenação)
+      for (const extra of [",sortType:2", ""]) {
+        try {
+          const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)}${extra},page:1,limit:40){nodes{${SHOPEE_FIELDS}}}}`);
+          nodes = d?.productOfferV2?.nodes || [];
+          falha = "";
+          break;
+        } catch (e) {
+          falha = (e as Error).message;
+        }
+      }
+      // 2) plano B: dentro das lojas oficiais de marcas de cozinha
+      if (falha) {
+        const lojas = await lojasCozinha(db, q);
+        for (const shopId of lojas) {
+          if (nodes.length >= limite * 2) break;
+          try {
+            const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)},shopId:${shopId},page:1,limit:10){nodes{${SHOPEE_FIELDS}}}}`);
+            nodes.push(...(d?.productOfferV2?.nodes || []));
+          } catch {
+            /* próxima loja */
+          }
+        }
+        nodes.sort((a, b) => Number(b.sales || 0) - Number(a.sales || 0));
+        if (!nodes.length) {
+          throw new CatalogoErro(`A busca da Shopee está fora do ar (${falha}) e as lojas oficiais não têm "${termo}". Tente de novo mais tarde ou cole o link do produto.`);
+        }
+        diagnostico = `busca geral da Shopee indisponível (${falha}); resultados das lojas oficiais de cozinha`;
       }
       const out: ItemCatalogo[] = [];
       for (const n of nodes) {
@@ -327,7 +385,7 @@ export async function carregarChaves(db: SupabaseClient): Promise<void> {
 
 export function catalogo(db: SupabaseClient, subId: string | null) {
   const m = ml(db);
-  const s = shopee(subId);
+  const s = shopee(db, subId);
   const temMl = Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET);
   const temShopee = Boolean(process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET);
   const loja = (l: Loja) => {
