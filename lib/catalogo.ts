@@ -320,7 +320,8 @@ function shopee(db: SupabaseClient, subId: string | null) {
       let nodes: ShopeeNode[] = [];
       let falha = "";
       // 1) busca geral (sortType 2 = mais vendidos; se falhar, sem ordenação)
-      for (const extra of [",sortType:2", ""]) {
+      for (const [i, extra] of [",sortType:2", "", ",sortType:2"].entries()) {
+        if (i === 2) await sleep(2500); // o erro 10000 costuma ser passageiro
         try {
           const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)}${extra},page:1,limit:40){nodes{${SHOPEE_FIELDS}}}}`);
           nodes = d?.productOfferV2?.nodes || [];
@@ -333,14 +334,20 @@ function shopee(db: SupabaseClient, subId: string | null) {
       // 2) plano B: dentro das lojas oficiais de marcas de cozinha
       if (falha) {
         const lojas = await lojasCozinha(db, q);
-        for (const shopId of lojas) {
-          if (nodes.length >= limite * 2) break;
-          try {
-            const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(termo)},shopId:${shopId},page:1,limit:10){nodes{${SHOPEE_FIELDS}}}}`);
-            nodes.push(...(d?.productOfferV2?.nodes || []));
-          } catch {
-            /* próxima loja */
+        // termo inteiro e, se não achar nada, só as palavras principais ("jogo de panelas antiaderente" → "panelas antiaderente" → "panelas")
+        const palavras = termo.toLowerCase().split(/\s+/).filter((w) => w.length > 2 && !["com", "para", "de", "kit", "jogo"].includes(w));
+        const termos = Array.from(new Set([termo, palavras.slice(0, 2).join(" "), palavras[0]].filter((t) => t && t.length >= 3)));
+        for (const t of termos) {
+          for (const shopId of lojas) {
+            if (nodes.length >= limite * 2) break;
+            try {
+              const d = await q<{ productOfferV2: { nodes: ShopeeNode[] } }>(`{productOfferV2(keyword:${JSON.stringify(t)},shopId:${shopId},page:1,limit:10){nodes{${SHOPEE_FIELDS}}}}`);
+              nodes.push(...(d?.productOfferV2?.nodes || []));
+            } catch {
+              /* próxima loja */
+            }
           }
+          if (nodes.length) break;
         }
         nodes.sort((a, b) => Number(b.sales || 0) - Number(a.sales || 0));
         if (!nodes.length) {
