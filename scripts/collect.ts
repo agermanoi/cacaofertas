@@ -11,6 +11,7 @@ import { selectOffers } from "../lib/match";
 import type { Collector, OfferInput, Product } from "../lib/types";
 import { mercadoLivre } from "../lib/collectors/mercadolivre";
 import { serpApi, serpApiSearchesLeft, serpSample } from "../lib/collectors/serpapi";
+import { mercadoLivreGoogle } from "../lib/collectors/mlgoogle";
 import { lomadee, lomadeeAffiliateLink, lomadeeBrands } from "../lib/collectors/lomadee";
 import { scraper } from "../lib/collectors/scraper";
 import { afilio, afilioCampaigns } from "../lib/collectors/afilio";
@@ -168,10 +169,11 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
   try {
     seen = JSON.parse(data?.value || "{}");
   } catch {}
-  // Prioridade: produtos em que a Amazon é o menor preço exibido e a leitura tem mais de 20 h
+  // Prioridade: produtos em que o Mercado Livre é o menor preço exibido e a leitura tem mais de 20 h
   // (é o preço que o visitante vê, então precisa estar fresco); depois, rodízio pelos mais antigos.
   const { data: ov } = await db.from("product_overview").select("slug,best_store").in("slug", products.map((p) => p.slug));
-  const amazonBest = new Set((ov || []).filter((r) => r.best_store === "Amazon").map((r) => r.slug));
+  // Mercado Livre agora vem pelo Google (mlgoogle): o preço do ML exibido precisa estar fresco
+  const amazonBest = new Set((ov || []).filter((r) => r.best_store === "Mercado Livre" || r.best_store === "Amazon").map((r) => r.slug));
   const staleCut = new Date(Date.now() - 20 * 3600_000).toISOString();
   const urgent = (p: Product) => amazonBest.has(p.slug) && (seen[p.slug] || "") < staleCut;
   const pick = products
@@ -191,7 +193,7 @@ async function serpBudget(products: Product[], collectors: Collector[]): Promise
 }
 let serpInfo: Record<string, unknown> | null = null;
 /** Fontes que gastam buscas da SerpAPI. */
-const SERP_SOURCES = new Set(["amazon", "serpapi"]);
+const SERP_SOURCES = new Set(["amazon", "serpapi", "mlgoogle"]);
 
 const afilioCollector = afilio();
 
@@ -221,7 +223,7 @@ async function main() {
   if (process.argv.length <= 2 || process.env.IMPORT_COUPONS === "1") await importCoupons(db);
   // Aceita slugs separados por espaço ou vírgula
   const slugs = process.argv.slice(2).flatMap((a) => a.split(/[,\s]+/)).filter(Boolean);
-  const collectors: Collector[] = [mercadoLivre(db), serpApi(), lomadee(), afilioCollector, shopee(), scraper()].filter((c) => c.enabled());
+  const collectors: Collector[] = [mercadoLivre(db), mercadoLivreGoogle(), serpApi(), lomadee(), afilioCollector, shopee(), scraper()].filter((c) => c.enabled());
   const products = await loadProducts(slugs);
   const afilioInfo = afilioCollector.enabled() ? await afilioCollector.prepare() : null;
 
