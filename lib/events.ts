@@ -139,16 +139,24 @@ export async function eventDeals(db: SupabaseClient, e: EventRow, products: Prod
   if (!products.length) return [];
   const day = e.date <= todayBR() ? e.date : todayBR();
   const from = addDays(e.date <= todayBR() ? e.date : todayBR(), -30);
-  const { data } = await db
-    .from("product_daily")
-    .select("product_id, day, min_price")
-    .in(
-      "product_id",
-      products.map((p) => p.id)
-    )
-    .gte("day", from)
-    .lte("day", day)
-    .limit(20000);
+  // em páginas: o Supabase corta cada consulta em 1.000 linhas
+  const data: { product_id: string; day: string; min_price: number | string }[] = [];
+  for (let off = 0; off < 50_000; off += 1000) {
+    const { data: page } = await db
+      .from("product_daily")
+      .select("product_id, day, min_price")
+      .in(
+        "product_id",
+        products.map((p) => p.id)
+      )
+      .gte("day", from)
+      .lte("day", day)
+      .order("day", { ascending: true })
+      .order("product_id", { ascending: true })
+      .range(off, off + 999);
+    data.push(...(page || []));
+    if (!page || page.length < 1000) break;
+  }
   const byProduct = new Map<string, { day: string; min_price: number }[]>();
   for (const r of data || []) {
     const list = byProduct.get(r.product_id) || [];

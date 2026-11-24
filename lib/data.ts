@@ -46,15 +46,24 @@ export async function getDailySeries(productIds: string[], days = 30): Promise<M
   if (demo.enabled()) return demo.daily(productIds, days);
   const out = new Map<string, DailyPoint[]>();
   if (!configured() || !productIds.length) return out;
-  const { data, error } = await publicClient()
-    .from("product_daily")
-    .select("product_id, day, min_price")
-    .in("product_id", productIds)
-    .gte("day", daysAgo(days))
-    .order("day", { ascending: true })
-    .limit(10000);
-  if (error) throw new Error(`[data] daily: ${error.message}`);
-  for (const r of data || []) {
+  // O Supabase devolve no máximo 1.000 linhas por consulta (o .limit não passa disso):
+  // com 100+ produtos × 30 dias, a série vinha cortada nos primeiros dias. Busca em páginas.
+  const PAGE = 1000;
+  const rows: { product_id: string; day: string; min_price: number | string }[] = [];
+  for (let from = 0; from < 50_000; from += PAGE) {
+    const { data, error } = await publicClient()
+      .from("product_daily")
+      .select("product_id, day, min_price")
+      .in("product_id", productIds)
+      .gte("day", daysAgo(days))
+      .order("day", { ascending: true })
+      .order("product_id", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(`[data] daily: ${error.message}`);
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE) break;
+  }
+  for (const r of rows) {
     const list = out.get(r.product_id) || [];
     list.push({ day: r.day, min_price: Number(r.min_price) });
     out.set(r.product_id, list);
