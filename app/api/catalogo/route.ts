@@ -77,6 +77,21 @@ export async function POST(req: NextRequest) {
         }
         return resposta({ ok: true, itens: out });
       }
+      case "diag_serp": {
+        // Diagnóstico da SerpAPI (chave na kv). Gasta 1 busca por chamada.
+        const { data: k } = await db.from("kv").select("value").eq("key", "serpapi_key").maybeSingle();
+        const key = String(k?.value || "");
+        const acc = await fetch(`https://serpapi.com/account.json?api_key=${encodeURIComponent(key)}`, { cache: "no-store" }).then((r) => r.json()).catch(() => ({}));
+        const out: Record<string, unknown> = { saldo: acc.total_searches_left ?? acc.plan_searches_left, plano: acc.plan_name };
+        if (body.q) {
+          const params = new URLSearchParams({ engine: String(body.engine || "google"), q: String(body.q), gl: "br", hl: "pt-br", google_domain: "google.com.br", num: "10", api_key: key });
+          const j = await fetch(`https://serpapi.com/search.json?${params}`, { cache: "no-store" }).then((r) => r.json());
+          out.organic = (j.organic_results || []).slice(0, 6).map((r: Record<string, any>) => ({ title: r.title, link: r.link, rich: r.rich_snippet, ext: r.detected_extensions, snippet: String(r.snippet || "").slice(0, 160) }));
+          out.shopping = (j.shopping_results || j.inline_shopping_results || []).slice(0, 4).map((r: Record<string, any>) => ({ title: r.title, source: r.source, price: r.price, link: r.link, product_link: r.product_link }));
+          out.erro = j.error;
+        }
+        return resposta({ ok: true, ...out });
+      }
       default:
         return resposta({ ok: false, erro: "Ação desconhecida." }, 400);
     }
