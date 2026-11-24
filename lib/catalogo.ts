@@ -107,17 +107,28 @@ function ml(db: SupabaseClient) {
   type Anuncio = { id: string; title: string; permalink?: string; status?: string; available_quantity?: number; pictures?: { url?: string; secure_url?: string }[]; thumbnail?: string; catalog_product_id?: string | null };
 
   let itemsBloqueado = false;
-  /** Alguém vende esse produto de catálogo agora? (buy box ou, sem ela, a lista de vendedores) */
+  /**
+   * Alguém vende esse produto de catálogo agora?
+   *  - status inativo → não;
+   *  - tem buy box → sim;
+   *  - sem buy box: pergunta a lista de vendedores; lista vazia → não.
+   *  - Se o ML não deixar consultar a lista (403, aconteceu em nov/2026), não dá para afirmar que
+   *    acabou: o produto ativo no catálogo conta como disponível. Só "não" com certeza.
+   */
   async function temVendedor(p: Produto): Promise<boolean> {
     if (p.status === "inactive") return false;
     if (p.buy_box_winner?.item_id) return true;
-    if (itemsBloqueado) return false;
+    if (itemsBloqueado) return true;
     try {
       const r = await get<{ results?: { item_id?: string }[] }>(`/products/${p.id}/items?limit=1`);
       return Boolean(r.results?.length);
     } catch (e) {
-      if (e instanceof HttpError && (e.status === 403 || e.status === 401)) itemsBloqueado = true;
-      return false;
+      if (e instanceof HttpError && (e.status === 403 || e.status === 401)) {
+        itemsBloqueado = true;
+        return true;
+      }
+      if (e instanceof HttpError && e.status === 404) return false;
+      return true;
     }
   }
 
