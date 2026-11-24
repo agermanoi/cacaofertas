@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { adminClient } from "@/lib/supabase";
+import { getMlAccessToken } from "@/lib/ml-token";
 import { carregarChaves, catalogo, CatalogoErro, ultimoDiagnostico, type Loja } from "@/lib/catalogo";
 
 /**
@@ -63,6 +64,18 @@ export async function POST(req: NextRequest) {
       case "checar": {
         const refs = (Array.isArray(body.refs) ? body.refs : []).map(String).filter(Boolean).slice(0, 40);
         return resposta({ ok: true, itens: await cat.checar(refs) });
+      }
+      case "diag_ml": {
+        // Diagnóstico da API do Mercado Livre (só GET em api.mercadolibre.com, com o token do projeto)
+        const paths = (Array.isArray(body.paths) ? body.paths : []).map(String).filter((x) => x.startsWith("/") && !x.includes("..")).slice(0, 12);
+        const token = await getMlAccessToken(db);
+        const out = [];
+        for (const path of paths) {
+          const r = await fetch(`https://api.mercadolibre.com${path}`, { headers: { authorization: `Bearer ${token}` }, cache: "no-store" });
+          const txt = await r.text();
+          out.push({ path, status: r.status, body: txt.slice(0, Number(body.max) || 700) });
+        }
+        return resposta({ ok: true, itens: out });
       }
       default:
         return resposta({ ok: false, erro: "Ação desconhecida." }, 400);
