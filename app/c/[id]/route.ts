@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminClient } from "@/lib/supabase";
-import { clickMeta } from "@/lib/analytics";
 import { applyAffiliateTags } from "@/lib/click-tags";
 import { pickLomadeeShort } from "@/lib/collectors/lomadee";
 
@@ -31,7 +30,7 @@ async function lomadeeShort(db: ReturnType<typeof adminClient>, organizationId: 
   }
 }
 
-/** Conta o clique no cupom e redireciona para a loja (link de afiliado quando houver). */
+/** Redireciona o cupom para a loja (link de afiliado quando houver). */
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.redirect(new URL("/cupons", req.url));
@@ -46,22 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.redirect(new URL("/cupons", req.url));
   }
 
-  const meta = await clickMeta(req.headers);
-  if (meta) {
-    await Promise.all([
-      db.rpc("increment_coupon_click", { cid: c.id }).then(
-        () => undefined,
-        () => undefined
-      ),
-      db
-        .from("clicks")
-        .insert({ coupon_id: c.id, referer: req.headers.get("referer")?.slice(0, 300), ...meta })
-        .then(
-          () => undefined,
-          () => undefined
-        ),
-    ]);
-  }
+  // o clique é contado pelo ClickTracker na página (abrir este link direto, como fazem os robôs, não conta)
 
   let target = c.affiliate_url || c.url;
 

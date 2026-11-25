@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { countdownText, cssVars, getSettings } from "@/lib/settings";
 import { countdownEvent, countdownLabel, getPublicEvents, navEvent } from "@/lib/events";
+import { ClickTracker } from "@/components/ClickTracker";
 import { BodyEndInjections, BodyStartInjections, HeadInjections } from "@/components/Injected";
 import { PageTracker } from "@/components/PageTracker";
 import "@fontsource-variable/nunito";
@@ -277,6 +278,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </div>
         </footer>
+        <ClickTracker />
         <BodyEndInjections s={s} />
         <PageTracker />
       <CookieConsent />
